@@ -1,283 +1,206 @@
 # Copilot Instructions for React Native & Expo Projects
 
-Este documento proporciona instrucciones detalladas y mejores prácticas para trabajar en proyectos de React Native con Expo. Está diseñado para agentes de IA (como GitHub Copilot) y desarrolladores, basado en consultas previas, principios KISS (Keep It Simple, Stupid), DRY (Don't Repeat Yourself) y SOLID, y recomendaciones actuales de Expo SDK 54 y React Native 0.81.4. Incluye configuraciones, componentes comunes, theming, librerías recomendadas y patrones prácticos.
+Este documento proporciona instrucciones detalladas y mejores prácticas para trabajar en proyectos de React Native con Expo. Está diseñado para agentes de IA (como GitHub Copilot) y desarrolladores, basado en consultas previas, principios KISS (Keep It Simple, Stupid), DRY (Don't Repeat Yourself) y SOLID, y recomendaciones actuales de Expo SDK 54 y React Native 0.81.4.
 
 ## Overview
 - **Framework**: React Native con Expo para desarrollo cross-platform (Android, iOS, Web).
 - **Versiones**: Expo ~54.0.13, React Native 0.81.4, React 19.1.0, TypeScript ~5.9.2.
 - **Enfoque**: Apps móviles simples a complejas, con énfasis en UI/UX, estado y navegación.
-- **Principios**: KISS (soluciones simples), DRY (evitar duplicación), SOLID (responsabilidades claras).
+- **Principios**: KISS, DRY, SOLID
 
 ## 🖥️ Environment Setup
 - **Sistema Operativo**: Windows (no Linux/Mac)
 - **IDE**: Visual Studio Code (VSCode)
-- **Terminal**: PowerShell (pwsh.exe) - NO bash, NO cmd, NO Git Bash
+- **Terminal**: PowerShell (pwsh.exe) - NO bash
 - **Node.js**: v18+ instalado
 - **Proyecto**: c:\Users\willy\projects\testing-apk
 
-### ⚠️ IMPORTANTE - Comandos para PowerShell en Windows
-Cuando generes comandos de terminal:
-- ✅ Usa PowerShell cmdlets: `Get-ChildItem`, `Move-Item`, `Remove-Item`, `Set-Location`
-- ✅ Usa rutas Windows: `c:\Users\willy\projects\...` (backslash)
-- ✅ Usa `&&` para encadenar comandos
-- ✅ Usa backtick (\`) para nueva línea en PowerShell
-- ❌ NO uses `ls`, `mv`, `rm` (son aliases de Unix)
-- ❌ NO uses rutas Unix: `/home/user/...`
-- ❌ NO uses `$()` syntax de bash, usa PowerShell `$()`
-- ❌ NO uses `\n`, usa backtick `` ` ``
+## Troubleshooting
+- **Hot Reload**: Si no actualiza, `npx expo start --clear`.
+- **Librerías**: Confirma versiones compatibles con Expo 54.
 
-## Project Setup
-### Inicialización
-- Usa `npx create-expo-app@latest` para proyectos nuevos.
-- Configura `app.json` con `"userInterfaceStyle": "automatic"` para soporte de temas light/dark.
-- Instala dependencias con `npx expo install` para compatibilidad.
+---
 
-### Estructura de Archivos
-- `App.tsx`: Componente raíz.
-- `app.json`: Configuración de Expo.
-- `package.json`: Dependencias.
-- Usa TypeScript para tipado fuerte.
+## 🔧 Flujo de Desarrollo y Testing
 
-### Configuración Inicial
-- Habilita `newArchEnabled: true` en `app.json` para nueva arquitectura.
-- Para temas: Importa `useColorScheme` de 'react-native'.
+### Workflow Estándar (Para Cada Fase/Feature)
 
-## Comandos PowerShell Comunes para Windows
-
-### Navegación y Archivos
-```powershell
-# Ir a directorio
-cd c:\Users\willy\projects\testing-apk
-
-# Listar archivos
-Get-ChildItem                          # Equivalente a 'ls'
-Get-ChildItem -Filter "*.md"           # Filtrar archivos
-Get-ChildItem -Filter "*.md" -File     # Solo archivos (no carpetas)
-Get-ChildItem -Recurse                 # Recursivo (incluye subcarpetas)
-
-# Crear carpeta
-New-Item -ItemType Directory -Path c:\ruta\nueva
-
-# Mover archivo
-Move-Item -Path c:\origen\archivo.txt -Destination c:\destino\
-
-# Eliminar archivo
-Remove-Item c:\ruta\archivo.txt
-
-# Ver contenido de archivo
-Get-Content archivo.txt
-cat archivo.txt  # Alias
+```
+1. IMPLEMENTAR
+   ↓
+2. TESTEAR EN EXPO GO
+   ↓
+3. VERIFICAR EN TELÉFONO
+   ↓
+4. GIT COMMIT (solo si pasa tests)
+   ↓
+5. SIGUIENTE FASE
 ```
 
-### Git Commands
-```powershell
-# Estado
-git status
-git log --oneline -5
+### Paso 1: Implementar Feature/Componente
 
-# Agregar y commit
+```powershell
+# Crear archivo, escribir código TypeScript
+npx tsc --noEmit       # Verificar tipos
+npm list               # Verificar dependencias
+```
+
+### Paso 2: Testear en Expo Go
+
+**ANTES de instalar cualquier librería - Verificar Compatibilidad:**
+
+```powershell
+# ¿Funciona en Expo Go? Preguntas clave:
+# - ¿Tiene native code custom? (NO = ✅)
+# - ¿Requiere TurboModules? (NO = ✅)
+# - ¿Está en Expo Go dependencies? (SÍ = ✅)
+# 
+# Si las 3 respuestas son positivas → Instalar
+# Si alguna es NO → Buscar alternativa sin native code
+```
+
+**Iniciar Expo:**
+
+```powershell
+npx expo start --clear  # Terminal 1: Servidor con cache limpio
+# Terminal 2: Ver logs en tiempo real
+
+# En teléfono:
+# 1. Abre Expo Go
+# 2. Escanea el QR code
+# 3. Verifica carga sin errores
+```
+
+**Checklist de Testing:**
+
+```
+☐ ¿App carga sin errores en Expo Go?
+☐ ¿Tests en App.tsx pasan? (si aplica)
+☐ ¿TypeScript compila? (npx tsc --noEmit)
+☐ ¿Funcionalidad funciona en teléfono?
+☐ ¿Sin warnings en consola?
+```
+
+### Paso 3: Verificar en Teléfono
+
+- Escanea QR y abre en Expo Go
+- Interactúa con la feature
+- Verifica guardado de datos (si aplica)
+- Recarga app y verifica persistencia
+- Verifica sin crashes
+
+### Paso 4: Git Commit
+
+```powershell
+git status              # Ver cambios
+git add -A              # Agregar todos
+git commit -m "✨ feat: componente FormInput"  # Commit
+
+# Emojis comunes:
+# ✨ feat: feature
+# 🐛 fix: bug
+# ♻️ refactor: refactor
+# 📝 docs: docs
+# 🔧 config: config
+```
+
+### Paso 5: Siguiente Fase
+
+Si testing pasó ✅, continuamos.
+
+---
+
+## 📦 Librería Check: Compatibilidad Con Expo Go
+
+### ⚠️ Caso: MMKV (react-native-mmkv) - POR QUÉ NO FUNCIONÓ
+
+**Error Encontrado:**
+```
+react-native-mmkv 3.x.x requires TurboModules, 
+but the new architecture is not enabled!
+```
+
+**Análisis:**
+1. MMKV v3.x.x usa TurboModules (native code)
+2. TurboModules requieren new architecture
+3. **Expo Go NO soporta TurboModules** ← Problema principal
+4. Incluso v2.x.x requiere native modules (tampoco funciona)
+
+**Solución: Cambiar a AsyncStorage**
+
+```typescript
+// ❌ ANTES (MMKV - no funciona en Expo Go)
+import { MMKV } from 'react-native-mmkv'
+storage.set('key', 'value')
+
+// ✅ DESPUÉS (AsyncStorage - funciona en Expo Go)
+import AsyncStorage from '@react-native-async-storage/async-storage'
+await AsyncStorage.setItem('key', JSON.stringify(value))
+```
+
+**Por qué AsyncStorage:**
+- ✅ Incluido en Expo Go
+- ✅ Funciona con QR scan
+- ✅ API similar (keys/values)
+- ✅ Async/await (mejor para React)
+- ⚠️ 10-20x más lento (suficiente para MVP)
+
+### 🛑 Checklist Antes de Instalar Cualquier Librería
+
+```
+Antes de: npm install nombre-libreria
+
+☐ ¿Tiene native code? (buscar en GitHub package.json)
+☐ ¿Está en Expo Go? (buscar en https://docs.expo.dev)
+☐ ¿Funciona con QR scan?
+☐ ¿O requiere Development Build?
+☐ ¿Hay alternativa sin native code?
+
+Si 3+ respuestas son SÍ a las primeras 3 → Instalar
+Si NO a alguna → Buscar alternativa o usar Development Build
+```
+
+### 📚 Referencias para Verificar Compatibilidad
+
+- **Expo Docs**: https://docs.expo.dev/versions/latest/
+- **Expo Go Dependencies**: https://github.com/expo/expo/blob/main/apps/expo-go/package.json
+- **Package GitHub**: Buscar `expo go`, `native code`, `prebuild`
+
+### 💡 Tabla de Decisión
+
+| Característica | Expo Go | Solución |
+|---|---|---|
+| Sin native code | ✅ | Instalar directo |
+| Native code (incluida en Expo) | ✅ | Instalar directo |
+| Native code (NO incluida) | ❌ | Alternativa O Development Build |
+| Requiere TurboModules | ❌ | Alternativa O Development Build |
+
+---
+
+## 📝 Comandos PowerShell Comunes
+
+```powershell
+# Git
+git status
 git add -A
 git commit -m "mensaje"
 
-# Ver cambios
-git diff
-git show HEAD
-```
-
-### NPM y Node
-```powershell
-# Instalar dependencias
+# NPM
 npm install
-npm install nombre-librería
-
-# Verificar versión
 npm list
-npm list react
+npx tsc --noEmit
 
-# Ejecutar scripts
-npm start
-npm run build
-npx tsc --noEmit  # TypeScript check
+# Expo
+npx expo start --clear
 ```
-
-### Expo Commands
-```powershell
-# Iniciar desarrollo
-npx expo start
-npx expo start --clear  # Limpiar cache
-
-# Compilar
-eas build --platform android
-eas build --platform ios
-
-# Publish
-eas update
-```
-
-### Comandos Importantes a EVITAR en Windows
-```powershell
-# ❌ NO USES (son de bash/Linux):
-ls                    # Usa: Get-ChildItem
-mv                    # Usa: Move-Item
-rm                    # Usa: Remove-Item
-cat                   # OK (pero Get-Content es mejor)
-mkdir                 # OK (pero New-Item es mejor)
-pwd                   # Usa: Get-Location
-cd /home/user/...     # Usa: cd c:\Users\user\...
-
-# ❌ NO en bash/Git Bash, estamos en PowerShell nativo
-/c/Users/...          # NO - usa c:\Users\...
-$(...) con \n         # NO - usa `n en PowerShell
-```
-
-
-## Best Practices (KISS, DRY, SOLID)
-- **KISS**: Soluciones simples; prefiere built-ins sobre librerías complejas.
-- **DRY**: Reusa estilos y componentes; evita duplicación en código.
-- **SOLID**:
-  - **Single Responsibility**: Un componente por función (ej. Button solo para toques).
-  - **Open/Closed**: Extiende sin modificar (ej. temas via props).
-  - **Liskov Substitution**: Componentes intercambiables.
-  - **Interface Segregation**: Props minimalistas.
-  - **Dependency Inversion**: Depende de abstracciones (ej. hooks).
-
-## Convenciones Windows & VSCode
-
-### Rutas de Archivos
-- Siempre usa **backslash** `\` en rutas Windows: `c:\Users\willy\projects\testing-apk`
-- En herramientas que requieren forward slash `/` (Git, Node), el sistema las convierte automáticamente
-- Nunca uses rutas Unix `/home/user/...` - no existen en Windows
-
-### Archivos en el Proyecto
-```
-c:\Users\willy\projects\testing-apk\
-├── README.md
-├── App.tsx
-├── package.json
-├── tsconfig.json
-├── app.json
-├── src/
-│   ├── types/
-│   ├── constants/
-│   ├── services/
-│   ├── hooks/
-│   ├── components/
-│   └── utils/
-└── docs/
-    ├── 00-ANALISIS/
-    ├── 01-FASE1-SETUP/
-    └── ...
-```
-
-### VSCode Integrations
-- Terminal integrada en VSCode usa PowerShell por defecto en Windows
-- Presiona `` Ctrl+` `` para abrir/cerrar terminal
-- Los comandos git, npm, npx funcionan directamente
-- TypeScript LSP proporciona errores en tiempo real
-
-### Errores Comunes a EVITAR
-```powershell
-# ❌ ERROR: Comando bash en PowerShell
-$ npm install      # $ es syntax de bash
-Get-Item: command not found
-
-# ✅ CORRECTO: PowerShell puro
-npm install
-
-# ❌ ERROR: Ruta Unix
-cd /home/user/projects
-
-# ✅ CORRECTO: Ruta Windows
-cd c:\Users\willy\projects
-
-# ❌ ERROR: Alias Unix
-ls -la            # ls podría funcionar como alias, pero no es nativo
-
-# ✅ CORRECTO: PowerShell cmdlet
-Get-ChildItem -Recurse
-
-# ❌ ERROR: Nueva línea bash
-echo "hola\nmundo"   # \n no funciona
-
-# ✅ CORRECTO: Nueva línea PowerShell
-echo "hola`nmundo"   # backtick
-```
-
-## Troubleshooting
-- **Hot Reload**: Si no actualiza, `npx expo start --clear`.
-- **Errores de Tema**: Verifica `userInterfaceStyle` y `expo-system-ui`.
-- **Librerías**: Confirma versiones compatibles con Expo 54.
-- **Performance**: Usa `React.memo` para componentes pesados.
 
 ## Instrucciones para GitHub Copilot
 
-### Contexto del Proyecto
-- **Plataforma**: Windows 10/11
-- **IDE**: Visual Studio Code
-- **Terminal**: PowerShell (pwsh.exe) - integrada en VSCode
-- **Ruta del Proyecto**: `c:\Users\willy\projects\testing-apk`
+- **Contexto**: Windows 10/11, PowerShell, VSCode
+- **Ruta**: c:\Users\willy\projects\testing-apk
+- **Usa**: Rutas Windows (c:\Users\...), PowerShell cmdlets
+- **Evita**: Comandos bash (ls, mv, rm), rutas Unix
 
-### Cómo Generarme Comandos Correctamente
+---
 
-#### ✅ Comando Correcto en Windows PowerShell
-```
-"En PowerShell, necesito listar todos los archivos .md"
-```
-Yo generaré:
-```powershell
-Get-ChildItem -Filter "*.md" -File | Select-Object Name
-```
-
-#### ❌ Comando Incorrecto (A EVITAR)
-```
-"Dame el comando bash para..."
-"Necesito un comando de Linux..."
-```
-Yo NO generaré:
-```bash
-ls *.md
-find . -name "*.md"
-```
-
-### Mejores Prácticas al Pedirme Cosas
-
-1. **Especifica el lenguaje si es importante**
-   - "En PowerShell, ..."
-   - "Para Windows, ..."
-   - "En VSCode, ..."
-
-2. **Menciona la ruta completa**
-   - "En `c:\Users\willy\projects\testing-apk`..."
-   - "Del archivo `c:\Users\willy\projects\testing-apk\src\types\ordenTrabajo.ts`..."
-
-3. **Sé específico sobre el contexto**
-   - "Soy en Windows con PowerShell"
-   - "Desarrollo en VSCode"
-   - "Proyecto React Native con Expo 54"
-
-4. **Cómo Pedir Archivos**
-   - "Crea el archivo `src/hooks/useFormData.ts`"
-   - "Edita `src/types/ordenTrabajo.ts` cambiando..."
-   - "Lee el archivo `docs/01-FASE1-SETUP/README.md`"
-
-5. **Cómo Pedir Comandos**
-   - "Ejecuta en PowerShell: instala el paquete X"
-   - "En terminal, verifica que TypeScript compila"
-   - "En PowerShell, haz commit de los cambios"
-
-### Errores que NO Debo Cometer
-
-| Error | Síntoma | Solución |
-|-------|--------|----------|
-| Comandos bash | `ls: command not found` | Usar PowerShell cmdlets |
-| Rutas Unix | `/home/user/...` | Usar rutas Windows `c:\Users\...` |
-| Syntax bash | `$()` con `\n` | Usar backtick PowerShell `` ` `` |
-| Alias Unix | `mv`, `rm`, `cat` | Usar cmdlets: `Move-Item`, `Remove-Item` |
-| Paths mixtos | `c:/Users/...` | Consistente: `c:\Users\...` |
-
-### Checkpoints Antes de Generar Comandos
-- [ ] ¿Estoy generando para PowerShell?
-- [ ] ¿Usé rutas con backslash `\`?
-- [ ] ¿Evité comandos Unix como `ls`, `mv`, `rm`?
-- [ ] ¿La sintaxis es correcta para PowerShell?
-- [ ] ¿El comando se ejecutará en Windows?
+**Flujo resumen: Implementar → Testear en Expo Go → Verificar en teléfono → Commit → Siguiente fase**

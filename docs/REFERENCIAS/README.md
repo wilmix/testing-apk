@@ -48,6 +48,18 @@ Guardar datos automáticamente en MMKV local, luego sincronizar.
 - Inputs: 44px alto mínimo
 - Spacing: 16px entre elementos
 
+## Instrucciones para GitHub Copilot
+
+**Ubicación**: `copilot-instructions.md` (en la raíz del proyecto)
+
+Este archivo contiene las instrucciones específicas para GitHub Copilot sobre:
+- Environment setup (Windows, VSCode, PowerShell)
+- Comandos PowerShell válidos para el proyecto
+- Rutas y convenciones Windows
+- Checkpoints para evitar errores
+
+**GitHub Copilot lo lee automáticamente como contexto.**
+
 ## Documentos de Análisis
 
 Revisar en `docs/00-ANALISIS/` para entender:

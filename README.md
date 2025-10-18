@@ -2,6 +2,8 @@
 
 App mobile **offline-first** para field workers (técnicos en campo) de recarga de extintores.
 
+> **📌 Nota para GitHub Copilot**: Lee `copilot-instructions.md` en la raíz del proyecto para contexto sobre el ambiente Windows/PowerShell/VSCode.
+
 ## 🎯 Objetivo
 
 Transformar el formulario web `OrdenTrabajo.tsx` (MUI, ~20 campos) en una experiencia mobile optimizada con:

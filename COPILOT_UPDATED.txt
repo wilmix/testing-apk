@@ -1,0 +1,97 @@
+# 🖥️ COPILOT INSTRUCTIONS ACTUALIZADO
+
+## ✅ Qué se agregó
+
+### 1. **🖥️ Environment Setup Section**
+Especificaciones claras del ambiente:
+- ✅ Sistema Operativo: **Windows**
+- ✅ IDE: **Visual Studio Code (VSCode)**
+- ✅ Terminal: **PowerShell (pwsh.exe)** - NO bash/cmd/Git Bash
+- ✅ Ruta del proyecto: `c:\Users\willy\projects\testing-apk`
+
+### 2. **⚠️ IMPORTANTE - Comando PowerShell Guidelines**
+Reglas claras para NO cometer errores:
+```
+✅ USAR:
+  - PowerShell cmdlets: Get-ChildItem, Move-Item, Remove-Item
+  - Rutas Windows: c:\Users\willy\...
+  - && para encadenar
+  - backtick (`) para nueva línea
+
+❌ NO USAR:
+  - Comandos Unix: ls, mv, rm
+  - Rutas Unix: /home/user/...
+  - Syntax bash: $(), \n
+```
+
+### 3. **📋 Comandos PowerShell Comunes**
+Referencia rápida de comandos:
+- Navegación: `cd`, `Get-ChildItem`, `Get-Location`
+- Archivos: `Move-Item`, `Remove-Item`, `New-Item`
+- Git: `git status`, `git add -A`, `git commit`
+- NPM: `npm install`, `npm list`, `npx tsc`
+- Expo: `npx expo start`, `eas build`
+
+### 4. **🚫 Comandos a EVITAR**
+Tabla de errores comunes con equivalentes correctos:
+- `ls` → `Get-ChildItem`
+- `mv` → `Move-Item`
+- `rm` → `Remove-Item`
+- `/home/user/...` → `c:\Users\user\...`
+- `\n` → backtick
+
+### 5. **🖇️ Convenciones Windows & VSCode**
+- Rutas siempre con backslash `\`
+- Estructura del proyecto documentada
+- VSCode integrations
+- Errores comunes a evitar con ejemplos
+
+### 6. **📖 Instrucciones para GitHub Copilot**
+**SECCIÓN NUEVA Y CRÍTICA:**
+- Contexto del proyecto
+- Cómo generarme comandos correctamente
+- Mejores prácticas al pedirme cosas
+- Tabla de errores que NO debo cometer
+- **Checkpoints antes de generar comandos** ✅
+
+---
+
+## 📊 Estadísticas del Archivo
+
+| Métrica | Valor |
+|---------|-------|
+| Líneas originales | ~60 |
+| Líneas actuales | **284** |
+| Secciones nuevas | **6** |
+| Ejemplos PowerShell | **15+** |
+| Checkpoints de validación | **5** |
+
+---
+
+## 🎯 Beneficio Clave
+
+**Este archivo evita errores futuros como:**
+- ❌ Generar comandos `bash` en Windows PowerShell
+- ❌ Usar rutas Unix en lugar de Windows
+- ❌ Usar `ls`, `mv`, `rm` en PowerShell
+- ❌ Generar syntax de bash en PowerShell
+
+**Ahora:**
+- ✅ Copilot sabe que estamos en Windows/PowerShell/VSCode
+- ✅ Copilot genera SOLO comandos PowerShell válidos
+- ✅ Copilot usa rutas Windows correctas
+- ✅ Copilot evita errores de command not found
+
+---
+
+## 📝 Ubicación
+
+```
+docs/REFERENCIAS/copilot-instructions.md
+```
+
+Este archivo es referencia para GitHub Copilot (yo) cada vez que generes comandos o código para el proyecto.
+
+---
+
+**Commit**: `53cccc5` - "📋 docs: actualizar copilot-instructions con especificaciones..."

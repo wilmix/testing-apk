@@ -255,19 +255,28 @@ npx expo start
 
 ---
 
-## 📚 Documentación
+## � Documentación
 
-### Análisis & Planificación
-- `PLAN_ACCION_FASES.md` - Plan completo de 7 fases
-- `docs/ANALISIS_ORDEN_TRABAJO_MOBILE.md` - Estrategia completa
+Toda la documentación está organizada en `docs/`:
 
-### Guías Técnicas
-- `docs/GUIA_TECNICA_IMPLEMENTACION.md` - Código copy-paste ready
-- `docs/RESUMEN_EJECUTIVO.md` - Overview ejecutivo
+### Análisis & Decisiones (`docs/00-ANALISIS/`)
+- `RESUMEN_EJECUTIVO.md` ← **Comienza aquí** si eres nuevo
+- `ANALISIS_ORDEN_TRABAJO_MOBILE.md` - Estrategia técnica completa
+- `MATRIZ_DECISIONES_JUSTIFICACION.md` - Por qué cada librería
+- `GUIA_TECNICA_IMPLEMENTACION.md` - Guía de implementación
 
-### Resúmenes
-- `FASE1_RESUMEN_VISUAL.md` - Resumen visual FASE 1
-- `docs/RESUMEN_VISUAL_TABLAS.md` - Tablas comparativas
+### Fases de Desarrollo
+- `docs/01-FASE1-SETUP/` - Setup inicial ✅ COMPLETADA
+- `docs/02-FASE2-HOOKS/` - Hooks base ⏳
+- `docs/03-FASE3-COMPONENTES/` - Componentes ⏳
+- `docs/04-FASE4-HEADER/` - Header form 🔴 APPROVAL 1
+- `docs/05-FASE5-DETALLES/` - Detalles dinámicos 🔴 APPROVAL 2
+- `docs/06-FASE6-FINAL/` - Final + submit 🔴 APPROVAL 3
+- `docs/07-FASE7-TESTING/` - Testing 🟢 PRODUCTION
+
+### Referencias
+- `docs/REFERENCIAS/` - Librerías, patrones, links
+- `docs/INDICE.md` - **Índice completo** (mapa del proyecto)
 
 ---
 

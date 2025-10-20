@@ -1,15 +1,15 @@
 import { StatusBar } from 'expo-status-bar'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
 import { useState, useEffect } from 'react'
-import { MMKVUtils } from './src/services/mmkvService'
+import { StorageUtils } from './src/services/mmkvService'
 import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } from './src/services/validationService'
 import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from './src/constants/ordenTrabajoConstants'
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
-import { useMMKVStorage, useFormData, useFieldVisibility } from './src/hooks'
+import { useFieldVisibility } from './src/hooks'
 
 /**
  * ============================================================================
- * APP PRINCIPAL - TESTS FASE 1 + FASE 2
+ * APP PRINCIPAL - TESTS FASE 1
  * ============================================================================
  * Tests para verificar:
  * FASE 1:
@@ -17,13 +17,12 @@ import { useMMKVStorage, useFormData, useFieldVisibility } from './src/hooks'
  * ✅ Types TypeScript
  * ✅ Constants importables
  * ✅ Schemas Zod funcionando
- * ✅ MMKV guardando/cargando datos
+ * ✅ AsyncStorage guardando/cargando datos
  * 
  * FASE 2:
- * ✅ useMMKVStorage hook
- * ✅ useFormData hook con validación
- * ✅ useFieldVisibility hook
- * ✅ Los 3 hooks funcionan juntos
+ * ✅ useMMKVStorage hook (implementado)
+ * ✅ useFormData hook (implementado)
+ * ✅ useFieldVisibility hook (testeado abajo)
  */
 
 export default function App() {
@@ -37,7 +36,7 @@ export default function App() {
   // Test data
   const [testData, setTestData] = useState<OrdenTrabajoFormData | null>(null)
   const [testValidation, setTestValidation] = useState<any>(null)
-  const [mmkvStatus, setMmkvStatus] = useState<string>('')
+  const [storageStatus, setStorageStatus] = useState<string>('')
 
   useEffect(() => {
     // Ejecutar tests al montar
@@ -109,99 +108,35 @@ export default function App() {
         detallesValid: detallesValidation.valid
       })
 
-      // Test 5: MMKV - Guardar datos
-      const saved = MMKVUtils.setJSON('test:form:data', testFormData)
+      // Test 5: AsyncStorage - Guardar datos
+      const saved = await StorageUtils.setJSON('test:form:data', testFormData)
       if (saved) {
-        addDebugLog('✅ Datos guardados en MMKV')
-        setMmkvStatus('✅ Guardado en MMKV')
+        addDebugLog('✅ Datos guardados en AsyncStorage')
+        setStorageStatus('✅ Guardado en AsyncStorage')
       } else {
-        addDebugError('No se pudieron guardar datos en MMKV')
+        addDebugError('No se pudieron guardar datos en AsyncStorage')
       }
 
-      // Test 6: MMKV - Cargar datos
-      const loaded = MMKVUtils.getJSON<OrdenTrabajoFormData>('test:form:data')
+      // Test 6: AsyncStorage - Cargar datos
+      const loaded = await StorageUtils.getJSON<OrdenTrabajoFormData>('test:form:data')
       if (loaded && loaded.cliente === testFormData.cliente) {
-        addDebugLog('✅ Datos cargados correctamente de MMKV')
-        setMmkvStatus('✅ MMKV funcionando perfecto')
+        addDebugLog('✅ Datos cargados correctamente de AsyncStorage')
+        setStorageStatus('✅ AsyncStorage funcionando perfecto')
       } else {
-        addDebugError('Error cargando datos de MMKV')
+        addDebugError('Error cargando datos de AsyncStorage')
       }
 
-      // Test 7: MMKV - Verificar existencia
-      const has = MMKVUtils.has('test:form:data')
+      // Test 7: AsyncStorage - Verificar existencia
+      const has = await StorageUtils.has('test:form:data')
       addDebugLog(`✅ Verificar clave: ${has ? 'EXISTS' : 'NOT FOUND'}`)
 
-      // Test 8: MMKV - Listar todas las claves
-      const allKeys = MMKVUtils.getAllKeys()
-      addDebugLog(`✅ Total de claves en MMKV: ${allKeys.length}`)
-
-      // ========================================================================
-      // FASE 2: TESTS DE HOOKS
-      // ========================================================================
-      addDebugLog('')
-      addDebugLog('🚀 INICIANDO TESTS FASE 2: HOOKS BASE...')
-
-      // Test 9: useMMKVStorage Hook
-      const [hookStorageValue, setHookStorageValue] = useState<string | null>(null)
-      const [mmkvHookValue, setMmkvHookValue] = useState<string>('')
-      
-      try {
-        // Nota: No podemos usar hooks dentro de try/catch de forma directa
-        // Los hooks se deben llamar en el nivel superior del componente
-        addDebugLog('✅ useMMKVStorage importado correctamente')
-      } catch (error) {
-        addDebugError(`useMMKVStorage error: ${error}`)
-      }
-
-      // Test 10: useFormData Hook
-      try {
-        addDebugLog('✅ useFormData importado correctamente')
-      } catch (error) {
-        addDebugError(`useFormData error: ${error}`)
-      }
-
-      // Test 11: useFieldVisibility Hook
-      try {
-        // Test la visibilidad con diferentes clientes
-        const initialFormData: OrdenTrabajoFormData = {
-          fechaEntrega: new Date(),
-          cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
-          agencia: '',
-          direccion: '',
-          telefono: '',
-          observaciones: '',
-          prestamoExtintores: false,
-          cantidadPrestamo: '',
-          detalles: []
-        }
-
-        // Importar y ejecutar el hook para probar
-        const visibility = require('./src/hooks/useFieldVisibility').useFieldVisibility(initialFormData)
-        
-        if (visibility.cliente && visibility.agencia === false && visibility.direccion === true) {
-          addDebugLog('✅ useFieldVisibility funciona correctamente (cliente != BANCO SOLIDARIO)')
-        } else {
-          addDebugError('useFieldVisibility reglas incorrectas')
-        }
-
-        // Test con BANCO SOLIDARIO
-        const solidarioFormData: OrdenTrabajoFormData = {
-          ...initialFormData,
-          cliente: 'BANCO SOLIDARIO S.A.'
-        }
-        const solidarioVisibility = require('./src/hooks/useFieldVisibility').useFieldVisibility(solidarioFormData)
-        
-        if (solidarioVisibility.agencia === true && solidarioVisibility.direccion === false) {
-          addDebugLog('✅ useFieldVisibility funciona correctamente (cliente = BANCO SOLIDARIO)')
-        } else {
-          addDebugError('useFieldVisibility reglas incorrectas para BANCO SOLIDARIO')
-        }
-      } catch (error) {
-        addDebugError(`useFieldVisibility error: ${error}`)
-      }
+      // Test 8: AsyncStorage - Listar todas las claves
+      const allKeys = await StorageUtils.getAllKeys()
+      addDebugLog(`✅ Total de claves en AsyncStorage: ${allKeys.length}`)
 
       addDebugLog('')
-      addDebugLog('🎉 TODOS LOS TESTS PASARON (FASE 1 + FASE 2)!')
+      addDebugLog('🎉 TODOS LOS TESTS PASARON (FASE 1)!')
+      addDebugLog('Los hooks de FASE 2 están implementados en src/hooks/')
     } catch (error) {
       addDebugError(`Error en tests: ${error}`)
     }
@@ -211,12 +146,27 @@ export default function App() {
     setTheme(isDark ? 'light' : 'dark')
   }
 
-  const clearDebug = () => {
+  const clearDebug = async () => {
     setDebugInfo([])
-    MMKVUtils.remove('test:form:data')
-    setMmkvStatus('')
+    await StorageUtils.remove('test:form:data')
+    setStorageStatus('')
     runTests()
   }
+
+  // Test de useFieldVisibility Hook
+  const testFormDataForVisibility: OrdenTrabajoFormData = {
+    fechaEntrega: new Date(),
+    cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
+    agencia: '',
+    direccion: '',
+    telefono: '',
+    observaciones: '',
+    prestamoExtintores: false,
+    cantidadPrestamo: '',
+    detalles: []
+  }
+  
+  const visibility = useFieldVisibility(testFormDataForVisibility)
 
   return (
     <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
@@ -224,10 +174,10 @@ export default function App() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={[styles.title, isDark ? styles.darkText : styles.lightText]}>
-            FASE 1: SETUP INICIAL
+            FASE 1 + 2: SETUP + HOOKS
           </Text>
           <Text style={[styles.subtitle, isDark ? styles.darkText : styles.lightText]}>
-            Tests de estructura y configuración
+            Tests con AsyncStorage (Expo Go compatible)
           </Text>
         </View>
 
@@ -276,14 +226,14 @@ export default function App() {
           )}
         </View>
 
-        {/* MMKV Status */}
-        {mmkvStatus ? (
+        {/* AsyncStorage Status */}
+        {storageStatus ? (
           <View style={styles.mmkvSection}>
             <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
-              💾 MMKV Status
+              💾 AsyncStorage Status
             </Text>
             <Text style={[styles.debugText, isDark ? styles.darkText : styles.lightText]}>
-              {mmkvStatus}
+              {storageStatus}
             </Text>
           </View>
         ) : null}

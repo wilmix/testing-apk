@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { ZodSchema } from 'zod';
-import { MMKVUtils } from '../services/mmkvService';
+import { StorageUtils } from '../services/mmkvService';
 import { validateData } from '../services/validationService';
 
 interface UseFormDataOptions {
@@ -37,15 +37,16 @@ export function useFormData<T extends Record<string, any>>(
   const { autoSave = true, debounceMs = 500 } = options;
 
   // Estado del formulario
-  const [data, setData] = useState<T>(() => {
-    // Intenta cargar del MMKV, sino usa initialValue
-    try {
-      const saved = MMKVUtils.getJSON<T>(storageKey);
-      return saved || initialValue;
-    } catch {
-      return initialValue;
-    }
-  });
+  const [data, setData] = useState<T>(initialValue);
+
+  // Cargar datos iniciales de AsyncStorage
+  useEffect(() => {
+    StorageUtils.getJSON<T>(storageKey).then((saved) => {
+      if (saved) setData(saved);
+    }).catch(() => {
+      // Ignorar errores de carga inicial
+    });
+  }, [storageKey]);
 
   // Estado de errores de validación
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,11 +59,9 @@ export function useFormData<T extends Record<string, any>>(
     if (!autoSave) return;
 
     const timeout = setTimeout(() => {
-      try {
-        MMKVUtils.setJSON(storageKey, data);
-      } catch (error) {
-        console.error(`Error saving form data to MMKV:`, error);
-      }
+      StorageUtils.setJSON(storageKey, data).catch((error) => {
+        console.error(`Error saving form data to AsyncStorage:`, error);
+      });
     }, debounceMs);
 
     return () => clearTimeout(timeout);
@@ -119,11 +118,9 @@ export function useFormData<T extends Record<string, any>>(
     setData(initialValue);
     setErrors({});
     setTouchedState({});
-    try {
-      MMKVUtils.remove(storageKey);
-    } catch (error) {
-      console.error(`Error removing form data from MMKV:`, error);
-    }
+    StorageUtils.remove(storageKey).catch((error) => {
+      console.error(`Error removing form data from AsyncStorage:`, error);
+    });
   }, [initialValue, storageKey]);
 
   // Marcar campo como tocado/no tocado

@@ -1,25 +1,21 @@
 /**
- * Inicialización de MMKV
- * Storage offline-first para la app
+ * Storage Service - AsyncStorage
+ * Storage offline-first para la app (compatible con Expo Go)
  */
 
-import { MMKV } from 'react-native-mmkv'
-
-export const mmkvStorage = new MMKV({
-  id: 'orden-trabajo-storage',
-  encryptionKey: 'orden-trabajo-encryption-key-v1' // En producción, usar clave segura
-})
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 /**
- * Utilidades para trabajar con MMKV
+ * Utilidades para trabajar con AsyncStorage
+ * API async/await para persistencia local
  */
-export const MMKVUtils = {
+export const StorageUtils = {
   /**
    * Guardar un objeto JSON
    */
-  setJSON: (key: string, value: any) => {
+  setJSON: async (key: string, value: any): Promise<boolean> => {
     try {
-      mmkvStorage.set(key, JSON.stringify(value))
+      await AsyncStorage.setItem(key, JSON.stringify(value))
       return true
     } catch (error) {
       console.error(`Error guardando ${key}:`, error)
@@ -30,9 +26,9 @@ export const MMKVUtils = {
   /**
    * Obtener un objeto JSON
    */
-  getJSON: <T = any>(key: string, defaultValue?: T): T | null => {
+  getJSON: async <T = any>(key: string, defaultValue?: T): Promise<T | null> => {
     try {
-      const value = mmkvStorage.getString(key)
+      const value = await AsyncStorage.getItem(key)
       return value ? JSON.parse(value) : defaultValue || null
     } catch (error) {
       console.error(`Error cargando ${key}:`, error)
@@ -43,28 +39,50 @@ export const MMKVUtils = {
   /**
    * Verificar si existe una clave
    */
-  has: (key: string): boolean => {
-    return mmkvStorage.contains(key)
+  has: async (key: string): Promise<boolean> => {
+    try {
+      const value = await AsyncStorage.getItem(key)
+      return value !== null
+    } catch (error) {
+      console.error(`Error verificando ${key}:`, error)
+      return false
+    }
   },
 
   /**
    * Eliminar una clave
    */
-  remove: (key: string): void => {
-    mmkvStorage.delete(key)
+  remove: async (key: string): Promise<void> => {
+    try {
+      await AsyncStorage.removeItem(key)
+    } catch (error) {
+      console.error(`Error eliminando ${key}:`, error)
+    }
   },
 
   /**
    * Limpiar todo el storage
    */
-  clear: (): void => {
-    mmkvStorage.clearAll()
+  clear: async (): Promise<void> => {
+    try {
+      await AsyncStorage.clear()
+    } catch (error) {
+      console.error('Error limpiando storage:', error)
+    }
   },
 
   /**
    * Obtener todas las claves
    */
-  getAllKeys: (): string[] => {
-    return mmkvStorage.getAllKeys()
+  getAllKeys: async (): Promise<readonly string[]> => {
+    try {
+      return await AsyncStorage.getAllKeys()
+    } catch (error) {
+      console.error('Error obteniendo claves:', error)
+      return []
+    }
   }
 }
+
+// Mantener compatibilidad con código existente
+export const MMKVUtils = StorageUtils

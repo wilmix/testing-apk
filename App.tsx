@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { useState, useEffect } from 'react'
 import { StorageUtils } from './src/services/mmkvService'
 import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } from './src/services/validationService'
@@ -294,7 +295,8 @@ function AppContent() {
   // Si está en modo HeaderForm, mostrar solo eso
   if (showHeaderForm) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
         <HeaderForm
           data={headerFormData}
           onDataChange={setHeaderFormData}
@@ -315,14 +317,15 @@ function AppContent() {
             <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>← Volver</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     )
   }
 
   // Si está en modo DetallesForm, mostrar solo eso
   if (showDetallesForm) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
         <DetallesForm
           data={detallesFormData}
           onDataChange={setDetallesFormData}
@@ -342,12 +345,13 @@ function AppContent() {
             <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>← Volver</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     )
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <ScrollView style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
@@ -572,16 +576,18 @@ function AppContent() {
           <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>🔄 Reiniciar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
-// Wrapper principal con ThemeProvider
+// Wrapper principal con SafeAreaProvider y ThemeProvider
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }
 

@@ -2,10 +2,53 @@
 
 Este documento proporciona instrucciones detalladas y mejores prácticas para trabajar en proyectos de React Native con Expo. Está diseñado para agentes de IA (como GitHub Copilot) y desarrolladores, basado en consultas previas, principios KISS (Keep It Simple, Stupid), DRY (Don't Repeat Yourself) y SOLID, y recomendaciones actuales de Expo SDK 54 y React Native 0.81.4.
 
+## 🎯 Development Philosophy
+
+### KISS, DRY, SOLID - Core Principles
+
+**KISS (Keep It Simple, Stupid)**:
+- Simple solutions over clever ones
+- Readable code over smart tricks
+- Delete code before adding complexity
+- One way to do things, not ten
+
+**DRY (Don't Repeat Yourself)**:
+- Single source of truth
+- Reusable components and hooks
+- Shared constants and utilities
+- No copy-paste programming
+
+**SOLID**:
+- **S**ingle Responsibility: One component, one job
+- **O**pen/Closed: Extend, don't modify
+- **L**iskov Substitution: Props contract consistency
+- **I**nterface Segregation: Small, focused interfaces
+- **D**ependency Inversion: Depend on abstractions (hooks, contexts)
+
+### Code Style Guidelines
+
+✅ **DO**:
+- Write **simple, efficient, elegant** code
+- Prefer native/built-in solutions
+- Use TypeScript strict mode
+- One library per problem domain
+- Component composition over inheritance
+- Hooks over class components
+- Functional programming patterns
+
+❌ **DON'T**:
+- Over-engineer or premature optimize
+- Add "just in case" features
+- Create unnecessary abstractions
+- Use heavy libraries for simple tasks
+- Mix concerns in one component
+- Hardcode values (use constants)
+
 ## Overview
-- **Framework**: React Native con Expo para desarrollo cross-platform (Android, iOS, Web).
-- **Versiones**: Expo ~54.0.13, React Native 0.81.4, React 19.1.0, TypeScript ~5.9.2.
-- **Enfoque**: Apps móviles simples a complejas, con énfasis en UI/UX, estado y navegación.
+- **Framework**: React Native con Expo para desarrollo cross-platform
+- **Versiones**: Expo ~54.0.13, React Native 0.81.4, React 19.1.0, TypeScript ~5.9.2
+- **Target Platform**: **Android** (90% users), iOS secondary
+- **Enfoque**: Apps móviles para trabajo en campo (field workers)
 - **Principios**: KISS, DRY, SOLID
 
 ## 🖥️ Environment Setup
@@ -14,6 +57,7 @@ Este documento proporciona instrucciones detalladas y mejores prácticas para tr
 - **Terminal**: PowerShell (pwsh.exe) - NO bash
 - **Node.js**: v18+ instalado
 - **Proyecto**: c:\Users\willy\projects\testing-apk
+- **Testing**: Android emulator + dispositivos físicos Android
 
 ## Troubleshooting
 - **Hot Reload**: Si no actualiza, `npx expo start --clear`.

@@ -6,6 +6,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Orden de Trabajo Mobile** - An offline-first React Native + Expo mobile app for field workers (fire extinguisher recharge technicians). The app transforms a web-based form into an optimized mobile experience with 70-80% UX improvement.
 
+## Development Philosophy: KISS, DRY, SOLID
+
+**Core Principles**:
+1. **KISS (Keep It Simple, Stupid)**: Simple solutions over clever ones. No over-engineering.
+2. **DRY (Don't Repeat Yourself)**: Reuse code, avoid duplication. Single source of truth.
+3. **SOLID**: Clean architecture, single responsibility, open for extension.
+
+**Guidelines**:
+- ✅ Write code that's **simple, efficient, elegant**
+- ✅ Prefer native solutions over heavy libraries
+- ✅ One library per problem (e.g., one safe area library, not multiple approaches)
+- ✅ Delete code before adding complexity
+- ❌ No over-abstraction or premature optimization
+- ❌ No "just in case" features
+
 ## Environment
 
 - **Platform**: Windows 10/11 (NOT Linux/Mac)
@@ -14,6 +29,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Project Path**: `c:\Users\willy\projects\testing-apk` on Windows
 - Use Windows-style paths (backslashes) in documentation/instructions for users
 - Use PowerShell commands, not bash commands
+
+## Target Platform
+
+- **Primary**: **Android** (90% of users are Android)
+- **Secondary**: iOS (tested occasionally, not priority)
+- **Focus**: Optimize for Android first, ensure iOS compatibility second
+- **Testing**: Android emulator + physical Android devices
 
 ## Tech Stack
 
@@ -25,6 +47,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Dropdowns | react-native-element-dropdown | 2.12.4 | Touch-optimized with search |
 | Validation | Zod | 3.25.76 | Type-safe, Spanish messages |
 | Date Picker | @react-native-community/datetimepicker | 8.4.4 | Native iOS/Android |
+| QR Scanner | expo-camera | 8.4.4 | Escaneo QR, permisos, Expo Go |
+| Safe Area | react-native-safe-area-context | ~5.6.0 | Cross-platform (Android + iOS) |
+| Theming | React Context | Built-in | Dark/Light mode automático |
 | State | React Hooks | Built-in | Simple, no Redux |
 
 ## Common Commands

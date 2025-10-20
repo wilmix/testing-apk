@@ -27,6 +27,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import type { BarcodeScanningResult } from 'expo-camera'
 import { useTheme } from '../../contexts/ThemeContext'
@@ -101,12 +102,12 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   if (!permission) {
     return (
       <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right', 'bottom']}>
           <ActivityIndicator size="large" color={theme.info} />
           <Text style={[styles.text, { color: theme.text }]}>
             Verificando permisos de cámara...
           </Text>
-        </View>
+        </SafeAreaView>
       </Modal>
     )
   }
@@ -115,7 +116,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   if (!permission.granted) {
     return (
       <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right', 'bottom']}>
           <View style={[styles.permissionContainer, { backgroundColor: theme.surface }]}>
             <Text style={[styles.title, { color: theme.text }]}>
               Permiso de Cámara
@@ -140,7 +141,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     )
   }
@@ -148,7 +149,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   // Escáner activo
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
+      <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right', 'bottom']}>
         {/* Cámara */}
         <CameraView
           style={styles.camera}
@@ -201,7 +202,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
             </View>
           </View>
         </CameraView>
-      </View>
+      </SafeAreaView>
     </Modal>
   )
 }
@@ -230,7 +231,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    paddingTop: 48, // Status bar spacing
   },
   headerText: {
     fontSize: 18,

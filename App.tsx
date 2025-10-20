@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { useState, useEffect } from 'react'
-import { StorageUtils } from './src/services/mmkvService'
+import { storageUtils } from './src/services/storageService';
 import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } from './src/services/validationService'
 import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from './src/constants/ordenTrabajoConstants'
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
@@ -23,7 +23,7 @@ import { ThemeProvider, useTheme } from './src/contexts/ThemeContext'
  * ✅ AsyncStorage guardando/cargando datos
  * 
  * FASE 2:
- * ✅ useMMKVStorage hook (implementado)
+ * ✅ useStorage hook (implementado)
  * ✅ useFormData hook (implementado)
  * ✅ useFieldVisibility hook (testeado abajo)
  *
@@ -169,7 +169,7 @@ function AppContent() {
       })
 
       // Test 5: AsyncStorage - Guardar datos
-      const saved = await StorageUtils.setJSON('test:form:data', testFormData)
+      const saved = await storageUtils.setJSON('test:form:data', testFormData)
       if (saved) {
         addDebugLog('✅ Datos guardados en AsyncStorage')
         setStorageStatus('✅ Guardado en AsyncStorage')
@@ -178,7 +178,7 @@ function AppContent() {
       }
 
       // Test 6: AsyncStorage - Cargar datos
-      const loaded = await StorageUtils.getJSON<OrdenTrabajoFormData>('test:form:data')
+      const loaded = await storageUtils.getJSON<OrdenTrabajoFormData>('test:form:data')
       if (loaded && loaded.cliente === testFormData.cliente) {
         addDebugLog('✅ Datos cargados correctamente de AsyncStorage')
         setStorageStatus('✅ AsyncStorage funcionando perfecto')
@@ -187,11 +187,11 @@ function AppContent() {
       }
 
       // Test 7: AsyncStorage - Verificar existencia
-      const has = await StorageUtils.has('test:form:data')
+      const has = await storageUtils.has('test:form:data')
       addDebugLog(`✅ Verificar clave: ${has ? 'EXISTS' : 'NOT FOUND'}`)
 
       // Test 8: AsyncStorage - Listar todas las claves
-      const allKeys = await StorageUtils.getAllKeys()
+      const allKeys = await storageUtils.getAllKeys()
       addDebugLog(`✅ Total de claves en AsyncStorage: ${allKeys.length}`)
 
       addDebugLog('')
@@ -239,7 +239,7 @@ function AppContent() {
 
   const clearDebug = async () => {
     setDebugInfo([])
-    await StorageUtils.remove('test:form:data')
+    await storageUtils.remove('test:form:data')
     setStorageStatus('')
     setShowHeaderForm(false)
     setShowDetallesForm(false)

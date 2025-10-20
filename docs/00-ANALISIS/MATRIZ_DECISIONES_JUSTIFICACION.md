@@ -3,6 +3,9 @@
 ## 📊 Comparativa: Opciones Evaluadas vs Elegida
 
 ### Storage Solution
+
+> **Nota de Implementación**: Aunque `react-native-mmkv` fue la opción elegida en este análisis por su rendimiento, la implementación final utiliza `@react-native-async-storage/async-storage`. Este cambio se debió a que `mmkv` requiere módulos nativos no compatibles con el entorno de desarrollo de **Expo Go**, y la prioridad fue mantener la agilidad del desarrollo sin necesidad de un "development build".
+
 ```
 ┌─────────────────────────┬──────────────┬─────────────┬──────────────┐
 │ Opción                  │ Velocidad    │ Offline OK  │ Sync         │

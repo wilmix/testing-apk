@@ -2,6 +2,6 @@
  * Hooks reutilizables para la app
  */
 
-export { useMMKVStorage } from './useMMKVStorage';
+export { useStorage } from './useStorage';
 export { useFormData } from './useFormData';
 export { useFieldVisibility } from './useFieldVisibility';

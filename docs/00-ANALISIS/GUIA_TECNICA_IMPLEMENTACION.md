@@ -54,36 +54,36 @@ const handleSubmit = () => {
 const updateField = (field, value) => {
   data[field] = value;
   validateField(field);  // ← Instant feedback
-  saveToMMKV();          // ← Persist
+  saveToStorage();       // ← Persist
 };
 
 // ✅ Persistencia automática (offline-first)
-// Guardado en MMKV cada cambio
+// Guardado en AsyncStorage cada cambio
 ```
 
 ---
 
 ## 🏗️ Stack Técnico Detallado
 
-### 1. **MMKV Storage** (Offline-First)
+### 1. **AsyncStorage** (Offline-First)
 ```typescript
 // Instalación
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 
 // Uso básico
-import { MMKV } from 'react-native-mmkv'
-export const storage = new MMKV()
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Guardar
-storage.set('orden:draft', JSON.stringify(data))
+await AsyncStorage.setItem('orden:draft', JSON.stringify(data));
 
 // Cargar
-const data = JSON.parse(storage.getString('orden:draft') || '{}')
+const jsonValue = await AsyncStorage.getItem('orden:draft');
+const data = jsonValue != null ? JSON.parse(jsonValue) : null;
 
 // Validar conexión y sincronizar
 if (isOnline) {
   await uploadOrder(data);
-  storage.delete('orden:draft');
+  await AsyncStorage.removeItem('orden:draft');
 }
 ```
 
@@ -173,37 +173,32 @@ return (
 
 ## 🎣 Hooks Propuestos - Implementación
 
-### Hook 1: `useMMKVStorage`
+### Hook 1: `useStorage`
 ```typescript
-// hooks/useMMKVStorage.ts
-import { useCallback, useState, useEffect } from 'react'
-import { MMKV } from 'react-native-mmkv'
+// hooks/useStorage.ts
+import { useCallback, useState, useEffect } from 'react';
+import { storageUtils } from '../services/storageService';
 
-export const storage = new MMKV()
+export function useStorage<T>(key: string, defaultValue: T) {
+  const [value, setValue] = useState<T>(defaultValue);
 
-export function useMMKVStorage<T>(key: string, defaultValue: T) {
-  const [value, setValue] = useState<T>(() => {
-    try {
-      const stored = storage.getString(key)
-      return stored ? JSON.parse(stored) : defaultValue
-    } catch {
-      return defaultValue
-    }
-  })
+  useEffect(() => {
+    storageUtils.getJSON<T>(key, defaultValue).then((storedValue) => {
+      if (storedValue !== null) {
+        setValue(storedValue);
+      }
+    });
+  }, [key, defaultValue]);
 
   const setStoredValue = useCallback(
     (newValue: T) => {
-      try {
-        setValue(newValue)
-        storage.set(key, JSON.stringify(newValue))
-      } catch (error) {
-        console.error(`Error saving to MMKV: ${key}`, error)
-      }
+      setValue(newValue);
+      storageUtils.setJSON(key, newValue);
     },
     [key]
-  )
+  );
 
-  return [value, setStoredValue] as const
+  return [value, setStoredValue] as const;
 }
 ```
 
@@ -211,7 +206,7 @@ export function useMMKVStorage<T>(key: string, defaultValue: T) {
 ```typescript
 // hooks/useFormData.ts
 import { useCallback, useState, useEffect } from 'react'
-import { useMMKVStorage } from './useMMKVStorage'
+import { useStorage } from './useStorage';
 import { z } from 'zod'
 
 export function useFormData<T>(
@@ -219,7 +214,7 @@ export function useFormData<T>(
   initialValue: T,
   schema: z.ZodSchema
 ) {
-  const [data, setData] = useMMKVStorage(storageKey, initialValue)
+  const [data, setData] = useStorage(storageKey, initialValue)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSaving, setIsSaving] = useState(false)
 
@@ -633,7 +628,7 @@ export interface FormState {
 - [ ] `package.json` con dependencias base
 - [ ] TypeScript configurado
 - [ ] ESLint/Prettier configurado
-- [ ] MMKV instalado y testeable
+- [ ] AsyncStorage instalado y testeable
 - [ ] Element Dropdown instalado
 - [ ] Zod instalado
 - [ ] Estructura de carpetas creada
@@ -646,7 +641,7 @@ export interface FormState {
 
 ```bash
 # En la carpeta del proyecto
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 npx expo install react-native-element-dropdown
 npx expo install zod
 npx expo install @react-native-community/datetimepicker

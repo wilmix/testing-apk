@@ -96,10 +96,10 @@ c:\Users\willy\projects\testing-apk\
 │  ├─ constants/
 │  │  └─ ordenTrabajoConstants.ts # CLIENTES, MARCAS, TIPOS, etc
 │  ├─ services/
-│  │  ├─ mmkvService.ts          # AsyncStorage utilities
+│  │  ├─ storageService.ts          # AsyncStorage utilities
 │  │  └─ validationService.ts    # Zod Schemas + validación
 │  ├─ hooks/                     # FASE 2 (próximamente)
-│  │  ├─ useMMKVStorage.ts
+│  │  ├─ useStorage.ts
 │  │  ├─ useFormData.ts
 │  │  └─ useFieldVisibility.ts
 │  ├─ components/                # FASE 3 (próximamente)
@@ -136,7 +136,7 @@ c:\Users\willy\projects\testing-apk\
 - ✅ Tests en App.tsx (todos pasan en Expo Go)
 
 ### ✅ FASE 2: Hooks Base (3-4h) - **COMPLETADA**
-- ✅ `useMMKVStorage` - Guardar/cargar datos (AsyncStorage)
+- ✅ `useStorage` - Guardar/cargar datos (AsyncStorage)
 - ✅ `useFormData` - Validación + persistencia
 - ✅ `useFieldVisibility` - Campos condicionales
 - ✅ Tests (4 tests pasan)

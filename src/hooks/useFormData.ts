@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { ZodSchema } from 'zod';
-import { StorageUtils } from '../services/mmkvService';
+import { storageUtils } from '../services/storageService';
 import { validateData } from '../services/validationService';
 
 interface UseFormDataOptions {
@@ -41,7 +41,7 @@ export function useFormData<T extends Record<string, any>>(
 
   // Cargar datos iniciales de AsyncStorage
   useEffect(() => {
-    StorageUtils.getJSON<T>(storageKey).then((saved) => {
+    storageUtils.getJSON<T>(storageKey).then((saved) => {
       if (saved) setData(saved);
     }).catch(() => {
       // Ignorar errores de carga inicial
@@ -59,7 +59,7 @@ export function useFormData<T extends Record<string, any>>(
     if (!autoSave) return;
 
     const timeout = setTimeout(() => {
-      StorageUtils.setJSON(storageKey, data).catch((error) => {
+      storageUtils.setJSON(storageKey, data).catch((error) => {
         console.error(`Error saving form data to AsyncStorage:`, error);
       });
     }, debounceMs);
@@ -118,7 +118,7 @@ export function useFormData<T extends Record<string, any>>(
     setData(initialValue);
     setErrors({});
     setTouchedState({});
-    StorageUtils.remove(storageKey).catch((error) => {
+    storageUtils.remove(storageKey).catch((error) => {
       console.error(`Error removing form data from AsyncStorage:`, error);
     });
   }, [initialValue, storageKey]);

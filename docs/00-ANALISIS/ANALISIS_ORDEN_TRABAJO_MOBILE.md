@@ -45,6 +45,8 @@ CARACTERÍSTICAS:
 
 ## 🏗️ Arquitectura Propuesta
 
+> **Nota de Implementación**: El análisis original recomendó `react-native-mmkv` por su rendimiento. Sin embargo, durante la implementación inicial (Fase 1), se descubrió que `mmkv` no es compatible con el entorno de desarrollo de **Expo Go**, ya que requiere módulos nativos. Para mantener la agilidad y evitar la necesidad de un "development build", se tomó la decisión de usar `@react-native-async-storage/async-storage` en su lugar. Toda la implementación de código y los hooks reflejan este cambio.
+
 ### Stack Tecnológico
 ```
 STORAGE (Offline-first):

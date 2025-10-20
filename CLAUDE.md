@@ -103,10 +103,10 @@ src/
 ├── constants/
 │   └── ordenTrabajoConstants.ts  # Static data: CLIENTES, MARCAS, TIPOS, etc.
 ├── services/
-│   ├── mmkvService.ts             # AsyncStorage utilities (StorageUtils)
+│   ├── storageService.ts             # AsyncStorage utilities (StorageUtils)
 │   └── validationService.ts      # Zod schemas + validateData()
 ├── hooks/
-│   ├── useMMKVStorage.ts         # Generic AsyncStorage hook
+│   ├── useStorage.ts         # Generic AsyncStorage hook
 │   ├── useFormData.ts            # Form state + validation + persistence
 │   └── useFieldVisibility.ts    # Conditional field visibility logic
 ├── components/
@@ -147,7 +147,7 @@ src/
   - Returns: `{ data, errors, touched, updateField, updateMultiple, reset, validate, setTouched }`
   - Auto-saves to AsyncStorage with configurable debounce
 - `useFieldVisibility`: Encapsulates conditional field logic (e.g., show agencia if client === "BANCO SOLIDARIO")
-- `useMMKVStorage<T>`: Low-level AsyncStorage wrapper for any key-value storage needs
+- `useStorage<T>`: Low-level AsyncStorage wrapper for any key-value storage needs
 
 **5. Component Composition**
 - Atomic components in `FormFields/`: `FormInput`, `FormDropdown`, `FormDatePicker`
@@ -283,7 +283,7 @@ if (validate()) {
 
 Phase tracking (see README.md for details):
 - ✅ FASE 1: Setup Inicial (dependencies, structure, types, constants, services)
-- ✅ FASE 2: Hooks Base (useMMKVStorage, useFormData, useFieldVisibility)
+- ✅ FASE 2: Hooks Base (useStorage, useFormData, useFieldVisibility)
 - ✅ FASE 3: Componentes Base (FormInput, FormDropdown, FormDatePicker, ValidationIcon)
 - ✅ FASE 4: Header Form (cliente + fecha + conditional agencia)
 - ✅ FASE 5: Detalles Dinámicos (dynamic list, cascading dropdowns, validation)

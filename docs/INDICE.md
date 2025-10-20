@@ -75,14 +75,27 @@ Este proyecto está organizado por fases de desarrollo. Cada fase tiene criterio
 
 ---
 
-#### **FASE 5: Detalles Dinámicos** 🔴 APPROVAL POINT 2
+#### **FASE 5: Detalles Dinámicos** ✅ APPROVAL POINT 2
 **`docs/05-FASE5-DETALLES/README.md`**
 
-- Duration: 5-6 horas
-- Status: ⏳ Planeada
-- Tasks: DetalleItem component, cascada Unidad→Capacidad, add/remove items
-- Approval: ✅ Mostrable para aprobación
-- Deliverables: Screenshots + video del flujo dinámico
+- Duration: 5-6 horas (real: ~3 horas)
+- Status: ✅ COMPLETADA
+- Deliverables: DetallesForm con lista dinámica, cascada Unidad→Capacidad, add/remove, validación per field
+- Features: Collapsible items, dark theme, AsyncStorage persistence
+- Tests: Todos pasando en Expo Go
+
+---
+
+#### **FASE 5.5: QR Reader** 📋 OPCIONAL - PLANNING
+**`docs/05_5-FASE5_5-QR_READER/README.md`**
+
+- Duration: 1-2 horas
+- Status: 📋 PLANNING (no bloqueador de FASE 6)
+- Purpose: Auto-llenar detalles desde QR con JSON batch
+- UX Improvement: 4min manual → 45seg con QR
+- JSON Format: `{"tipo":"extintor_batch","detalles":[...]}`
+- Fallback: Si QR falla, llenar manual (ya funciona)
+- Deliverables: useQRReader hook + QRScanner component
 
 ---
 
@@ -90,7 +103,7 @@ Este proyecto está organizado por fases de desarrollo. Cada fase tiene criterio
 **`docs/06-FASE6-FINAL/README.md`**
 
 - Duration: 4-5 horas
-- Status: ⏳ Planeada
+- Status: ⏳ PRÓXIMA
 - Tasks: Ubicación condicional, teléfono, observaciones, préstamo, submit
 - Approval: ✅ Mostrable para aprobación
 - Deliverables: Screenshots + video del flujo completo

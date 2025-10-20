@@ -194,6 +194,100 @@ npx tsc --noEmit
 npx expo start --clear
 ```
 
+---
+
+## 📱 QR Reader Pattern (FASE 5.5)
+
+### Estructura JSON para QR
+
+```json
+{
+  "version": "1.0",
+  "tipo": "extintor_batch",
+  "detalles": [
+    {
+      "extintorNro": "001",
+      "capacidadUnidad": "KILOS",
+      "capacidadValor": "6 KILOS",
+      "marca": "KIDDE BRASIL",
+      "tipo": "ABC"
+    }
+  ]
+}
+```
+
+### Hook: useQRReader
+
+```typescript
+const { parseQRData, error } = useQRReader()
+const detalles = parseQRData(qrString)
+```
+
+**Responsabilidades:**
+- Parse JSON
+- Validar estructura
+- Mapear a DetalleExtintor[]
+- Manejo de errores
+
+### Component: QRScanner
+
+```typescript
+<QRScanner
+  onScan={(detalles) => handleQRScanned(detalles)}
+  onCancel={() => setShowQRScanner(false)}
+  isDark={isDark}
+/>
+```
+
+**Features:**
+- Camera overlay
+- QR detection
+- Feedback visual
+- Botón cancelar
+
+### Integration Pattern
+
+```typescript
+// En DetallesForm
+const [showQRScanner, setShowQRScanner] = useState(false)
+
+const handleQRScanned = (newDetalles: DetalleExtintor[]) => {
+  const merged = [...data.detalles, ...newDetalles]
+  onDataChange({ ...data, detalles: merged })
+}
+
+// UI: Botón + Modal
+<TouchableOpacity onPress={() => setShowQRScanner(true)}>
+  <Text>📱 Escanear QR</Text>
+</TouchableOpacity>
+
+{showQRScanner && (
+  <QRScanner
+    onScan={handleQRScanned}
+    onCancel={() => setShowQRScanner(false)}
+    isDark={isDark}
+  />
+)}
+```
+
+### Testing QR
+
+```powershell
+# 1. Generar QR (online o CLI)
+npm install -g qr-image
+qr '{"version":"1.0",...}'
+
+# 2. Escanear en Expo Go
+npx expo start
+# Abre DetallesForm → Escanear QR → Verificar merge
+
+# 3. Validar parse
+const detalles = parseQRData(validJSON)
+expect(detalles.length).toBeGreaterThan(0)
+```
+
+---
+
 ## Instrucciones para GitHub Copilot
 
 - **Contexto**: Windows 10/11, PowerShell, VSCode

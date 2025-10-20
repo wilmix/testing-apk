@@ -27,6 +27,20 @@
 - **Documentación**: [DateTimePicker Docs](https://github.com/react-native-camera/react-native-date-time-picker)
 - **Uso en proyecto**: FASE 3 - Componentes
 
+### expo-camera (FASE 5.5)
+- **Versión**: ~14.1.0 (incluida en Expo Go)
+- **Propósito**: Acceso a cámara para QR scanning
+- **Documentación**: [Expo Camera Docs](https://docs.expo.dev/versions/latest/sdk/camera/)
+- **Uso en proyecto**: FASE 5.5 - QRScanner component
+- **Ventajas**: ✅ Nativo, incluido en Expo Go, permisos automáticos
+
+### expo-barcode-scanner (FASE 5.5)
+- **Versión**: ~12.0.0 (incluida en Expo Go)
+- **Propósito**: Detección de QR/barcodes
+- **Documentación**: [Expo Barcode Scanner Docs](https://docs.expo.dev/versions/latest/sdk/bar-code-scanner/)
+- **Uso en proyecto**: FASE 5.5 - QRScanner component
+- **Ventajas**: ✅ Funciona sin TurboModules, QR detection en tiempo real
+
 ## Expo SDK
 - **Versión**: 54.0.13
 - **React Native**: 0.81.4

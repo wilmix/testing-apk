@@ -153,21 +153,45 @@ c:\Users\willy\projects\testing-apk\
 - ✅ Validación real-time
 - ✅ Guardado AsyncStorage
 
-### 📋 FASE 5: Detalles Dinámicos (5-6h) - **APPROVAL POINT 2**
-- Items add/remove
-- Cascada Unidad → Capacidad
-- Validación completa
+### ✅ FASE 5: Detalles Dinámicos (5-6h) - **COMPLETADA** ⭐ APPROVAL POINT 2
+- ✅ Items add/remove dinámicos
+- ✅ Cascada Unidad → Capacidad (funcional)
+- ✅ Validación completa per extintor
+- ✅ Collapsible items con estado
+- ✅ Dark theme completo
+
+### 📋 FASE 5.5: QR Reader (1-2h) - **OPCIONAL, PLANNING**
+- 📱 Escanear QR con batch de extintores
+- Auto-llenar DetallesForm desde JSON
+- Merge: QR + manualmente agregados
+- Fallback: si QR falla, llenar manual
+- [Documentación completa: `docs/05_5-FASE5_5-QR_READER/README.md`]
+
+**JSON Format:**
+```json
+{
+  "version": "1.0",
+  "tipo": "extintor_batch",
+  "detalles": [
+    {"extintorNro":"001","capacidadUnidad":"KILOS","capacidadValor":"6 KILOS","marca":"KIDDE BRASIL","tipo":"ABC"}
+  ]
+}
+```
+
+**UX Improvement:** 4min (manual 8 ext) → 45seg (QR + ajustes)
 
 ### ✏️ FASE 6: Final + Submit (4-5h) - **APPROVAL POINT 3**
 - Ubicación condicional
-- Teléfono
-- Observaciones
-- Préstamo con reveal
-- Submit
+- Teléfono (requerido, numérico)
+- Observaciones (max 500 chars)
+- Préstamo checkbox + reveal cantidad
+- Submit button + API integration
 
 ### 🧪 FASE 7: Testing (3-4h) - **APPROVAL POINT 4**
+- End-to-end: Header → Detalles → Final → Submit
 - Offline functionality
-- Performance
+- Performance testing
+- UX completo
 - Responsive design
 - UX completo
 
@@ -180,12 +204,15 @@ c:\Users\willy\projects\testing-apk\
 ```
 ✅ FASE 1: Setup Inicial                      COMPLETADA
 ✅ FASE 2: Hooks Base                         COMPLETADA  
-✅ FASE 3: Componentes Base                   COMPLETADA
+✅ FASE 3: Componentes Base (4)               COMPLETADA
 ✅ FASE 4: Header Form (APPROVAL POINT 1)     COMPLETADA ⭐
 ✅ FASE 5: Detalles Dinámicos (APPROVAL 2)    COMPLETADA ⭐
-🚀 FASE 6: Final + Submit (PRÓXIMA)           LISTA PARA EMPEZAR
-⏳ FASE 7: Testing                            Pendiente
+📋 FASE 5.5: QR Reader (OPCIONAL)             PLANNING 📱
+🚀 FASE 6: Final + Submit (APPROVAL POINT 3)  PRÓXIMA
+⏳ FASE 7: Testing (APPROVAL POINT 4)         Pendiente
 ```
+
+**Progreso:** 5 de 7 fases completadas (71%)
 
 ---
 

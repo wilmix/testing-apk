@@ -15,3 +15,6 @@ export type { ValidationIconProps } from './Feedback/ValidationIcon'
 // OrdenTrabajo components
 export { HeaderForm } from './OrdenTrabajo/HeaderForm'
 export type { HeaderFormProps } from './OrdenTrabajo/HeaderForm'
+
+export { DetallesForm } from './OrdenTrabajo/DetallesForm'
+export type { DetallesFormProps } from './OrdenTrabajo/DetallesForm'

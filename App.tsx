@@ -6,11 +6,11 @@ import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } fro
 import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from './src/constants/ordenTrabajoConstants'
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
 import { useFieldVisibility } from './src/hooks'
-import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm } from './src/components'
+import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm, DetallesForm } from './src/components'
 
 /**
  * ============================================================================
- * APP PRINCIPAL - TESTS FASE 1, 2, 3 Y 4
+ * APP PRINCIPAL - TESTS FASE 1, 2, 3, 4 Y 5
  * ============================================================================
  * Tests para verificar:
  * FASE 1:
@@ -35,6 +35,9 @@ import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm } f
  * ✅ HeaderForm component (cliente + fecha + agencia condicional)
  * ✅ Validación integrada con Zod
  * ✅ AsyncStorage persistence
+ *
+ * FASE 5:
+ * ✅ DetallesForm component (lista dinámica, cascada, validación)
  */
 
 export default function App() {
@@ -70,6 +73,29 @@ export default function App() {
     prestamoExtintores: false,
     cantidadPrestamo: '',
     detalles: [],
+  })
+
+  // FASE 5 - Show DetallesForm view
+  const [showDetallesForm, setShowDetallesForm] = useState(false)
+  const [detallesFormData, setDetallesFormData] = useState<OrdenTrabajoFormData>({
+    fechaEntrega: new Date(),
+    cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
+    agencia: '',
+    direccion: '',
+    telefono: '',
+    observaciones: '',
+    prestamoExtintores: false,
+    cantidadPrestamo: '',
+    detalles: [
+      {
+        id: 'extintor_001',
+        extintorNro: '',
+        capacidadUnidad: '',
+        capacidadValor: '',
+        marca: '',
+        tipo: '',
+      },
+    ],
   })
 
   useEffect(() => {
@@ -218,6 +244,7 @@ export default function App() {
     await StorageUtils.remove('test:form:data')
     setStorageStatus('')
     setShowHeaderForm(false)
+    setShowDetallesForm(false)
     setHeaderFormData({
       fechaEntrega: new Date(),
       cliente: '',
@@ -228,6 +255,26 @@ export default function App() {
       prestamoExtintores: false,
       cantidadPrestamo: '',
       detalles: [],
+    })
+    setDetallesFormData({
+      fechaEntrega: new Date(),
+      cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
+      agencia: '',
+      direccion: '',
+      telefono: '',
+      observaciones: '',
+      prestamoExtintores: false,
+      cantidadPrestamo: '',
+      detalles: [
+        {
+          id: 'extintor_001',
+          extintorNro: '',
+          capacidadUnidad: '',
+          capacidadValor: '',
+          marca: '',
+          tipo: '',
+        },
+      ],
     })
     runTests()
   }
@@ -268,6 +315,37 @@ export default function App() {
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
             onPress={() => setShowHeaderForm(false)}
+          >
+            <Text style={styles.buttonText}>← Volver</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={toggleTheme}>
+            <Text style={styles.buttonText}>🌓 Tema</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
+
+  // Si está en modo DetallesForm, mostrar solo eso
+  if (showDetallesForm) {
+    return (
+      <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+        <DetallesForm
+          data={detallesFormData}
+          onDataChange={setDetallesFormData}
+          onContinue={() => {
+            addDebugLog('✅ DetallesForm Continuar presionado')
+            addDebugLog(`   Detalles: ${detallesFormData.detalles.length} extintor(es)`)
+            detallesFormData.detalles.forEach((d, i) => {
+              addDebugLog(`     Extintor ${i + 1}: ${d.extintorNro} (${d.capacidadValor})`)
+            })
+          }}
+          isDark={isDark}
+        />
+        <View style={[styles.actionsContainer, isDark ? styles.darkActionsContainer : styles.lightActionsContainer]}>
+          <TouchableOpacity
+            style={[styles.button, styles.secondaryButton]}
+            onPress={() => setShowDetallesForm(false)}
           >
             <Text style={styles.buttonText}>← Volver</Text>
           </TouchableOpacity>
@@ -494,6 +572,12 @@ export default function App() {
           onPress={() => setShowHeaderForm(true)}
         >
           <Text style={styles.buttonText}>📝 HeaderForm</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: '#34C759' }]} 
+          onPress={() => setShowDetallesForm(true)}
+        >
+          <Text style={styles.buttonText}>📋 DetallesForm</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={clearDebug}>
           <Text style={styles.buttonText}>🔄 Reiniciar</Text>

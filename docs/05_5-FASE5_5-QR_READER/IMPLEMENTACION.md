@@ -1,12 +1,19 @@
 # Implementación FASE 5.5: QR Reader
 
-**Status**: ✅ COMPLETADO | **Fecha**: 2025-01-20 | **Tiempo**: 2h
+**Status**: ✅ COMPLETADO FINAL | **Fecha**: 2025-01-20 | **Tiempo**: 4h (incluye haptics + UI visual)
 
 ---
 
 ## 📋 Resumen
 
 Sistema de escaneo QR para auto-llenar datos de extintores individuales. El usuario puede escanear QR codes uno por uno para agregar extintores rápidamente, manteniendo la opción de entrada manual.
+
+**NUEVO - VERSIÓN FINAL**:
+- ✅ Feedback háptico (vibración) configurable
+- ✅ **Feedback visual claro y obvio** con colores diferenciados
+- ✅ Mensajes grandes y legibles para cada evento
+- ✅ Iconos grandes (✅ ⚠️ ❌) que destacan
+- ✅ Duración visible: 2-3 segundos por mensaje
 
 ---
 
@@ -147,9 +154,247 @@ const handleQRScanned = useCallback((qrData: Partial<DetalleExtintor>) => {
 
 ---
 
+## 🎮 NUEVO: Feedback Háptico (Vibración)
+
+### Archivo de Configuración: `hapticConfig.ts`
+
+**Ubicación**: `src/constants/hapticConfig.ts`
+
+**Características**:
+- ✅ Totalmente configurable sin cambiar código
+- ✅ 4 tipos de vibración predefinidos
+- ✅ 4 presets listos para usar
+- ✅ Control global de intensidad
+- ✅ Fácil activar/desactivar tipos específicos
+
+**Tipos de Vibración**:
+```typescript
+HapticType.SUCCESS   // ✅ Éxito - 1 vibración suave (extintor agregado)
+HapticType.WARNING   // ⚠️ Duplicado - 2 vibraciones (atención)
+HapticType.ERROR     // ❌ Error - 3 vibraciones (acción requerida)
+HapticType.LIGHT     // ✨ Leve - 1 vibración micro (confirmación)
+```
+
+**Configuración Rápida - Presets**:
+```typescript
+// En hapticConfig.ts, cambia la exportación para usar presets:
+
+// Preset: COMPLETO - Todas las vibraciones
+export const HAPTIC_GLOBAL_CONFIG = HAPTIC_PRESETS.FULL
+
+// Preset: MODERADO - Solo vibraciones importantes
+export const HAPTIC_GLOBAL_CONFIG = HAPTIC_PRESETS.MODERATE
+
+// Preset: MÍNIMO - Solo errores y advertencias
+export const HAPTIC_GLOBAL_CONFIG = HAPTIC_PRESETS.MINIMAL
+
+// Preset: DESACTIVADO - Sin vibraciones
+export const HAPTIC_GLOBAL_CONFIG = HAPTIC_PRESETS.DISABLED
+```
+
+### Hook: `useHapticFeedback.ts`
+
+**Ubicación**: `src/hooks/useHapticFeedback.ts`
+
+**API**:
+```typescript
+const haptic = useHapticFeedback()
+
+// Trigger vibración predefinida
+await haptic.trigger('success')   // ✅ Éxito
+await haptic.trigger('warning')   // ⚠️ Duplicado
+await haptic.trigger('error')     // ❌ Error
+await haptic.trigger('light')     // ✨ Leve
+
+// Trigger personalizado (patrón custom)
+await haptic.triggerCustom([50, 100, 50])  // 3 vibraciones personalizadas
+
+// Verificar si está habilitado
+const isEnabled = haptic.isEnabled('success')
+const isGloballyEnabled = haptic.isGloballyEnabled
+```
+
+**Dependencias**:
+- `expo-haptics` ~14.0.0 (incluido en Expo Go, SDK 54)
+
+### Integración en QRScanner
+
+**Ubicación**: `src/components/QR/QRScanner.tsx`
+
+**Cambios**:
+```typescript
+import { useHapticFeedback, HapticType } from '../../hooks/useHapticFeedback'
+
+const haptic = useHapticFeedback()
+
+// ✨ Vibración leve cuando se abre el scanner
+useEffect(() => {
+  if (visible) {
+    haptic.trigger(HapticType.LIGHT)
+  }
+}, [visible])
+
+// ✅ Vibración de éxito cuando QR es válido
+await haptic.trigger(HapticType.SUCCESS)
+
+// ⚠️ Vibración de advertencia cuando es duplicado
+await haptic.trigger(HapticType.WARNING)
+
+// ❌ Vibración de error cuando QR es inválido
+await haptic.trigger(HapticType.ERROR)
+```
+
+**Patrones de Vibración**:
+
+| Evento | Patrón | Sensación | Duración |
+|--------|--------|-----------|----------|
+| **✅ Éxito** | 1 vibración | "tick" suave | 50ms |
+| **⚠️ Duplicado** | 2 vibraciones | "tick-tick" | 200ms total |
+| **❌ Error** | 3 vibraciones | "tick-tick-tick" intenso | 450ms total |
+| **✨ Leve** | 1 vibración micro | Casi imperceptible | 20ms |
+
+---
+
+## 📊 Archivos Creados/Modificados
+
+### Archivos Nuevos
+```
+src/
+├── constants/
+│   └── hapticConfig.ts         (NUEVO - ~120 líneas)
+└── hooks/
+    └── useHapticFeedback.ts    (NUEVO - ~160 líneas)
+```
+
+### Archivos Modificados
+```
+src/components/QR/QRScanner.tsx
+- Importar useHapticFeedback y HapticType
+- Agregar haptic.trigger() en eventos
+
+src/hooks/index.ts
+- Exportar useHapticFeedback y tipos
+- Exportar HAPTIC_CONFIG y HAPTIC_GLOBAL_CONFIG
+
+src/components/OrdenTrabajo/DetallesForm.tsx
+- Sin cambios (solo usa QRScanner que incluye haptics)
+```
+
+### Dependencias
+```json
+{
+  "expo-haptics": "~14.0.0"  // AGREGADO via npx expo install
+}
+```
+
+---
+
+## 🎨 NUEVO: Feedback Visual - FeedbackOverlay
+
+### Componente: `FeedbackOverlay.tsx`
+
+**Ubicación**: `src/components/Feedback/FeedbackOverlay.tsx`
+
+**Características**:
+- ✅ Componente reutilizable para mostrar feedback visual
+- ✅ 3 tipos: success (verde), error (rojo), warning (naranja)
+- ✅ Iconos grandes (56px): ✅ ❌ ⚠️
+- ✅ Títulos en mayúsculas y claros
+- ✅ Mensajes cortos, legibles y directos
+- ✅ Duración configurable (2-3 segundos)
+- ✅ Se centra en pantalla con sombra para destacar
+
+**Props**:
+```typescript
+{
+  type: 'success' | 'error' | 'warning'
+  title: string        // "¡ÉXITO!", "¡ERROR!", "¡DUPLICADO!"
+  message: string      // Mensaje (1-2 líneas)
+  visible: boolean     // Mostrar/ocultar
+  duration?: number    // ms antes de desaparecer (default: 2000)
+}
+```
+
+**Colores por Tipo**:
+
+| Tipo | Color | Ícono | Caso de Uso |
+|------|-------|-------|-----------|
+| **success** | Verde (#34C759) | ✅ | QR válido y agregado |
+| **warning** | Naranja (#FF9500) | ⚠️ | Extintor duplicado |
+| **error** | Rojo (#FF3B30) | ❌ | QR inválido o error |
+
+### Integración en QRScanner
+
+**Cambios en `src/components/QR/QRScanner.tsx`**:
+
+```typescript
+import { FeedbackOverlay } from '../Feedback/FeedbackOverlay'
+
+// Estados para feedback visual
+const [feedbackVisible, setFeedbackVisible] = useState(false)
+const [feedbackType, setFeedbackType] = useState<'success' | 'error' | 'warning'>('success')
+const [feedbackTitle, setFeedbackTitle] = useState('')
+const [feedbackMessage, setFeedbackMessage] = useState('')
+
+// ✅ Éxito
+setFeedbackType('success')
+setFeedbackTitle('¡ÉXITO!')
+setFeedbackMessage('Extintor agregado a tu lista')
+setFeedbackVisible(true)
+
+// ⚠️ Duplicado
+setFeedbackType('warning')
+setFeedbackTitle('¡DUPLICADO!')
+setFeedbackMessage('Este extintor ya está en tu lista')
+setFeedbackVisible(true)
+
+// ❌ Error
+setFeedbackType('error')
+setFeedbackTitle('¡ERROR!')
+setFeedbackMessage('No se pudo leer el código. Intenta de nuevo')
+setFeedbackVisible(true)
+
+// En el JSX
+<FeedbackOverlay
+  type={feedbackType}
+  title={feedbackTitle}
+  message={feedbackMessage}
+  visible={feedbackVisible}
+  duration={3000}  // 3 segundos para duplicado/error, 2 seg para éxito
+/>
+```
+
+**Duraciones**:
+- **Éxito**: 2 segundos (rápido, el usuario sabe que funcionó)
+- **Duplicado**: 3 segundos (más tiempo para leer)
+- **Error**: 3 segundos (más tiempo para entender qué pasó)
+
+### Experiencia del Usuario
+
+**Antes** (solo texto pequeño):
+```
+⚠️ Este extintor ya existe en la lista
+```
+
+**Ahora** (feedback visual claro):
+```
+┌──────────────────────────────┐
+│           ⚠️                 │
+│                              │
+│       ¡DUPLICADO!            │
+│                              │
+│  Este extintor ya está en   │
+│  tu lista                    │
+│                              │
+│        (3 segundos)          │
+│   + Vibración (2 pulsos)     │
+└──────────────────────────────┘
+```
+
+---
+
 ## 📱 Formato QR Implementado
 
-### Formato JSON (Extintor Individual)
 
 ```json
 {
@@ -175,33 +420,52 @@ const handleQRScanned = useCallback((qrData: Partial<DetalleExtintor>) => {
 
 ---
 
-## 📊 Archivos Creados/Modificados
+## 📊 Archivos Creados/Modificados - VERSIÓN FINAL
 
-### Archivos Nuevos
+### Archivos Nuevos (Fase 5.5)
 ```
 src/
 ├── hooks/
-│   └── useQRReader.ts          (NUEVO - 155 líneas)
+│   ├── useQRReader.ts          (NUEVO - 155 líneas)
+│   └── useHapticFeedback.ts    (NUEVO - 160 líneas)
+├── constants/
+│   └── hapticConfig.ts         (NUEVO - 120 líneas)
 └── components/
-    └── QR/
-        └── QRScanner.tsx       (NUEVO - 330 líneas)
+    ├── QR/
+    │   └── QRScanner.tsx       (NUEVO - 450 líneas)
+    └── Feedback/
+        └── FeedbackOverlay.tsx (NUEVO - 144 líneas)
 ```
 
-### Archivos Modificados
+### Archivos Modificados (Fase 5.5)
 ```
 src/components/OrdenTrabajo/DetallesForm.tsx
-- Importar QRScanner
-- Estado showQRScanner
-- Handler handleQRScanned
-- Botón QR en header
-- Modal QRScanner
-- Actualizado info text
+- Importar QRScanner component
+- Estado showQRScanner para modal
+- Handler handleQRScanned para agregar extintores
+- Botón "📷 QR" en header
+- Pasar existingDetalles={data.detalles} al scanner
+- Modal QRScanner con todas las props
+
+src/hooks/useQRReader.ts
+- Agregada función isDuplicate()
+- Compara: extintorNro + marca + tipo + capacidadUnidad + capacidadValor
+- Retorna boolean para validar contra existingDetalles
+
+src/hooks/index.ts
+- Exportar useHapticFeedback
+- Exportar HapticType enum
+- Exportar tipos relacionados
+
+src/components/index.ts
+- Exportar FeedbackOverlay component
 ```
 
-### Dependencias
+### Dependencias Agregadas
 ```json
 {
-  "expo-camera": "~8.4.4"  // AGREGADO via npx expo install
+  "expo-camera": "~8.4.4",       // AGREGADO via npx expo install
+  "expo-haptics": "~14.0.0"      // AGREGADO via npx expo install
 }
 ```
 
@@ -258,6 +522,16 @@ src/components/OrdenTrabajo/DetallesForm.tsx
    - ✅ Extintor se agrega automáticamente
    - ✅ Puede escanear otro o continuar
    - ✅ Si escanea duplicado, ve error y puede reintentar
+
+7. **Feedback Háptico (NUEVO)**:
+   - ✅ ✨ Vibración leve al abrir scanner
+   - ✅ ✅ Vibración de éxito cuando QR válido
+   - ✅ ⚠️ Vibración de advertencia cuando es duplicado
+   - ✅ ❌ Vibración de error cuando QR es inválido
+   - ✅ Vibraciones configurables sin código
+   - ✅ Hook useHapticFeedback integrado
+   - ✅ Presets listos (FULL, MODERATE, MINIMAL, DISABLED)
+   - ✅ Teléfono físico siente las vibraciones correctamente
 
 ---
 
@@ -377,13 +651,23 @@ src/components/OrdenTrabajo/DetallesForm.tsx
 
 ## 📈 Métricas de Implementación
 
-- **Tiempo de desarrollo**: 2.5 horas (incluye validación de duplicados)
-- **Líneas de código**: ~520 líneas
-- **Archivos nuevos**: 2
-- **Archivos modificados**: 2 (DetallesForm + useQRReader)
-- **Dependencias agregadas**: 1 (`expo-camera`)
-- **Tests manuales**: 6 escenarios (incluye duplicados)
-- **Bugs encontrados**: 0 (compilación clean)
+- **Tiempo de desarrollo**: 4 horas (incluye QR parsing + validación de duplicados + haptics + feedback visual)
+- **Líneas de código**: ~1,025 líneas totales
+- **Archivos nuevos**: 5
+  - `useQRReader.ts` (~155 líneas)
+  - `QRScanner.tsx` (~450 líneas)
+  - `hapticConfig.ts` (~120 líneas)
+  - `useHapticFeedback.ts` (~160 líneas)
+  - `FeedbackOverlay.tsx` (~144 líneas)
+- **Archivos modificados**: 5
+  - `DetallesForm.tsx` (integración QRScanner con existingDetalles)
+  - `useQRReader.ts` (función isDuplicate() agregada)
+  - `hooks/index.ts` (exports de useHapticFeedback y HapticType)
+  - `components/index.ts` (exports de FeedbackOverlay)
+  - `QRScanner.tsx` (integración de FeedbackOverlay visual)
+- **Dependencias agregadas**: 2 (`expo-camera ~8.4.4`, `expo-haptics ~14.0.0`)
+- **Tests manuales**: 7 escenarios completos (QR parsing + duplicados + haptics + visual feedback)
+- **TypeScript compilation**: ✅ Exit Code: 0 (sin errores)
 
 ---
 
@@ -396,20 +680,33 @@ src/components/OrdenTrabajo/DetallesForm.tsx
 - [x] Integración en `DetallesForm`
 - [x] Validación completa de datos
 - [x] **NUEVO**: Validación de duplicados
+- [x] **NUEVO**: Feedback háptico (vibración)
+- [x] **NUEVO**: Configuración de vibraciones
+- [x] **NUEVO**: Presets de vibraciones (FULL, MODERATE, MINIMAL, DISABLED)
 - [x] Error handling
 - [x] TypeScript compilation sin errores
-- [x] Testing manual exitoso (incluye duplicados)
+- [x] Testing manual exitoso (incluye duplicados + haptics)
 - [x] Documentación actualizada
 
 ---
 
-**FASE 5.5 ACTUALIZADA ✅ - Validación de Duplicados Agregada**
+**FASE 5.5 COMPLETADA ✅ - Validación de Duplicados + Feedback Háptico + Visual**
 
-**Cambios en esta versión**:
-- ✅ Función `isDuplicate()` en `useQRReader.ts`
-- ✅ Prop `existingDetalles` en `QRScanner.tsx`
-- ✅ Validación en `handleBarCodeScanned()` del scanner
-- ✅ Mensaje de error: "⚠️ Este extintor ya existe en la lista"
-- ✅ Pasar `data.detalles` a `QRScanner` desde `DetallesForm`
+**Componentes Implementados**:
+- ✅ Función `isDuplicate()` en `useQRReader.ts` - Detecta extintores duplicados
+- ✅ Hook `useHapticFeedback()` - Controla vibración del teléfono
+- ✅ Config `hapticConfig.ts` - Configurable (FULL/MODERATE/MINIMAL/DISABLED)
+- ✅ Component `FeedbackOverlay.tsx` - Feedback visual claro (verde/naranja/rojo)
+- ✅ Integración en `QRScanner.tsx` - Haptics + Visual feedback combinados
+- ✅ Integración en `DetallesForm.tsx` - Pasa existingDetalles para validar duplicados
 
-Siguiente: FASE 6 - Final + Submit
+**Fixes Realizados (v2)**:
+- 🔧 Aumentada duración de warning/error a 3 segundos (era 2s, muy rápido para leer)
+- 🔧 Agregado explicit `setFeedbackVisible(false)` en timeouts (conflicto de hide logic)
+- 🔧 Mejorada lógica de ocultación en FeedbackOverlay (ambos `show` y `visible`)
+- 🔧 Validado que duplicate/error messages ahora se muestran correctamente
+- 🔧 TypeScript compilation verificado (Exit Code: 0)
+
+---
+
+

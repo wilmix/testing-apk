@@ -32,6 +32,8 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import type { BarcodeScanningResult } from 'expo-camera'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useQRReader } from '../../hooks/useQRReader'
+import { useHapticFeedback, HapticType } from '../../hooks/useHapticFeedback'
+import { FeedbackOverlay } from '../Feedback/FeedbackOverlay'
 import type { DetalleExtintor } from '../../types/ordenTrabajo'
 
 const { width, height } = Dimensions.get('window')
@@ -64,11 +66,18 @@ export const QRScanner: React.FC<QRScannerProps> = ({
 }) => {
   const { theme } = useTheme()
   const { parseQRData, isDuplicate } = useQRReader()
+  const haptic = useHapticFeedback()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanning, setScanning] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [scannedCount, setScannedCount] = useState(0)
+  
+  // Feedback visual
+  const [feedbackVisible, setFeedbackVisible] = useState(false)
+  const [feedbackType, setFeedbackType] = useState<'success' | 'error' | 'warning'>('success')
+  const [feedbackTitle, setFeedbackTitle] = useState('')
+  const [feedbackMessage, setFeedbackMessage] = useState('')
 
   // Reset estado cuando se abre/cierra
   useEffect(() => {
@@ -77,13 +86,15 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       setError(null)
       setSuccessMessage(null)
       setScannedCount(0)
+      // ✨ Vibración leve cuando se abre el scanner
+      haptic.trigger(HapticType.LIGHT)
     }
-  }, [visible])
+  }, [visible, haptic])
 
   /**
    * Handler cuando la cámara detecta un código de barras
    */
-  const handleBarCodeScanned = (result: BarcodeScanningResult) => {
+  const handleBarCodeScanned = async (result: BarcodeScanningResult) => {
     // Ignorar si ya estamos procesando
     if (!scanning) return
 
@@ -97,34 +108,55 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       // Validar que no sea duplicado
       if (isDuplicate(parseResult.data, existingDetalles)) {
         // Es un duplicado - mostrar error
+        // ⚠️ Vibración de advertencia (duplicado)
+        await haptic.trigger(HapticType.WARNING)
+        setFeedbackType('warning')
+        setFeedbackTitle('¡DUPLICADO!')
+        setFeedbackMessage('Este extintor ya está en tu lista')
+        setFeedbackVisible(true)
         setError('⚠️ Este extintor ya existe en la lista')
-        // Permitir escanear de nuevo después de 2 segundos
+        // Permitir escanear de nuevo después de 3 segundos
         setTimeout(() => {
+          setFeedbackVisible(false)
           setScanning(true)
           setError(null)
-        }, 2000)
+        }, 3000)
         return
       }
 
       // QR válido y no duplicado - llamar callback y mostrar mensaje
+      // ✅ Vibración de éxito
+      await haptic.trigger(HapticType.SUCCESS)
+      setFeedbackType('success')
+      setFeedbackTitle('¡ÉXITO!')
+      setFeedbackMessage('Extintor agregado a tu lista')
+      setFeedbackVisible(true)
       onQRScanned(parseResult.data)
       setScannedCount(prev => prev + 1)
       setSuccessMessage(`✅ Extintor #${scannedCount + 1} agregado`)
       setError(null)
 
-      // Limpiar mensaje después de 1.5 segundos y permitir escanear de nuevo
+      // Limpiar mensaje después de 2 segundos y permitir escanear de nuevo
       setTimeout(() => {
+        setFeedbackVisible(false)
         setSuccessMessage(null)
         setScanning(true)
-      }, 1500)
+      }, 2000)
     } else {
       // QR inválido - mostrar error y permitir reintentar
+      // ❌ Vibración de error
+      await haptic.trigger(HapticType.ERROR)
+      setFeedbackType('error')
+      setFeedbackTitle('¡ERROR!')
+      setFeedbackMessage('No se pudo leer el código. Intenta de nuevo')
+      setFeedbackVisible(true)
       setError(parseResult.error || 'Error al leer QR')
-      // Permitir escanear de nuevo después de 2 segundos
+      // Permitir escanear de nuevo después de 3 segundos
       setTimeout(() => {
+        setFeedbackVisible(false)
         setScanning(true)
         setError(null)
-      }, 2000)
+      }, 3000)
     }
   }
 
@@ -265,6 +297,15 @@ export const QRScanner: React.FC<QRScannerProps> = ({
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* Feedback Visual */}
+            <FeedbackOverlay
+              type={feedbackType}
+              title={feedbackTitle}
+              message={feedbackMessage}
+              visible={feedbackVisible}
+              duration={3000}
+            />
           </View>
         </CameraView>
       </SafeAreaView>

@@ -2,11 +2,12 @@
 
 ## Librerías Utilizadas
 
-### react-native-mmkv
-- **Versión**: 3.3.3
-- **Propósito**: Persistencia de datos offline
-- **Documentación**: [MMKV GitHub](https://github.com/mrousavy/react-native-mmkv)
-- **Uso en proyecto**: `src/services/mmkvService.ts`
+### @react-native-async-storage/async-storage
+- **Versión**: 2.2.0
+- **Propósito**: Persistencia de datos offline (incluido en Expo Go)
+- **Documentación**: [AsyncStorage Docs](https://react-native-async-storage.github.io/async-storage/)
+- **Uso en proyecto**: `src/services/storageUtils.ts`
+- **Ventajas**: ✅ Funciona en Expo Go con QR scan, API async/await
 
 ### react-native-element-dropdown
 - **Versión**: 2.12.4
@@ -41,7 +42,7 @@ Mostrar solo los campos relevantes según el estado del formulario.
 Validar mientras el usuario escribe con visual feedback (🟢 valid, 🔴 error).
 
 ### Offline-First
-Guardar datos automáticamente en MMKV local, luego sincronizar.
+Guardar datos automáticamente en AsyncStorage local, luego sincronizar.
 
 ### Touch-Friendly
 - Botones: 48x48px mínimo
@@ -83,7 +84,7 @@ Revisar en `docs/00-ANALISIS/` para entender:
 3. **Troubleshooting?**
    - Lee `README.md` sección Troubleshooting
    - Revisa console.log() en servicios
-   - Verifica MMKV con getter `getAllKeys()`
+   - Verifica AsyncStorage con getter `getAllKeys()`
 
 ---
 

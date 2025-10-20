@@ -18,7 +18,7 @@ Transformar el formulario web `OrdenTrabajo.tsx` (MUI, ~20 campos) en una experi
 
 | Componente | Librería | Versión | Por qué |
 |-----------|----------|---------|--------|
-| **Storage** | `react-native-mmkv` | 3.3.3 | ~30x más rápido, offline-first |
+| **Storage** | `@react-native-async-storage/async-storage` | 2.2.0 | Incluido en Expo Go, offline-first |
 | **Dropdowns** | `react-native-element-dropdown` | 2.12.4 | Touch-optimized, search |
 | **Validación** | `zod` | 3.25.76 | Type-safe, mensajes ES |
 | **Date Picker** | `@react-native-community/datetimepicker` | 8.4.4 | Nativo iOS/Android |
@@ -95,7 +95,7 @@ c:\Users\willy\projects\testing-apk\
 │  ├─ constants/
 │  │  └─ ordenTrabajoConstants.ts # CLIENTES, MARCAS, TIPOS, etc
 │  ├─ services/
-│  │  ├─ mmkvService.ts          # MMKV Storage utilities
+│  │  ├─ mmkvService.ts          # AsyncStorage utilities
 │  │  └─ validationService.ts    # Zod Schemas + validación
 │  ├─ hooks/                     # FASE 2 (próximamente)
 │  │  ├─ useMMKVStorage.ts
@@ -126,21 +126,21 @@ c:\Users\willy\projects\testing-apk\
 ## 🎬 Plan de Fases
 
 ### ✅ FASE 1: Setup Inicial (2-3h) - **COMPLETADA**
-- ✅ Instalar dependencias (MMKV, Element Dropdown, Zod, DateTimePicker)
+- ✅ Instalar dependencias (AsyncStorage, Element Dropdown, Zod, DateTimePicker)
 - ✅ Crear estructura de carpetas
 - ✅ TypeScript Types
 - ✅ Constants
 - ✅ Schemas Zod
-- ✅ MMKV Service
-- ✅ Tests en App.tsx
+- ✅ AsyncStorage Service
+- ✅ Tests en App.tsx (todos pasan en Expo Go)
 
-### 🔄 FASE 2: Hooks Base (3-4h) - **PRÓXIMA**
-- `useMMKVStorage` - Guardar/cargar datos
-- `useFormData` - Validación + persistencia
-- `useFieldVisibility` - Campos condicionales
-- Tests
+### ✅ FASE 2: Hooks Base (3-4h) - **COMPLETADA**
+- ✅ `useMMKVStorage` - Guardar/cargar datos (AsyncStorage)
+- ✅ `useFormData` - Validación + persistencia
+- ✅ `useFieldVisibility` - Campos condicionales
+- ✅ Tests (4 tests pasan)
 
-### 📱 FASE 3: Componentes Base (2-3h)
+### 📱 FASE 3: Componentes Base (2-3h) - **PRÓXIMA**
 - `FormInput`, `FormDropdown`, `FormDatePicker`
 - `ValidationIcon`
 - Estilos touch-friendly
@@ -149,7 +149,7 @@ c:\Users\willy\projects\testing-apk\
 - Cliente dropdown + search
 - Fecha Entrega date picker
 - Validación real-time
-- Guardado MMKV
+- Guardado AsyncStorage
 
 ### 📋 FASE 5: Detalles Dinámicos (5-6h) - **APPROVAL POINT 2**
 - Items add/remove
@@ -182,11 +182,12 @@ c:\Users\willy\projects\testing-apk\
    ├─ Types: ✅ 7 interfaces
    ├─ Constants: ✅ 9 constantes
    ├─ Schemas: ✅ 6 schemas
-   ├─ Services: ✅ MMKV + Validación
+   ├─ Services: ✅ AsyncStorage + Validación
    ├─ Tests: ✅ 8 tests en App.tsx
    └─ Git: ✅ Commit realizado
 
-🚀 PRÓXIMO: FASE 2 - Hooks Base
+✅ FASE 1 COMPLETADA ✅ FASE 2 COMPLETADA
+🚀 PRÓXIMO: FASE 3 - Componentes Base
 ```
 
 ---
@@ -200,7 +201,7 @@ Para verificar que todo funciona:
 npx tsc --noEmit
 
 # 2. Verificar dependencias
-npm list react-native-mmkv react-native-element-dropdown zod @react-native-community/datetimepicker
+npm list @react-native-async-storage/async-storage react-native-element-dropdown zod @react-native-community/datetimepicker
 
 # 3. Ver App.tsx tests
 npx expo start
@@ -210,7 +211,7 @@ npx expo start
 
 **Outputs esperados en App.tsx:**
 ```
-✅ Imports exitosos (MMKV, Types, Constants, Schemas)
+✅ Imports exitosos (AsyncStorage, Types, Constants, Schemas)
 ✅ CLIENTES: 11 clientes
 ✅ MARCAS: 11 marcas
 ✅ TIPOS: 6 tipos
@@ -218,10 +219,10 @@ npx expo start
 ✅ Datos de prueba creados
 ✅ Header validation: VALID
 ✅ Detalles validation: VALID
-✅ Datos guardados en MMKV
-✅ Datos cargados correctamente de MMKV
+✅ Datos guardados en AsyncStorage
+✅ Datos cargados correctamente de AsyncStorage
 ✅ Verificar clave: EXISTS
-✅ Total de claves en MMKV: 1
+✅ Total de claves en AsyncStorage: 1
 🎉 TODOS LOS TESTS PASARON!
 ```
 
@@ -230,7 +231,7 @@ npx expo start
 ## 💡 Características Clave
 
 ### Offline-First ✅
-- Todos los datos guardados en MMKV automáticamente
+- Todos los datos guardados en AsyncStorage automáticamente
 - Funciona 100% sin internet
 - Indicador visual de estado
 - Sincronización automática al recuperar conexión
@@ -287,7 +288,7 @@ Toda la documentación está organizada en `docs/`:
 ### Documentación Oficial
 - [Expo Docs](https://docs.expo.dev)
 - [React Native Docs](https://reactnative.dev)
-- [MMKV GitHub](https://github.com/mrousavy/react-native-mmkv)
+- [AsyncStorage Docs](https://react-native-async-storage.github.io/async-storage/)
 - [Element Dropdown Docs](https://github.com/hoaphantn7604/react-native-element-dropdown)
 - [Zod Docs](https://zod.dev)
 
@@ -315,13 +316,13 @@ npx tsc --noEmit
 npx tsc
 ```
 
-### "MMKV not working"
+### "AsyncStorage not working"
 ```bash
 # Verificar que está instalada
-npm list react-native-mmkv
+npm list @react-native-async-storage/async-storage
 
 # Reinstalar si es necesario
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 ```
 
 ### "Emulador no se conecta"
@@ -412,7 +413,7 @@ PRE-REQUISITOS COMPLETADOS:
 ARCHIVOS CREADOS:
 ✅ src/types/ordenTrabajo.ts
 ✅ src/constants/ordenTrabajoConstants.ts
-✅ src/services/mmkvService.ts
+✅ src/services/storageUtils.ts (AsyncStorage)
 ✅ src/services/validationService.ts
 ✅ App.tsx (actualizado con tests)
 

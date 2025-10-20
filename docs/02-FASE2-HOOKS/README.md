@@ -1,9 +1,13 @@
 # 🔄 FASE 2: HOOKS BASE ✅
 
-- ✅ `useMMKVStorage<T>` - Persistencia MMKV
-- ✅ `useFormData<T>` - Gestión + validación Zod
-- ✅ `useFieldVisibility` - Reglas condicionales
+- ✅ `useMMKVStorage<T>` - Persistencia AsyncStorage (async/await)
+- ✅ `useFormData<T>` - Gestión + validación Zod + auto-save
+- ✅ `useFieldVisibility` - Reglas condicionales por cliente
 
 **Archivos**: `src/hooks/useMMKVStorage.ts`, `useFormData.ts`, `useFieldVisibility.ts`
 
-**Status**: COMPLETADA
+**Status**: ✅ COMPLETADA (4 tests pasan)
+
+**Nota**: Hook actualizado para usar AsyncStorage en lugar de MMKV
+
+```

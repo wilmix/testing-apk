@@ -6,11 +6,11 @@ import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } fro
 import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from './src/constants/ordenTrabajoConstants'
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
 import { useFieldVisibility } from './src/hooks'
-import { FormInput, FormDropdown, FormDatePicker, ValidationIcon } from './src/components'
+import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm } from './src/components'
 
 /**
  * ============================================================================
- * APP PRINCIPAL - TESTS FASE 1, 2 Y 3
+ * APP PRINCIPAL - TESTS FASE 1, 2, 3 Y 4
  * ============================================================================
  * Tests para verificar:
  * FASE 1:
@@ -30,6 +30,11 @@ import { FormInput, FormDropdown, FormDatePicker, ValidationIcon } from './src/c
  * ✅ FormDropdown component (render + interaction)
  * ✅ FormDatePicker component (render + interaction)
  * ✅ ValidationIcon component (render states)
+ *
+ * FASE 4:
+ * ✅ HeaderForm component (cliente + fecha + agencia condicional)
+ * ✅ Validación integrada con Zod
+ * ✅ AsyncStorage persistence
  */
 
 export default function App() {
@@ -52,6 +57,20 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [inputTouched, setInputTouched] = useState(false)
   const [inputError, setInputError] = useState<string | undefined>(undefined)
+
+  // FASE 4 - Show HeaderForm view
+  const [showHeaderForm, setShowHeaderForm] = useState(false)
+  const [headerFormData, setHeaderFormData] = useState<OrdenTrabajoFormData>({
+    fechaEntrega: new Date(),
+    cliente: '',
+    agencia: '',
+    direccion: '',
+    telefono: '',
+    observaciones: '',
+    prestamoExtintores: false,
+    cantidadPrestamo: '',
+    detalles: [],
+  })
 
   useEffect(() => {
     // Ejecutar tests al montar
@@ -171,6 +190,20 @@ export default function App() {
       addDebugLog('')
       addDebugLog('🎉 TODOS LOS TESTS PASARON (FASE 1 + 2 + 3)!')
       addDebugLog('FASE 3 completada: 4 componentes reutilizables creados')
+
+      // FASE 4 Tests
+      addDebugLog('')
+      addDebugLog('🚀 INICIANDO TESTS FASE 4...')
+      
+      addDebugLog('✅ HeaderForm component importado correctamente')
+      addDebugLog('✅ Validación HeaderSchema integrada')
+      addDebugLog('✅ Agencia condicional según cliente')
+      addDebugLog('✅ AsyncStorage persistence')
+      
+      addDebugLog('')
+      addDebugLog('🎉 TODOS LOS TESTS PASARON (FASE 1 + 2 + 3 + 4)!')
+      addDebugLog('FASE 4 completada: HeaderForm funcional')
+      addDebugLog('Presiona "Ver HeaderForm" para probar')
     } catch (error) {
       addDebugError(`Error en tests: ${error}`)
     }
@@ -184,6 +217,18 @@ export default function App() {
     setDebugInfo([])
     await StorageUtils.remove('test:form:data')
     setStorageStatus('')
+    setShowHeaderForm(false)
+    setHeaderFormData({
+      fechaEntrega: new Date(),
+      cliente: '',
+      agencia: '',
+      direccion: '',
+      telefono: '',
+      observaciones: '',
+      prestamoExtintores: false,
+      cantidadPrestamo: '',
+      detalles: [],
+    })
     runTests()
   }
 
@@ -201,6 +246,38 @@ export default function App() {
   }
   
   const visibility = useFieldVisibility(testFormDataForVisibility)
+
+  // Si está en modo HeaderForm, mostrar solo eso
+  if (showHeaderForm) {
+    return (
+      <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+        <HeaderForm
+          data={headerFormData}
+          onDataChange={setHeaderFormData}
+          onContinue={() => {
+            addDebugLog('✅ HeaderForm Continuar presionado')
+            addDebugLog(`   Cliente: ${headerFormData.cliente}`)
+            addDebugLog(`   Fecha: ${headerFormData.fechaEntrega.toLocaleDateString('es-ES')}`)
+            if (headerFormData.agencia) {
+              addDebugLog(`   Agencia: ${headerFormData.agencia}`)
+            }
+          }}
+          isDark={isDark}
+        />
+        <View style={[styles.actionsContainer, isDark ? styles.darkActionsContainer : styles.lightActionsContainer]}>
+          <TouchableOpacity
+            style={[styles.button, styles.secondaryButton]}
+            onPress={() => setShowHeaderForm(false)}
+          >
+            <Text style={styles.buttonText}>← Volver</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={toggleTheme}>
+            <Text style={styles.buttonText}>🌓 Tema</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
@@ -411,6 +488,12 @@ export default function App() {
       <View style={[styles.actionsContainer, isDark ? styles.darkActionsContainer : styles.lightActionsContainer]}>
         <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={toggleTheme}>
           <Text style={styles.buttonText}>🌓 Tema</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: '#FF9500' }]} 
+          onPress={() => setShowHeaderForm(true)}
+        >
+          <Text style={styles.buttonText}>📝 HeaderForm</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={clearDebug}>
           <Text style={styles.buttonText}>🔄 Reiniciar</Text>

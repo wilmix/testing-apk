@@ -11,3 +11,7 @@ export type { FormDatePickerProps } from './FormFields/FormDatePicker'
 // Feedback components
 export { ValidationIcon } from './Feedback/ValidationIcon'
 export type { ValidationIconProps } from './Feedback/ValidationIcon'
+
+// OrdenTrabajo components
+export { HeaderForm } from './OrdenTrabajo/HeaderForm'
+export type { HeaderFormProps } from './OrdenTrabajo/HeaderForm'

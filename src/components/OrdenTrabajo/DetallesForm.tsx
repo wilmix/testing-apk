@@ -484,6 +484,7 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
         onClose={() => setShowQRScanner(false)}
         onQRScanned={handleQRScanned}
         onManualAdd={handleManualAddFromScanner}
+        existingDetalles={data.detalles}
       />
     </ScrollView>
   )

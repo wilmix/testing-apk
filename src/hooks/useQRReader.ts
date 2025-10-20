@@ -28,6 +28,7 @@ interface QRParseResult {
 
 export interface UseQRReaderReturn {
   parseQRData: (qrText: string) => QRParseResult
+  isDuplicate: (qrData: Partial<DetalleExtintor>, existingDetalles: DetalleExtintor[]) => boolean
   lastScanned: string | null
   lastResult: QRParseResult | null
 }
@@ -149,8 +150,28 @@ export const useQRReader = (): UseQRReaderReturn => {
     }
   }
 
+  /**
+   * Verifica si el dato del QR ya existe en la lista de extintores
+   * Compara: extintorNro, marca, tipo, capacidadUnidad, capacidadValor
+   */
+  const isDuplicate = (
+    qrData: Partial<DetalleExtintor>,
+    existingDetalles: DetalleExtintor[]
+  ): boolean => {
+    return existingDetalles.some((detalle) => {
+      return (
+        detalle.extintorNro === qrData.extintorNro &&
+        detalle.marca === qrData.marca &&
+        detalle.tipo === qrData.tipo &&
+        detalle.capacidadUnidad === qrData.capacidadUnidad &&
+        detalle.capacidadValor === qrData.capacidadValor
+      )
+    })
+  }
+
   return {
     parseQRData,
+    isDuplicate,
     lastScanned,
     lastResult,
   }

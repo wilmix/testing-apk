@@ -45,6 +45,8 @@ export interface QRScannerProps {
   onQRScanned: (data: Partial<DetalleExtintor>) => void
   /** Callback cuando se quiere agregar manualmente */
   onManualAdd?: () => void
+  /** Array de extintores existentes para validar duplicados */
+  existingDetalles?: DetalleExtintor[]
 }
 
 /**
@@ -58,9 +60,10 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   onClose,
   onQRScanned,
   onManualAdd,
+  existingDetalles = [],
 }) => {
   const { theme } = useTheme()
-  const { parseQRData } = useQRReader()
+  const { parseQRData, isDuplicate } = useQRReader()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanning, setScanning] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -91,7 +94,19 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     const parseResult = parseQRData(result.data)
 
     if (parseResult.success && parseResult.data) {
-      // QR válido - llamar callback y mostrar mensaje
+      // Validar que no sea duplicado
+      if (isDuplicate(parseResult.data, existingDetalles)) {
+        // Es un duplicado - mostrar error
+        setError('⚠️ Este extintor ya existe en la lista')
+        // Permitir escanear de nuevo después de 2 segundos
+        setTimeout(() => {
+          setScanning(true)
+          setError(null)
+        }, 2000)
+        return
+      }
+
+      // QR válido y no duplicado - llamar callback y mostrar mensaje
       onQRScanned(parseResult.data)
       setScannedCount(prev => prev + 1)
       setSuccessMessage(`✅ Extintor #${scannedCount + 1} agregado`)

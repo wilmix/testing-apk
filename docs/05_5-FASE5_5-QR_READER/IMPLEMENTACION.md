@@ -20,17 +20,25 @@ Sistema de escaneo QR para auto-llenar datos de extintores individuales. El usua
 - Parsear JSON desde string QR
 - Validar estructura y campos requeridos
 - Validar valores contra constantes (MARCAS, TIPOS, etc.)
+- Detectar duplicados en lista de extintores existentes
 - Retornar `Partial<DetalleExtintor>` para un extintor individual
 
 **API**:
 ```typescript
-const { parseQRData, lastResult } = useQRReader()
+const { parseQRData, isDuplicate, lastResult } = useQRReader()
 
+// Parse y validación básica
 const result = parseQRData(qrString)
 if (result.success) {
   // Usar result.data para pre-llenar formulario
 } else {
   // Mostrar result.error
+}
+
+// Detectar duplicados
+const isDup = isDuplicate(qrData, existingDetalles)
+if (isDup) {
+  // Mostrar mensaje: "Este extintor ya existe en la lista"
 }
 ```
 
@@ -41,6 +49,7 @@ if (result.success) {
 - ✅ `tipo` debe estar en `TIPOS` constant
 - ✅ `capacidadUnidad` debe estar en `CAPACIDAD_UNIDADES`
 - ✅ `capacidadValor` debe ser válido para la unidad seleccionada
+- ✅ **NUEVO**: No permite duplicados (valida contra extintores existentes)
 
 ### 2. Component: `QRScanner.tsx`
 
@@ -52,6 +61,8 @@ if (result.success) {
   visible: boolean
   onClose: () => void
   onQRScanned: (data: Partial<DetalleExtintor>) => void
+  onManualAdd?: () => void
+  existingDetalles?: DetalleExtintor[]  // NUEVO: Para validar duplicados
 }
 ```
 
@@ -62,6 +73,7 @@ if (result.success) {
 - ✅ Camera overlay con frame de escaneo
 - ✅ Detección automática de QR codes
 - ✅ Feedback visual de errores (QR inválido)
+- ✅ **NUEVO**: Validación de duplicados - rechaza extintores ya escaneados
 - ✅ Cierre automático al escanear QR válido
 - ✅ Theming con `useTheme()` (no `isDark` props)
 - ✅ Botón de cerrar manual
@@ -80,6 +92,16 @@ if (result.success) {
 />
 ```
 
+**Validación de Duplicados**:
+```typescript
+// En handleBarCodeScanned
+if (isDuplicate(parseResult.data, existingDetalles)) {
+  setError('⚠️ Este extintor ya existe en la lista')
+  // Permitir reintentar después de 2 segundos
+  return
+}
+```
+
 ### 3. Integration: DetallesForm
 
 **Ubicación**: `src/components/OrdenTrabajo/DetallesForm.tsx`
@@ -91,6 +113,7 @@ if (result.success) {
 4. ✅ Handler `handleQRScanned` que agrega nuevo extintor con datos del QR
 5. ✅ `<QRScanner>` modal al final del JSX
 6. ✅ Actualizado texto info: "Escanea QR o agrega manualmente"
+7. ✅ **NUEVO**: Pasar `existingDetalles={data.detalles}` al QRScanner para validar duplicados
 
 **Handler Implementation**:
 ```typescript
@@ -111,6 +134,15 @@ const handleQRScanned = useCallback((qrData: Partial<DetalleExtintor>) => {
   setExpandedDetalleId(newDetalle.id)
   setShowQRScanner(false)
 }, [data, onDataChange])
+
+// Componente
+<QRScanner
+  visible={showQRScanner}
+  onClose={() => setShowQRScanner(false)}
+  onQRScanned={handleQRScanned}
+  onManualAdd={handleManualAddFromScanner}
+  existingDetalles={data.detalles}  // NUEVO: Validar duplicados
+/>
 ```
 
 ---
@@ -200,7 +232,15 @@ src/components/OrdenTrabajo/DetallesForm.tsx
    - ✅ Permite reintentar después de error
    - ✅ Cierra modal al escanear QR válido
 
-4. **Integración DetallesForm**:
+4. **Validación de Duplicados** (NUEVO):
+   - ✅ Permite agregar extintor nuevo
+   - ✅ **Rechaza escaneo duplicado** del mismo extintor
+   - ✅ Muestra mensaje: "⚠️ Este extintor ya existe en la lista"
+   - ✅ Permite reintentar después de 2 segundos
+   - ✅ Permite agregar extintor diferente normalmente
+   - ✅ Compara: `extintorNro + marca + tipo + capacidadUnidad + capacidadValor`
+
+5. **Integración DetallesForm**:
    - ✅ Botón "📷 QR" visible en header
    - ✅ Abre modal de scanner
    - ✅ Agrega extintor con datos del QR
@@ -208,14 +248,16 @@ src/components/OrdenTrabajo/DetallesForm.tsx
    - ✅ Permite editar después de escanear
    - ✅ Permite agregar más extintores (manual o QR)
    - ✅ Theming funciona correctamente
+   - ✅ **Valida duplicados contra lista actual**
 
-5. **UX Flow Completo**:
+6. **UX Flow Completo**:
    - ✅ Usuario abre DetallesForm
    - ✅ Toca botón "📷 QR"
    - ✅ Permite acceso a cámara
    - ✅ Escanea QR del extintor
    - ✅ Extintor se agrega automáticamente
    - ✅ Puede escanear otro o continuar
+   - ✅ Si escanea duplicado, ve error y puede reintentar
 
 ---
 
@@ -335,12 +377,12 @@ src/components/OrdenTrabajo/DetallesForm.tsx
 
 ## 📈 Métricas de Implementación
 
-- **Tiempo de desarrollo**: 2 horas
-- **Líneas de código**: ~500 líneas
+- **Tiempo de desarrollo**: 2.5 horas (incluye validación de duplicados)
+- **Líneas de código**: ~520 líneas
 - **Archivos nuevos**: 2
-- **Archivos modificados**: 1
+- **Archivos modificados**: 2 (DetallesForm + useQRReader)
 - **Dependencias agregadas**: 1 (`expo-camera`)
-- **Tests manuales**: 5 escenarios
+- **Tests manuales**: 6 escenarios (incluye duplicados)
 - **Bugs encontrados**: 0 (compilación clean)
 
 ---
@@ -353,13 +395,21 @@ src/components/OrdenTrabajo/DetallesForm.tsx
 - [x] Theming con `useTheme()`
 - [x] Integración en `DetallesForm`
 - [x] Validación completa de datos
+- [x] **NUEVO**: Validación de duplicados
 - [x] Error handling
 - [x] TypeScript compilation sin errores
-- [x] Testing manual exitoso
+- [x] Testing manual exitoso (incluye duplicados)
 - [x] Documentación actualizada
 
 ---
 
-**FASE 5.5 COMPLETADA ✅**
+**FASE 5.5 ACTUALIZADA ✅ - Validación de Duplicados Agregada**
+
+**Cambios en esta versión**:
+- ✅ Función `isDuplicate()` en `useQRReader.ts`
+- ✅ Prop `existingDetalles` en `QRScanner.tsx`
+- ✅ Validación en `handleBarCodeScanned()` del scanner
+- ✅ Mensaje de error: "⚠️ Este extintor ya existe en la lista"
+- ✅ Pasar `data.detalles` a `QRScanner` desde `DetallesForm`
 
 Siguiente: FASE 6 - Final + Submit

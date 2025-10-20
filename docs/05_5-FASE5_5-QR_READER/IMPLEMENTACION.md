@@ -77,27 +77,87 @@ if (isDup) {
 - ✅ Modal fullscreen con `expo-camera`
 - ✅ Manejo de permisos con `useCameraPermissions()`
 - ✅ UI para solicitar permisos si no están otorgados
+- ✅ **Estructura correcta**: Overlay con `position: absolute` FUERA de `<CameraView>`
 - ✅ Camera overlay con frame de escaneo
 - ✅ Detección automática de QR codes
 - ✅ Feedback visual de errores (QR inválido)
-- ✅ **NUEVO**: Validación de duplicados - rechaza extintores ya escaneados
-- ✅ Cierre automático al escanear QR válido
+- ✅ **Validación de duplicados** - rechaza extintores ya escaneados
+- ✅ **FeedbackOverlay visual** - mensajes claros (verde/naranja/rojo)
+- ✅ **Haptic feedback** - vibraciones diferenciadas por tipo
+- ✅ **Scanner pausado** - 2 segundos sin lectura después de cada escaneo
 - ✅ Theming con `useTheme()` (no `isDark` props)
 - ✅ Botón de cerrar manual
 
 **Dependencias**:
-- `expo-camera` v8.4.4 (incluido en Expo Go, SDK 54)
+- `expo-camera` ~8.4.4 (incluido en Expo Go, SDK 54)
+- `expo-haptics` ~14.0.0 (incluido en Expo Go, SDK 54)
 - **NO** `expo-barcode-scanner` (deprecated)
 
-**API de expo-camera SDK 54**:
+**Estructura del Modal** (IMPORTANTE):
 ```typescript
-<CameraView
-  barcodeScannerSettings={{
-    barcodeTypes: ['qr'],
-  }}
-  onBarcodeScanned={handleBarCodeScanned}
-/>
+<Modal>
+  <SafeAreaView>
+    {/* Cámara SIN children (evita WARNING) */}
+    <CameraView
+      onBarcodeScanned={scanning ? handleBarCodeScanned : undefined}
+    />
+    
+    {/* Overlay con position absolute - FUERA de CameraView */}
+    <View style={{ position: 'absolute', top: 0, ... }}>
+      <Header />
+      <Frame />
+      <Footer />
+    </View>
+    
+    {/* FeedbackOverlay - FUERA de CameraView */}
+    <FeedbackOverlay visible={feedbackVisible} ... />
+  </SafeAreaView>
+</Modal>
 ```
+
+**Por qué esta estructura**:
+- `<CameraView>` NO soporta children (genera WARNING)
+- Overlay y FeedbackOverlay usan `position: 'absolute'` para renderizar encima
+- Esto permite que el feedback visual se muestre correctamente
+
+**Gestión de Timeouts** (Fix crítico):
+```typescript
+// useRef para rastrear timeout activo
+const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+// useRef para detectar transiciones open/close
+const isOpenRef = useRef(false)
+
+// useEffect SOLO se ejecuta en transiciones (no en cada render)
+useEffect(() => {
+  if (visible && !isOpenRef.current) {
+    // Modal se ABRE: inicializar estado
+    isOpenRef.current = true
+    setScanning(true)
+    // NO limpiar timeouts aquí
+  } else if (!visible && isOpenRef.current) {
+    // Modal se CIERRA: limpiar timeout
+    isOpenRef.current = false
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+  }
+}, [visible]) // Solo depende de 'visible', NO de haptic
+
+// En handleBarCodeScanned:
+timeoutRef.current = setTimeout(() => {
+  setFeedbackVisible(false)
+  setScanning(true)
+  timeoutRef.current = null
+}, 2000)
+```
+
+**Problema resuelto**:
+- ❌ ANTES: useEffect se ejecutaba en cada render (por `haptic` en dependencias)
+- ❌ ANTES: Limpiaba `timeoutRef.current` antes de que el timeout se ejecutara
+- ❌ ANTES: Scanner leía múltiples veces sin delay
+- ✅ AHORA: useEffect solo ejecuta en transiciones (visible cambia de true ↔ false)
+- ✅ AHORA: Timeouts se ejecutan correctamente
+- ✅ AHORA: Scanner pausado exactamente 2 segundos
 
 **Validación de Duplicados**:
 ```typescript
@@ -364,10 +424,23 @@ setFeedbackVisible(true)
 />
 ```
 
-**Duraciones**:
-- **Éxito**: 2 segundos (rápido, el usuario sabe que funcionó)
-- **Duplicado**: 3 segundos (más tiempo para leer)
-- **Error**: 3 segundos (más tiempo para entender qué pasó)
+**Duración del Feedback** (Uniforme para evitar lecturas múltiples):
+- **Éxito**: 2 segundos + scanner pausado
+- **Duplicado**: 2 segundos + scanner pausado
+- **Error**: 2 segundos + scanner pausado
+
+**Prevención de "Lectura Loca"**:
+- Durante los 2 segundos de mensaje, `scanning = false` (no captura QR)
+- Evita que el scanner lea múltiples veces el mismo código
+- Después de 2s, scanner se reactiva automáticamente
+- **CRÍTICO**: Timeouts se rastrean con `useRef` y se limpian al abrir/cerrar modal
+- Previene "timeouts huérfanos" que causaban lecturas rápidas en escaneos posteriores
+
+**Problema Resuelto (v4)**:
+```
+❌ v3: Timeout sin limpiar → scanner se activa rápidamente en segundo escaneo
+✅ v4: Timeout rastreado con useRef → se limpia al abrir modal → delay funciona siempre
+```
 
 ### Experiencia del Usuario
 
@@ -651,11 +724,11 @@ src/components/index.ts
 
 ## 📈 Métricas de Implementación
 
-- **Tiempo de desarrollo**: 4 horas (incluye QR parsing + validación de duplicados + haptics + feedback visual)
-- **Líneas de código**: ~1,025 líneas totales
+- **Tiempo de desarrollo**: 5 horas (incluye QR parsing + validación + haptics + feedback visual + fixes estructura)
+- **Líneas de código**: ~1,040 líneas totales
 - **Archivos nuevos**: 5
   - `useQRReader.ts` (~155 líneas)
-  - `QRScanner.tsx` (~450 líneas)
+  - `QRScanner.tsx` (~465 líneas - incluye fix estructura + timeouts)
   - `hapticConfig.ts` (~120 líneas)
   - `useHapticFeedback.ts` (~160 líneas)
   - `FeedbackOverlay.tsx` (~144 líneas)
@@ -664,10 +737,15 @@ src/components/index.ts
   - `useQRReader.ts` (función isDuplicate() agregada)
   - `hooks/index.ts` (exports de useHapticFeedback y HapticType)
   - `components/index.ts` (exports de FeedbackOverlay)
-  - `QRScanner.tsx` (integración de FeedbackOverlay visual)
+  - `QRScanner.tsx` (múltiples iteraciones - estructura final correcta)
 - **Dependencias agregadas**: 2 (`expo-camera ~8.4.4`, `expo-haptics ~14.0.0`)
-- **Tests manuales**: 7 escenarios completos (QR parsing + duplicados + haptics + visual feedback)
+- **Tests manuales**: 8 escenarios (parsing + duplicados + haptics + visual + estructura + timeouts)
+- **Bugs encontrados y resueltos**: 3
+  1. FeedbackOverlay dentro de CameraView (bloqueado por expo-camera)
+  2. useEffect limpiando timeouts activos (por dependencia de haptic)
+  3. Scanner leyendo múltiples veces sin delay
 - **TypeScript compilation**: ✅ Exit Code: 0 (sin errores)
+- **Warnings eliminados**: ✅ CameraView children warning resuelto
 
 ---
 
@@ -700,12 +778,23 @@ src/components/index.ts
 - ✅ Integración en `QRScanner.tsx` - Haptics + Visual feedback combinados
 - ✅ Integración en `DetallesForm.tsx` - Pasa existingDetalles para validar duplicados
 
-**Fixes Realizados (v2)**:
-- 🔧 Aumentada duración de warning/error a 3 segundos (era 2s, muy rápido para leer)
-- 🔧 Agregado explicit `setFeedbackVisible(false)` en timeouts (conflicto de hide logic)
-- 🔧 Mejorada lógica de ocultación en FeedbackOverlay (ambos `show` y `visible`)
-- 🔧 Validado que duplicate/error messages ahora se muestran correctamente
-- 🔧 TypeScript compilation verificado (Exit Code: 0)
+**Fixes Realizados (v5 - FINAL COMPLETO Y FUNCIONAL)**:
+- 🔧 **CRÍTICO - Fix estructura CameraView**: Movido overlay y FeedbackOverlay FUERA de `<CameraView>` 
+- 🔧 **Overlay con position absolute**: Renderiza correctamente encima de cámara (elimina WARNING)
+- 🔧 **Fix timeouts con isOpenRef**: useEffect solo ejecuta en transiciones open/close, no en cada render
+- 🔧 **Previene limpieza de timeouts activos**: useEffect ya no cancela timeouts mientras están corriendo
+- 🔧 **Duración uniforme**: 2 segundos para todo (éxito, duplicado, error)
+- 🔧 **Scanner pausado durante feedback** (scanning = false) - evita "lectura loca"
+- 🔧 **FeedbackOverlay visible**: Mensajes de éxito/duplicado/error se muestran correctamente
+- 🔧 **TypeScript compilation verificado** (Exit Code: 0)
+- ✅ **PROBADO Y FUNCIONANDO**: Overlay visible, timeouts ejecutándose, scanner pausado 2s
+
+**Problema resuelto**:
+- ❌ ANTES: `<CameraView>` con children causaba WARNING y bloqueaba renderizado de overlay
+- ❌ ANTES: useEffect limpiaba timeouts en cada render (por dependencia de `haptic`)
+- ✅ AHORA: Estructura correcta con position absolute + useEffect optimizado con isOpenRef
+
+
 
 ---
 

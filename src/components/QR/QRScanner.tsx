@@ -17,7 +17,7 @@
  * ```
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   Modal,
   View,
@@ -79,17 +79,40 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   const [feedbackTitle, setFeedbackTitle] = useState('')
   const [feedbackMessage, setFeedbackMessage] = useState('')
 
+  // Ref para rastrear timeouts activos y limpiarlos
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  // Ref para rastrear si el modal está abierto y evitar re-ejecutar el useEffect
+  const isOpenRef = useRef(false)
+
   // Reset estado cuando se abre/cierra
   useEffect(() => {
-    if (visible) {
+    if (visible && !isOpenRef.current) {
+      // Modal se ACABA de abrir (transición de false a true)
+      isOpenRef.current = true
       setScanning(true)
       setError(null)
       setSuccessMessage(null)
       setScannedCount(0)
+      setFeedbackVisible(false)
       // ✨ Vibración leve cuando se abre el scanner
       haptic.trigger(HapticType.LIGHT)
+    } else if (!visible && isOpenRef.current) {
+      // Modal se ACABA de cerrar (transición de true a false)
+      isOpenRef.current = false
+      // Limpiar timeout cuando se cierra el modal
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
     }
-  }, [visible, haptic])
+    
+    return () => {
+      // Cleanup al desmontar
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [visible])
 
   /**
    * Handler cuando la cámara detecta un código de barras
@@ -115,32 +138,45 @@ export const QRScanner: React.FC<QRScannerProps> = ({
         setFeedbackMessage('Este extintor ya está en tu lista')
         setFeedbackVisible(true)
         setError('⚠️ Este extintor ya existe en la lista')
-        // Permitir escanear de nuevo después de 3 segundos
-        setTimeout(() => {
+        // Permitir escanear de nuevo después de 2 segundos (scanner pausado todo el tiempo)
+        // Usar ref para poder limpiar el timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current)
+        }
+        timeoutRef.current = setTimeout(() => {
           setFeedbackVisible(false)
           setScanning(true)
           setError(null)
-        }, 3000)
+          timeoutRef.current = null
+        }, 2000)
         return
       }
 
-      // QR válido y no duplicado - llamar callback y mostrar mensaje
+      // QR válido y no duplicado - mostrar mensaje y llamar callback
       // ✅ Vibración de éxito
       await haptic.trigger(HapticType.SUCCESS)
       setFeedbackType('success')
       setFeedbackTitle('¡ÉXITO!')
       setFeedbackMessage('Extintor agregado a tu lista')
       setFeedbackVisible(true)
-      onQRScanned(parseResult.data)
       setScannedCount(prev => prev + 1)
       setSuccessMessage(`✅ Extintor #${scannedCount + 1} agregado`)
       setError(null)
+      
+      // IMPORTANTE: Notificar al parent INMEDIATAMENTE para que registre los datos
+      onQRScanned(parseResult.data)
 
-      // Limpiar mensaje después de 2 segundos y permitir escanear de nuevo
-      setTimeout(() => {
+      // IMPORTANTE: Delay 2 segundos con scanner PAUSADO (scanning = false)
+      // Evita que el scanner lea múltiples veces y se "vuelva loco"
+      // El feedback se muestra por 2 segundos mientras el scanner está pausado
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      timeoutRef.current = setTimeout(() => {
         setFeedbackVisible(false)
         setSuccessMessage(null)
-        setScanning(true)
+        setScanning(true)  // Reabrir scanner después del delay
+        timeoutRef.current = null
       }, 2000)
     } else {
       // QR inválido - mostrar error y permitir reintentar
@@ -151,12 +187,17 @@ export const QRScanner: React.FC<QRScannerProps> = ({
       setFeedbackMessage('No se pudo leer el código. Intenta de nuevo')
       setFeedbackVisible(true)
       setError(parseResult.error || 'Error al leer QR')
-      // Permitir escanear de nuevo después de 3 segundos
-      setTimeout(() => {
+      // Permitir escanear de nuevo después de 2 segundos (scanner pausado todo el tiempo)
+      // Usar ref para poder limpiar el timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      timeoutRef.current = setTimeout(() => {
         setFeedbackVisible(false)
         setScanning(true)
         setError(null)
-      }, 3000)
+        timeoutRef.current = null
+      }, 2000)
     }
   }
 
@@ -212,7 +253,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.modalContainer} edges={['top', 'left', 'right', 'bottom']}>
-        {/* Cámara */}
+        {/* Cámara - SIN children para evitar el warning */}
         <CameraView
           style={styles.camera}
           facing="back"
@@ -220,94 +261,94 @@ export const QRScanner: React.FC<QRScannerProps> = ({
             barcodeTypes: ['qr'],
           }}
           onBarcodeScanned={scanning ? handleBarCodeScanned : undefined}
-        >
-          {/* Overlay con instrucciones */}
-          <View style={styles.overlay}>
-            {/* Header */}
-            <View style={[styles.header, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.headerText, { color: theme.text }]}>
-                Escanear QR del Extintor
+        />
+
+        {/* Overlay con instrucciones - FUERA de CameraView, con position absolute */}
+        <View style={styles.overlay}>
+          {/* Header */}
+          <View style={[styles.header, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.headerText, { color: theme.text }]}>
+              Escanear QR del Extintor
+            </Text>
+            <TouchableOpacity
+              style={[styles.closeButton, { backgroundColor: theme.error }]}
+              onPress={onClose}
+            >
+              <Text style={[styles.closeButtonText, { color: '#ffffff' }]}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Frame de escaneo */}
+          <View style={styles.frameContainer}>
+            <View style={[styles.frame, { borderColor: theme.info }]} />
+            <Text style={[styles.instruction, { color: '#ffffff' }]}>
+              Centra el código QR en el marco
+            </Text>
+          </View>
+
+          {/* Success message */}
+          {successMessage && (
+            <View style={[styles.successContainer, { backgroundColor: theme.successBg }]}>
+              <Text style={[styles.successText, { color: theme.success }]}>
+                {successMessage}
               </Text>
-              <TouchableOpacity
-                style={[styles.closeButton, { backgroundColor: theme.error }]}
-                onPress={onClose}
-              >
-                <Text style={[styles.closeButtonText, { color: '#ffffff' }]}>✕</Text>
-              </TouchableOpacity>
+              <Text style={[styles.successSubtext, { color: theme.textSecondary }]}>
+                Escanea el siguiente o finaliza
+              </Text>
             </View>
+          )}
 
-            {/* Frame de escaneo */}
-            <View style={styles.frameContainer}>
-              <View style={[styles.frame, { borderColor: theme.info }]} />
-              <Text style={[styles.instruction, { color: '#ffffff' }]}>
-                Centra el código QR en el marco
+          {/* Error message */}
+          {error && !successMessage && (
+            <View style={[styles.errorContainer, { backgroundColor: theme.errorBg }]}>
+              <Text style={[styles.errorText, { color: theme.error }]}>
+                {error}
+              </Text>
+              <Text style={[styles.errorSubtext, { color: theme.textSecondary }]}>
+                Intenta escanear nuevamente
               </Text>
             </View>
+          )}
 
-            {/* Success message */}
-            {successMessage && (
-              <View style={[styles.successContainer, { backgroundColor: theme.successBg }]}>
-                <Text style={[styles.successText, { color: theme.success }]}>
-                  {successMessage}
-                </Text>
-                <Text style={[styles.successSubtext, { color: theme.textSecondary }]}>
-                  Escanea el siguiente o finaliza
-                </Text>
-              </View>
-            )}
-
-            {/* Error message */}
-            {error && !successMessage && (
-              <View style={[styles.errorContainer, { backgroundColor: theme.errorBg }]}>
-                <Text style={[styles.errorText, { color: theme.error }]}>
-                  {error}
-                </Text>
-                <Text style={[styles.errorSubtext, { color: theme.textSecondary }]}>
-                  Intenta escanear nuevamente
-                </Text>
-              </View>
-            )}
-
-            {/* Footer con botones */}
-            <View style={[styles.footer, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.footerText, { color: theme.textSecondary, marginBottom: 12 }]}>
-                {scannedCount > 0
-                  ? `${scannedCount} extintor${scannedCount !== 1 ? 'es' : ''} escaneado${scannedCount !== 1 ? 's' : ''}`
-                  : 'Escanea múltiples QR o agrega manualmente'
-                }
-              </Text>
-              <View style={styles.buttonRow}>
-                {onManualAdd && (
-                  <TouchableOpacity
-                    style={[styles.footerButton, styles.manualButton, { backgroundColor: theme.buttonSecondary }]}
-                    onPress={onManualAdd}
-                  >
-                    <Text style={[styles.footerButtonText, { color: theme.buttonSecondaryText }]}>
-                      ➕ Agregar sin QR
-                    </Text>
-                  </TouchableOpacity>
-                )}
+          {/* Footer con botones */}
+          <View style={[styles.footer, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.footerText, { color: theme.textSecondary, marginBottom: 12 }]}>
+              {scannedCount > 0
+                ? `${scannedCount} extintor${scannedCount !== 1 ? 'es' : ''} escaneado${scannedCount !== 1 ? 's' : ''}`
+                : 'Escanea múltiples QR o agrega manualmente'
+              }
+            </Text>
+            <View style={styles.buttonRow}>
+              {onManualAdd && (
                 <TouchableOpacity
-                  style={[styles.footerButton, styles.finishButton, { backgroundColor: theme.buttonPrimary }]}
-                  onPress={onClose}
+                  style={[styles.footerButton, styles.manualButton, { backgroundColor: theme.buttonSecondary }]}
+                  onPress={onManualAdd}
                 >
-                  <Text style={[styles.footerButtonText, { color: theme.buttonPrimaryText }]}>
-                    ✅ Finalizar
+                  <Text style={[styles.footerButtonText, { color: theme.buttonSecondaryText }]}>
+                    ➕ Agregar sin QR
                   </Text>
                 </TouchableOpacity>
-              </View>
+              )}
+              <TouchableOpacity
+                style={[styles.footerButton, styles.finishButton, { backgroundColor: theme.buttonPrimary }]}
+                onPress={onClose}
+              >
+                <Text style={[styles.footerButtonText, { color: theme.buttonPrimaryText }]}>
+                  ✅ Finalizar
+                </Text>
+              </TouchableOpacity>
             </View>
-
-            {/* Feedback Visual */}
-            <FeedbackOverlay
-              type={feedbackType}
-              title={feedbackTitle}
-              message={feedbackMessage}
-              visible={feedbackVisible}
-              duration={3000}
-            />
           </View>
-        </CameraView>
+        </View>
+
+        {/* Feedback Visual - FUERA de CameraView para que se renderice correctamente */}
+        <FeedbackOverlay
+          type={feedbackType}
+          title={feedbackTitle}
+          message={feedbackMessage}
+          visible={feedbackVisible}
+          duration={2000}
+        />
       </SafeAreaView>
     </Modal>
   )
@@ -324,9 +365,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Overlay sobre cámara
+  // Overlay sobre cámara - ABSOLUTE positioning para renderizar encima de CameraView
   overlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'space-between',
   },

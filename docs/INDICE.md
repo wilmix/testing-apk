@@ -39,7 +39,7 @@ Este proyecto está organizado por fases de desarrollo. Cada fase tiene criterio
 
 - Duration: 2-3 horas
 - Status: ✅ Completa
-- Deliverables: Dependencias, tipos, constantes, validación, MMKV, tests
+- Deliverables: Dependencias, tipos, constantes, validación, AsyncStorage, tests
 - Summary: Instaladas 4 librerías, creados 4 archivos de servicio, 8 tests ejecutables
 
 ---
@@ -49,7 +49,7 @@ Este proyecto está organizado por fases de desarrollo. Cada fase tiene criterio
 
 - Duration: 3-4 horas
 - Status: ⏳ Planeada
-- Tasks: `useMMKVStorage`, `useFormData`, `useFieldVisibility`, tests
+- Tasks: `useStorage`, `useFormData`, `useFieldVisibility`, tests
 - Approval: Auto (sin approval point)
 
 ---
@@ -181,7 +181,7 @@ Para cada fase:
 - [ ] Agregar tests en `App.tsx`
 - [ ] Verificar TypeScript (sin `any`)
 - [ ] Verificar compilación: `npx tsc --noEmit`
-- [ ] Verificar MMKV persistence (si aplica)
+- [ ] Verificar AsyncStorage persistence (si aplica)
 
 ### Después de cada fase:
 - [ ] Todos los tests pasando
@@ -201,7 +201,7 @@ Para cada fase:
 | Estructura código | `docs/01-FASE1-SETUP/` |
 | Cómo funcionan tipos | `src/types/ordenTrabajo.ts` |
 | Validación Zod | `src/services/validationService.ts` |
-| MMKV storage | `src/services/mmkvService.ts` |
+| AsyncStorage storage | `src/services/storageService.ts` |
 | Hooks | `src/hooks/` (FASE 2+) |
 | Componentes | `src/components/` (FASE 3+) |
 | Tests | `App.tsx` |
@@ -218,7 +218,7 @@ Para cada fase:
 ## 📞 PUNTOS DE CONTACTO
 
 **Para Validación Zod**: `src/services/validationService.ts`
-**Para Persistencia**: `src/services/mmkvService.ts`
+**Para Persistencia**: `src/services/storageService.ts`
 **Para Tipos**: `src/types/ordenTrabajo.ts`
 **Para Constantes**: `src/constants/ordenTrabajoConstants.ts`
 

@@ -37,7 +37,7 @@ ENTREGA_FINAL.md                     → Resumen (5 min)
 
 ### 3️⃣ Stack Tecnológico Seleccionado
 ```
-🏪 Storage         → react-native-mmkv (~30x más rápido)
+🏪 Storage         → @react-native-async-storage/async-storage (compatible con Expo Go)
 📱 UI Components   → react-native-element-dropdown (touch-optimized)
 ✓ Validation       → zod (type-safe, mensajes ES)
 📅 Date Picker     → @react-native-community/datetimepicker (nativo)
@@ -47,7 +47,7 @@ ENTREGA_FINAL.md                     → Resumen (5 min)
 ### 4️⃣ Arquitectura de Solución
 ```
 PATRONES:
-  • Offline-First       → Persistencia automática MMKV
+  • Offline-First       → Persistencia automática AsyncStorage
   • Progressive         → Campos progresivos, no abrumar
   • Real-Time Valid     → Feedback inmediato sin submit
   • Touch-Friendly      → Botones ≥48px, inputs ≥44px
@@ -103,7 +103,7 @@ ANÁLISIS TÉCNICO:
   • 4 approval points definidos
 
 CÓDIGO LISTO:
-  • useMMKVStorage hook (~60 líneas)
+  • useStorage hook (~60 líneas)
   • useFormData hook (~120 líneas)
   • useFieldVisibility hook (~80 líneas)
   • FormInput component (~80 líneas)
@@ -150,7 +150,7 @@ CÓDIGO LISTO:
 │                                                  │
 │  NECESITO QUE CONFIRMES:                         │
 │                                                  │
-│  ✅ Stack: MMKV + Element Dropdown + Zod         │
+│  ✅ Stack: AsyncStorage + Element Dropdown + Zod         │
 │  ✅ Enfoque: Progressive + Offline + Real-time   │
 │  ✅ Timeline: 7 fases, 25-32 horas               │
 │  ✅ Approval Points: 4 checkpoints               │
@@ -281,7 +281,7 @@ TOTAL: ~8-10 días calendario
 ### Inmediato (Hoy/Mañana)
 ```
 npm install:
-  npx expo install react-native-mmkv
+  npx expo install @react-native-async-storage/async-storage
   npx expo install react-native-element-dropdown
   npx expo install zod
   npx expo install @react-native-community/datetimepicker
@@ -290,7 +290,7 @@ Crear estructura:
   mkdir -p src/{hooks,components,services,types,utils,constants}
 
 Copiar código:
-  → useMMKVStorage (GUIA_TECNICA)
+  → useStorage (GUIA_TECNICA)
   → useFormData (GUIA_TECNICA)
   → useFieldVisibility (GUIA_TECNICA)
   → FormInput, FormDropdown, ValidationIcon (GUIA_TECNICA)

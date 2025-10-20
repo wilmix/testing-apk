@@ -17,14 +17,14 @@ Formulario web (MUI, 20+ campos) no es usable en mobile para field workers en ca
 
 ### Solución
 Formulario mobile **offline-first** con:
-- ⚡ MMKV (persistencia local ~30x más rápido)
+- ⚡ AsyncStorage (persistencia local compatible con Expo Go)
 - 📱 Element Dropdown (touch-optimized con search)
 - ✓ Zod (validación real-time con mensajes ES)
 - 🎯 Progressive disclosure (mostrar campos gradualmente)
 
 ### Tech Stack
 ```bash
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 npx expo install react-native-element-dropdown
 npx expo install zod
 npx expo install @react-native-community/datetimepicker
@@ -69,8 +69,7 @@ Una vez aprobado, procederemos con:
 cd c:\dev\react-native\testing-app
 
 # Instalar librerías
-npx expo install react-native-mmkv
-npx expo install react-native-element-dropdown
+npx expo install @react-native-async-storage/async-storagenpx expo install react-native-element-dropdown
 npx expo install zod
 npx expo install @react-native-community/datetimepicker
 ```
@@ -79,7 +78,7 @@ npx expo install @react-native-community/datetimepicker
 ```
 src/
 ├─ hooks/
-│  ├─ useMMKVStorage.ts
+│  ├─ useStorage.ts
 │  ├─ useFormData.ts
 │  └─ useFieldVisibility.ts
 ├─ components/
@@ -106,7 +105,7 @@ src/
 ### Archivos de Configuración
 - TypeScript types
 - Zod schemas
-- MMKV initialization
+- AsyncStorage
 - Constants (MARCAS, TIPOS, etc)
 
 ---
@@ -127,7 +126,7 @@ FASE 4: HEADER FORM ✅ APPROVAL 1
     ├─ Cliente dropdown + search
     ├─ Fecha entrega date picker
     ├─ Validación real-time
-    ├─ Persistencia MMKV
+    ├─ Persistencia AsyncStorage
     └─ Mostrar para tu revisión
        ↓
 FASE 5: DETALLES ✅ APPROVAL 2
@@ -158,7 +157,7 @@ Una vez completada Fase 4, debes poder:
 ✓ Seleccionar cliente de un dropdown con search  
 ✓ Cambiar fecha de entrega con date picker  
 ✓ Ver validación en tiempo real (rojo si error)  
-✓ Ver datos guardados automáticamente en MMKV  
+✓ Ver datos guardados automáticamente en AsyncStorage  
 ✓ Botón "Continuar" deshabilitado sin cliente  
 ✓ Funciona completamente sin internet  
 ✓ Botones y inputs son grandes (44-48px)  
@@ -171,7 +170,7 @@ Una vez completada Fase 4, debes poder:
 |-----------|-------------------|
 | Grid 6/12 columnas | Single column, 100% ancho |
 | Validación en submit | Validación real-time |
-| Sin persistencia local | Guardado automático MMKV |
+| Sin persistencia local | Guardado automático AsyncStorage |
 | Dropdowns nativos | Element Dropdown + search |
 | Autocomplete MUI | Dropdown cached options |
 | Scroll horizontal | Scroll vertical único |
@@ -203,7 +202,7 @@ GUIA_TECNICA_IMPLEMENTACION.md
 
 1. **Lee y aprueba** la documentación
 2. **Confirma** que estás de acuerdo con:
-   - Stack: MMKV + Element Dropdown + Zod
+   - Stack: AsyncStorage + Element Dropdown + Zod
    - Enfoque: Progressive, Offline-first, Touch-friendly
    - Timeline: 25-32 horas en 7 fases
    - 4 approval points (después de cada fase testeable)
@@ -216,19 +215,18 @@ GUIA_TECNICA_IMPLEMENTACION.md
 
 ## 🎓 Notas Importantes
 
-### Por qué MMKV
-- ~30x más rápido que AsyncStorage
-- Sincrónico + asincrónico
-- Encriptación opcional
-- Hooks nativos para React
-- Funciona perfectamente con Expo
+### Por qué AsyncStorage
+- Compatible con Expo Go
+- API Asíncrona simple (async/await)
+- Suficiente para las necesidades de la app
+- No requiere compilación nativa
 
 ### Por qué Element Dropdown
 - Touch-optimized (botones grandes)
 - Search functionality built-in
 - Mejor UX que Picker nativo
 - Altamente customizable
-- Cached options en MMKV
+- Cached options en AsyncStorage
 
 ### Por qué Zod
 - Type-safe validation
@@ -252,19 +250,19 @@ GUIA_TECNICA_IMPLEMENTACION.md
 mkdir -p src/{hooks,components/{FormFields,Feedback,OrdenTrabajo},services,constants,types,utils}
 
 # Paso 2: Instalar dependencias
-npx expo install react-native-mmkv react-native-element-dropdown zod @react-native-community/datetimepicker
+npx expo install @react-native-async-storage/async-storage react-native-element-dropdown zod @react-native-community/datetimepicker
 
 # Paso 3: Crear archivos base
 # - src/types/ordenTrabajo.ts (TypeScript)
 # - src/constants/ordenTrabajoConstants.ts (MARCAS, TIPOS, etc)
 # - src/services/validationService.ts (Zod schemas)
-# - src/hooks/useMMKVStorage.ts (Hook 1)
+# - src/hooks/useStorage.ts (Hook 1)
 # - src/hooks/useFormData.ts (Hook 2)
 # - src/hooks/useFieldVisibility.ts (Hook 3)
 # - src/components/FormFields/* (Componentes base)
 
 # Paso 4: Tests en App.tsx
-# - Verificar MMKV funciona
+# - Verificar AsyncStorage funciona
 # - Verificar hooks funcionan
 # - Verificar componentes renderizan
 
@@ -285,16 +283,16 @@ npx expo install react-native-mmkv react-native-element-dropdown zod @react-nati
 ## ❓ Preguntas Frecuentes
 
 **P: ¿Por qué no usar Firebase para sincronización?**  
-R: MMKV es más rápido para datos locales, Firebase es para backend. Los necesitamos ambos.
+R: AsyncStorage es más rápido para datos locales, Firebase es para backend. Los necesitamos ambos.
 
 **P: ¿Y si el usuario pierde conexión a mitad del formulario?**  
-R: Los datos se guardan en MMKV. Cuando recupera conexión, se sincronizan automáticamente.
+R: Los datos se guardan en AsyncStorage. Cuando recupera conexión, se sincronizan automáticamente.
 
 **P: ¿Necesito conocer Zod?**  
 R: No, pero lo aprendes rápido. El código está listo para copiar-pegar.
 
-**P: ¿Cuál es el tamaño de MMKV?**  
-R: ~500KB. Element Dropdown ~300KB. Zod ~25KB gzipped.
+**P: ¿Cuál es el tamaño de AsyncStorage?**  
+R: Es nativo de React Native, no agrega tamaño a la app. Element Dropdown ~300KB. Zod ~25KB gzipped.
 
 **P: ¿Funciona en iOS y Android?**  
 R: Sí, ambos. DatePicker es nativo en ambos.
@@ -306,7 +304,7 @@ R: Sí, ambos. DatePicker es nativo en ambos.
 **¿Estás listo para proceder?**
 
 Necesito que confirmes:
-1. ✅ Apruebas el stack (MMKV + Element Dropdown + Zod)
+1. ✅ Apruebas el stack (AsyncStorage + Element Dropdown + Zod)
 2. ✅ Apruebas el enfoque (Progressive, Offline-first, Touch-friendly)
 3. ✅ Apruebas el timeline (Fases 1-7 con 4 approval points)
 4. ✅ Confirmas que quieres comenzar con Fase 1-3

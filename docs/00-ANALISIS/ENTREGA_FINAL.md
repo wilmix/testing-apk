@@ -49,11 +49,11 @@
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                                                                  │
-│  STORAGE (Offline-First)           → react-native-mmkv         │
-│  • ~30x más rápido que AsyncStorage                             │
-│  • Sincrónico + asincrónico                                     │
-│  • Encriptación nativa                                          │
-│  • Trust Score: 10/10 (Context7)                                │
+│  STORAGE (Offline-First)           → @react-native-async-storage/async-storage         │
+│  • Incluido en Expo Go                                          │
+│  • No requiere build nativo                                     │
+│  • Suficiente para MVP                                          │
+│  • Trust Score: 9.2/10 (Context7)                               │
 │                                                                  │
 │  DROPDOWN/SELECT (Touch-Friendly)  → react-native-element-     │
 │  • Search built-in                          dropdown             │
@@ -93,7 +93,7 @@
 FASE 1-3: SETUP INICIAL (7-10 horas)
 └─ Instalar dependencias
 └─ Crear estructura carpetas
-└─ Implementar 3 hooks base (useMMKVStorage, useFormData, useFieldVisibility)
+└─ Implementar 3 hooks base (useStorage, useFormData, useFieldVisibility)
 └─ Implementar componentes UI base (FormInput, FormDropdown, ValidationIcon)
 └─ Tests en App.tsx
 └─ 📍 CORE FOUNDATION LISTA
@@ -102,7 +102,7 @@ FASE 4: HEADER FORM (4-5 horas) ✅ APPROVAL POINT 1
 ├─ Cliente dropdown + search
 ├─ Fecha entrega date picker
 ├─ Validación real-time
-├─ Persistencia MMKV
+├─ Persistencia AsyncStorage
 ├─ Botones grandes, layout vertical
 └─ 📍 MOSTRAR PARA APROBACIÓN
 
@@ -134,7 +134,7 @@ FASE 7: TESTING & OPTIMIZACIÓN (3-4 horas) ✅ APPROVAL POINT 4
 
 ```
 🌐 OFFLINE-FIRST
-   ✓ Todos los datos guardados en MMKV
+   ✓ Todos los datos guardados en AsyncStorage
    ✓ Funciona 100% sin conexión
    ✓ Sincronización automática al conectar
    ✓ Indicador visual de estado
@@ -160,7 +160,7 @@ FASE 7: TESTING & OPTIMIZACIÓN (3-4 horas) ✅ APPROVAL POINT 4
    ✓ No requiere precisión
 
 ⚙️ HIGH PERFORMANCE
-   ✓ MMKV ~30x más rápido que AsyncStorage
+   ✓ AsyncStorage para compatibilidad con Expo Go
    ✓ Scroll fluido (60fps)
    ✓ Submit <300ms
    ✓ Lazy load de opciones
@@ -197,7 +197,7 @@ FASE 7: TESTING & OPTIMIZACIÓN (3-4 horas) ✅ APPROVAL POINT 4
 ✓ Cliente seleccionable vía dropdown con search
 ✓ Fecha entrega con date picker nativo
 ✓ Validación real-time: cliente requerido
-✓ Guardado automático en MMKV cada 2 segundos
+✓ Guardado automático en AsyncStorage cada 2 segundos
 ✓ Botón continuar deshabilitado sin cliente
 ✓ Funciona 100% sin internet
 ✓ Botones ≥48px, inputs ≥44px, espaciado ≥16px
@@ -210,7 +210,7 @@ FASE 7: TESTING & OPTIMIZACIÓN (3-4 horas) ✅ APPROVAL POINT 4
 ✓ Dropdowns marca y tipo con search funcionan
 ✓ Validación por item: número extintor requerido
 ✓ Scroll fluido sin lag
-✓ Items persistidos en MMKV
+✓ Items persistidos en AsyncStorage
 ```
 
 ### Fase 6 (Final)
@@ -273,7 +273,7 @@ CONTENIDO: 45+ bloques de código, 20+ tablas comparativas
 CONFIRMACIÓN NECESARIA PARA PROCEDER:
 
 1. ✅ STACK TECNOLÓGICO
-   [ ] Apruebas react-native-mmkv para storage
+   [ ] Apruebas @react-native-async-storage/async-storage para storage
    [ ] Apruebas react-native-element-dropdown para selects
    [ ] Apruebas zod para validación
    [ ] Apruebas @react-native-community/datetimepicker

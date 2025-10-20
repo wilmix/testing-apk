@@ -7,8 +7,7 @@
 ┌─────────────────────────────────┬─────────────────┬──────────────┬────────────────┐
 │ COMPONENTE                      │ LIBRERÍA        │ VERSION      │ TAMAÑO         │
 ├─────────────────────────────────┼─────────────────┼──────────────┼────────────────┤
-│ Storage (Offline)               │ react-native-   │ v6+          │ ~500KB         │
-│                                 │ mmkv            │              │                │
+│ Storage (Offline)               │ @react-native-async-storage/async-storage            │ v2+          │ included       │
 ├─────────────────────────────────┼─────────────────┼──────────────┼────────────────┤
 │ Dropdown com Search             │ react-native-   │ Latest       │ ~300KB         │
 │                                 │ element-        │              │                │
@@ -70,7 +69,7 @@ APPROVAL POINTS: Después de cada fase testeable
 ┌────────────────────────────┬─────────────┬──────────────────┬─────────────────┐
 │ FEATURE                    │ FASE        │ ESTADO           │ COMPLEJIDAD     │
 ├────────────────────────────┼─────────────┼──────────────────┼─────────────────┤
-│ Offline Storage (MMKV)     │ 1-3         │ Core foundation  │ Baja            │
+│ Offline Storage (AsyncStorage)     │ 1-3         │ Core foundation  │ Baja            │
 ├────────────────────────────┼─────────────┼──────────────────┼─────────────────┤
 │ Auto-save Form             │ 1-3         │ On updateField   │ Media           │
 ├────────────────────────────┼─────────────┼──────────────────┼─────────────────┤
@@ -112,7 +111,7 @@ APPROVAL POINTS: Después de cada fase testeable
 │ FASE 4      │ Cliente seleccionable (dropdown)   │ Funcional  │ 🔄 Próximo   │
 │ (Header)    │ Fecha entrega con picker           │ Funcional  │ 🔄 Próximo   │
 │             │ Validación real-time (Zod)        │ Test       │ 🔄 Próximo   │
-│             │ Guardado automático en MMKV       │ Console    │ 🔄 Próximo   │
+│             │ Guardado automático en AsyncStorage       │ Console    │ 🔄 Próximo   │
 │             │ Botón Continuar disabled sin data │ UI state   │ 🔄 Próximo   │
 │             │ Funciona sin internet             │ Offlline   │ 🔄 Próximo   │
 │             │ Botones ≥48px, inputs ≥44px      │ Inspector  │ 🔄 Próximo   │
@@ -122,7 +121,7 @@ APPROVAL POINTS: Después de cada fase testeable
 │             │ Dropdowns con search OK           │ Funcional  │ 🔄 Después   │
 │             │ Validación por item               │ Test       │ 🔄 Después   │
 │             │ Scroll fluido sin lag             │ Performance│ 🔄 Después   │
-│             │ Items persistidos en MMKV         │ Console    │ 🔄 Después   │
+│             │ Items persistidos en AsyncStorage         │ Console    │ 🔄 Después   │
 ├─────────────┼────────────────────────────────────┼────────────┼──────────────┤
 │ FASE 6      │ Textarea observaciones OK          │ Funcional  │ 🔄 Después   │
 │ (Final)     │ Checkbox préstamo→reveal cantidad │ UI state   │ 🔄 Después   │
@@ -176,7 +175,7 @@ RESUMEN: 70-80% mejora en experiencia usuario, diseñado para field workers
 ├──────────────────────────────────────┼──────────┼──────────┼─────────────────┤
 │ src/types/ordenTrabajo.ts            │ 1        │ ~50      │ 🔴 Crítica      │
 │ src/constants/ordenTrabajoConst.ts   │ 1        │ ~100     │ 🔴 Crítica      │
-│ src/hooks/useMMKVStorage.ts          │ 3        │ ~60      │ 🔴 Crítica      │
+│ src/hooks/useStorage.ts          │ 3        │ ~60      │ 🔴 Crítica      │
 │ src/hooks/useFormData.ts             │ 3        │ ~120     │ 🔴 Crítica      │
 │ src/hooks/useFieldVisibility.ts      │ 3        │ ~80      │ 🟡 Importante   │
 │ src/services/validationService.ts    │ 3        │ ~150     │ 🔴 Crítica      │
@@ -300,7 +299,7 @@ ESTADO: Análisis completado, aguardando aprobación final
 Formulario web (20+ campos, MUI) no usable en mobile para field workers
 
 ✅ SOLUCIÓN
-React Native offline-first con MMKV + Element Dropdown + Zod
+React Native offline-first con AsyncStorage + Element Dropdown + Zod
 - Campos progresivos (solo necesarios)
 - Validación real-time
 - Guardado automático
@@ -308,7 +307,7 @@ React Native offline-first con MMKV + Element Dropdown + Zod
 - Touch-friendly
 
 🏗️ STACK
-MMKV (storage ~30x rápido)
+AsyncStorage (storage compatible con Expo Go)
 Element Dropdown (search + touch UX)
 Zod (validación type-safe ES)
 React Native Hooks (state)

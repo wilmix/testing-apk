@@ -14,8 +14,8 @@
 
 📦 DEPENDENCIAS INSTALADAS
 
-  ✅ react-native-mmkv@3.3.3
-     └─ Storage offline-first (~30x más rápido)
+  ✅ @react-native-async-storage/async-storage
+     └─ Storage offline-first (compatible con Expo Go)
   
   ✅ react-native-element-dropdown@2.12.4
      └─ Dropdowns con search touch-optimized
@@ -38,11 +38,11 @@ src/
 │  └─ ordenTrabajoConstants.ts .............. 77 líneas ✅
 │
 ├─ services/
-│  ├─ mmkvService.ts ........................ 67 líneas ✅
+│  ├─ storageService.ts ........................ 67 líneas ✅
 │  └─ validationService.ts ................. 152 líneas ✅
 │
 ├─ hooks/                          (PRÓXIMA FASE)
-│  ├─ useMMKVStorage.ts
+│  ├─ useStorage.ts
 │  ├─ useFormData.ts
 │  └─ useFieldVisibility.ts
 │
@@ -75,17 +75,17 @@ src/
    • CLIENTES (11 clientes)
    • AGENCIAS_BANCO_SOLIDARIO (9 agencias)
    • TELEFONOS_EJEMPLO (9 teléfonos)
-   • STORAGE_KEYS (keys para MMKV)
+   • STORAGE_KEYS (keys para AsyncStorage)
    • DEFAULT_VALUES (valores por defecto)
 
-✅ src/services/mmkvService.ts
-   • mmkvStorage (instancia inicializada)
-   • MMKVUtils.setJSON() - guardar
-   • MMKVUtils.getJSON() - cargar
-   • MMKVUtils.has() - verificar
-   • MMKVUtils.remove() - eliminar
-   • MMKVUtils.clear() - limpiar todo
-   • MMKVUtils.getAllKeys() - listar claves
+✅ src/services/storageService.ts
+   • storage (instancia inicializada)
+   • StorageUtils.setJSON() - guardar
+   • StorageUtils.getJSON() - cargar
+   • StorageUtils.has() - verificar
+   • StorageUtils.remove() - eliminar
+   • StorageUtils.clear() - limpiar todo
+   • StorageUtils.getAllKeys() - listar claves
 
 ✅ src/services/validationService.ts
    • DetalleExtintorSchema
@@ -103,7 +103,7 @@ src/
    • Tests de constants
    • Tests de creación de datos
    • Tests de validación con Zod
-   • Tests de MMKV (guardar/cargar/verificar)
+   • Tests de AsyncStorage (guardar/cargar/verificar)
    • UI de debugging visual
    • Botones: Cambiar Tema, Reiniciar
 
@@ -117,7 +117,7 @@ src/
   ✅ Types TypeScript: 7 interfaces sin 'any'
   ✅ Constants: 9 constantes importables
   ✅ Schemas Zod: 6 schemas validables
-  ✅ MMKV Service: Funciona correctamente
+  ✅ AsyncStorage Service: Funciona correctamente
   ✅ App.tsx: Compila y corre sin errores
   ✅ Git commit: FASE1_COMPLETADA registrado
 
@@ -128,7 +128,7 @@ src/
 Archivos Creados: 4
   • src/types/ordenTrabajo.ts
   • src/constants/ordenTrabajoConstants.ts
-  • src/services/mmkvService.ts
+  • src/services/storageService.ts
   • src/services/validationService.ts
 
 Carpetas Creadas: 6
@@ -149,14 +149,14 @@ Commit: ✅ FASE 1 COMPLETADA: Setup inicial
 
 🚀 PRÓXIMO: FASE 2 - HOOKS BASE (3-4 horas)
 
-  Tarea 2.1: useMMKVStorage Hook
-    └─ Guardar/cargar datos de MMKV
+  Tarea 2.1: useStorage Hook
+    └─ Guardar/cargar datos de AsyncStorage
     └─ Sincronización automática
     └─ Manejo de tipos genéricos
 
   Tarea 2.2: useFormData Hook
     └─ Gestionar datos con validación real-time
-    └─ Guardar automáticamente en MMKV
+    └─ Guardar automáticamente en AsyncStorage
     └─ Validar con Zod schemas
 
   Tarea 2.3: useFieldVisibility Hook
@@ -200,7 +200,7 @@ Commit: ✅ FASE 1 COMPLETADA: Setup inicial
 │  ├─ Types: ✅ 7 interfaces tipadas                                          │
 │  ├─ Constants: ✅ 9 constantes                                              │
 │  ├─ Schemas: ✅ 6 schemas Zod                                               │
-│  ├─ Services: ✅ MMKV + Validación                                          │
+│  ├─ Services: ✅ AsyncStorage + Validación                                          │
 │  ├─ Tests: ✅ 8 tests en App.tsx                                            │
 │  ├─ TypeScript: ✅ Compilando sin errores                                   │
 │  └─ Git: ✅ Commit realizado                                                │

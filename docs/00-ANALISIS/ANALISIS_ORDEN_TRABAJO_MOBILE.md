@@ -89,7 +89,7 @@ VALIDACIÓN REAL-TIME:
 - Sin bloquear, solo indicar estado
 
 OFFLINE:
-- Guardar en MMKV mientras se completa
+- Guardar en AsyncStorage mientras se completa
 - Sincronizar cuando hay conexión
 - Indicador de estado: "sin guardar" / "guardando" / "guardado"
 
@@ -110,7 +110,7 @@ PASO 1 - HEADER MÍNIMO
 │ Nueva Orden de Trabajo  │
 ├─────────────────────────┤
 │ [Seleccionar Cliente] ↓ │ ← Dropdown searchable
-│  (MMKV cached options)  │
+│  (AsyncStorage cached options)  │
 │                         │
 │ [Fecha Entrega: hoy] 🗓 │ ← Date picker nativo
 ├─────────────────────────┤
@@ -224,9 +224,9 @@ src/
 │  ├─ useFormData.ts
 │  ├─ useOfflineStorage.ts
 │  ├─ useFieldVisibility.ts
-│  └─ useMMKVStorage.ts
+│  └─ useStorage.ts
 ├─ services/
-│  ├─ storageService.ts                (MMKV + AsyncStorage)
+│  ├─ storageService.ts                (AsyncStorage)
 │  ├─ validationService.ts             (Zod schemas)
 │  └─ ordenTrabajoService.ts           (Business logic)
 ├─ constants/
@@ -243,12 +243,12 @@ src/
 
 ### Fase 1️⃣: Setup Inicial
 - [ ] Instalar dependencias
-- [ ] Configurar MMKV storage
+- [ ] Configurar AsyncStorage storage
 - [ ] Crear estructura de carpetas
 - [ ] TypeScript types
 
 ### Fase 2️⃣: Hooks Base
-- [ ] `useMMKVStorage` hook
+- [ ] `useStorage` hook
 - [ ] `useFormData` hook
 - [ ] `useFieldVisibility` hook
 - [ ] Validación con zod
@@ -259,10 +259,10 @@ src/
 - [ ] Estilos consistentes (colores, tamaños)
 
 ### Fase 4️⃣: Orden Trabajo - Header
-- [ ] Cliente autocomplete (options cached en MMKV)
+- [ ] Cliente autocomplete (options cached en AsyncStorage)
 - [ ] Fecha entrega date picker
 - [ ] Validación real-time
-- [ ] Persistencia en MMKV
+- [ ] Persistencia en AsyncStorage
 
 ### Fase 5️⃣: Orden Trabajo - Detalles
 - [ ] Formulario dinámico items
@@ -291,7 +291,7 @@ src/
 ✓ Cliente seleccionable vía dropdown con search
 ✓ Fecha de entrega con date picker nativo
 ✓ Validación real-time: cliente requerido
-✓ Guardado automático en MMKV cada 2 segundos
+✓ Guardado automático en AsyncStorage cada 2 segundos
 ✓ Botón continuar deshabilitado sin cliente
 ✓ Visual: botones ≥48px, inputs ≥44px
 ✓ Funciona sin internet
@@ -304,7 +304,7 @@ src/
 ✓ Dropdown marca y tipo con search funcionan
 ✓ Validación por item: número extintor requerido
 ✓ Visual: scroll fluido, items claros
-✓ Persistencia de items en MMKV
+✓ Persistencia de items en AsyncStorage
 ```
 
 ### Fase 6 (Final)
@@ -323,7 +323,7 @@ src/
 
 ```bash
 # Dependencias principales
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 npx expo install react-native-element-dropdown
 npx expo install zod
 npx expo install @react-native-community/datetimepicker
@@ -354,12 +354,12 @@ SEMANA 2:
 ## 📌 Consideraciones Especiales
 
 ### Offline-First
-- MMKV almacena formularios en progreso
+- AsyncStorage almacena formularios en progreso
 - Al recuperar conexión, sincronizar con API
 - Indicador visual: "⚠️ sin conexión" o "✓ sincronizado"
 
 ### Performance
-- Lazy load de opciones (MARCAS, TIPOS) en MMKV
+- Lazy load de opciones (MARCAS, TIPOS) en AsyncStorage
 - No renderizar todos los items si están hidden
 - Memoizar componentes form para evitar re-renders
 
@@ -378,7 +378,7 @@ SEMANA 2:
 
 ## 📝 Notas Técnicas
 
-1. **MMKV vs AsyncStorage**: MMKV es ~30x más rápido, sincrónico, pero requiere compilación nativa. Para Expo es compatible.
+1. **AsyncStorage vs MMKV**: AsyncStorage es compatible con Expo Go, mientras que MMKV requiere compilación nativa.
 
 2. **Validación con Zod**: Schema-based, type-safe, permite mensajes custom en español.
 

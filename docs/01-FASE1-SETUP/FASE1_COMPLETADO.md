@@ -10,7 +10,7 @@
 
 ### ✅ Tarea 1.1: Instalar Dependencias
 ```bash
-✅ react-native-mmkv@3.3.3
+✅ @react-native-async-storage/async-storage
 ✅ react-native-element-dropdown@2.12.4
 ✅ zod@3.25.76
 ✅ @react-native-community/datetimepicker@8.4.4
@@ -25,7 +25,7 @@
 ```
 src/
 ├─ hooks/                      ✅ CREADO
-│  ├─ useMMKVStorage.ts       (PRÓXIMA FASE)
+│  ├─ useStorage.ts       (PRÓXIMA FASE)
 │  ├─ useFormData.ts          (PRÓXIMA FASE)
 │  └─ useFieldVisibility.ts   (PRÓXIMA FASE)
 ├─ components/                ✅ CREADO
@@ -39,7 +39,7 @@ src/
 │     ├─ OrdenTrabajoMobile.tsx (PRÓXIMA FASE)
 │     └─ DetalleItem.tsx      (PRÓXIMA FASE)
 ├─ services/                  ✅ CREADO
-│  ├─ mmkvService.ts          ✅ CREADO
+│  ├─ storageService.ts          ✅ CREADO
 │  ├─ validationService.ts    ✅ CREADO
 │  └─ ordenTrabajoService.ts  (PRÓXIMA FASE)
 ├─ constants/                 ✅ CREADO
@@ -83,7 +83,7 @@ Constants importados de `OrdenTrabajo.tsx` y tipados:
 - ✅ `CLIENTES` - 11 clientes
 - ✅ `AGENCIAS_BANCO_SOLIDARIO` - 9 agencias
 - ✅ `TELEFONOS_EJEMPLO` - 9 teléfonos ejemplo
-- ✅ `STORAGE_KEYS` - Keys para MMKV
+- ✅ `STORAGE_KEYS` - Keys para AsyncStorage
 - ✅ `DEFAULT_VALUES` - Valores por defecto
 
 **Verificación**: Todos importables y con tipos correctos ✓
@@ -111,20 +111,20 @@ Funciones de validación:
 
 ---
 
-### ✅ Tarea 1.6: MMKV Service
+### ✅ Tarea 1.6: AsyncStorage Service
 
-**Archivo**: `src/services/mmkvService.ts`
+**Archivo**: `src/services/storageService.ts`
 
 Creado:
-- ✅ `mmkvStorage` - Instancia de MMKV inicializada
-- ✅ `MMKVUtils.setJSON()` - Guardar objetos JSON
-- ✅ `MMKVUtils.getJSON()` - Cargar objetos JSON
-- ✅ `MMKVUtils.has()` - Verificar si existe clave
-- ✅ `MMKVUtils.remove()` - Eliminar una clave
-- ✅ `MMKVUtils.clear()` - Limpiar todo el storage
-- ✅ `MMKVUtils.getAllKeys()` - Listar todas las claves
+- ✅ `storage` - Instancia de AsyncStorage importada
+- ✅ `StorageUtils.setJSON()` - Guardar objetos JSON
+- ✅ `StorageUtils.getJSON()` - Cargar objetos JSON
+- ✅ `StorageUtils.has()` - Verificar si existe clave
+- ✅ `StorageUtils.remove()` - Eliminar una clave
+- ✅ `StorageUtils.clear()` - Limpiar todo el storage
+- ✅ `StorageUtils.getAllKeys()` - Listar todas las claves
 
-**Verificación**: MMKV funciona perfectamente ✓
+**Verificación**: AsyncStorage funciona perfectamente ✓
 
 ---
 
@@ -137,15 +137,15 @@ Tests implementados:
 - ✅ Verificar constants cargados (CLIENTES, MARCAS, TIPOS, etc)
 - ✅ Crear datos de prueba
 - ✅ Validar con Zod (Header + Detalles)
-- ✅ Guardar datos en MMKV
-- ✅ Cargar datos de MMKV
-- ✅ Verificar existencia de clave en MMKV
-- ✅ Listar todas las claves en MMKV
+- ✅ Guardar datos en AsyncStorage
+- ✅ Cargar datos de AsyncStorage
+- ✅ Verificar existencia de clave en AsyncStorage
+- ✅ Listar todas las claves en AsyncStorage
 
 UI de testing:
 - ✅ Status cards (Estructura, TypeScript, Constants, Schemas)
 - ✅ Debug logs con emoji (✅ exitoso, ❌ error)
-- ✅ MMKV Status visual
+- ✅ AsyncStorage Status visual
 - ✅ Test Data visible
 - ✅ Validación Results visible
 - ✅ Botones: Cambiar Tema, Reiniciar
@@ -162,7 +162,7 @@ UI de testing:
 ✅ TypeScript types definidos (7 tipos, no any)
 ✅ Constants importables desde src/constants (9 constants)
 ✅ Schemas Zod compilables (6 schemas validables)
-✅ MMKV funciona (guardar/cargar/verificar)
+✅ AsyncStorage funciona (guardar/cargar/verificar)
 ✅ npm run type-check pasa sin errores
 ✅ Tests en App.tsx ejecutables
 ✅ Todos los archivos creados exitosamente
@@ -179,7 +179,7 @@ src/
 ├─ constants/
 │  └─ ordenTrabajoConstants.ts (77 líneas)
 ├─ services/
-│  ├─ mmkvService.ts (67 líneas)
+│  ├─ storageService.ts (67 líneas)
 │  └─ validationService.ts (152 líneas)
 ├─ hooks/ (3 carpetas)
 ├─ components/ (3 carpetas)
@@ -205,7 +205,7 @@ src/
 **Objetivo**: Implementar los 3 hooks reutilizables
 
 ### Tareas:
-1. **useMMKVStorage** - Hook para guardar/cargar datos
+1. **useStorage** - Hook para guardar/cargar datos
 2. **useFormData** - Hook para validación + persistencia
 3. **useFieldVisibility** - Hook para campos condicionales
 4. **Tests en App.tsx** - Verificar los 3 hooks funcionan
@@ -221,7 +221,7 @@ src/
 - ✅ TypeScript strict (sin any)
 - ✅ Constants reutilizables
 - ✅ Schemas Zod validables
-- ✅ MMKV storage inicializado
+- ✅ AsyncStorage storage inicializado
 - ✅ Tests visuales en App.tsx
 - ✅ Listo para siguientes fases
 

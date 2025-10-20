@@ -17,7 +17,7 @@ Preparar el proyecto base con dependencias instaladas y estructura de carpetas l
 
 #### Tarea 1.1: Instalar Dependencias (30 min)
 ```bash
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 npx expo install react-native-element-dropdown
 npx expo install zod
 npx expo install @react-native-community/datetimepicker
@@ -31,7 +31,7 @@ npx expo install @react-native-community/datetimepicker
 ```
 src/
 ├─ hooks/
-│  ├─ useMMKVStorage.ts          # Hook MMKV
+│  ├─ useStorage.ts          # Hook AsyncStorage
 │  ├─ useFormData.ts              # Hook validación + persistencia
 │  └─ useFieldVisibility.ts       # Hook campos condicionales
 ├─ components/
@@ -118,22 +118,22 @@ Crear los 3 hooks reutilizables que serán el corazón de la app.
 
 ### 📋 Tareas
 
-#### Tarea 2.1: `useMMKVStorage` Hook (45 min)
-En `src/hooks/useMMKVStorage.ts`:
+#### Tarea 2.1: `useStorage` Hook (45 min)
+En `src/hooks/useStorage.ts`:
 
 **Funcionalidad**:
-- Guardar/cargar datos de MMKV
+- Guardar/cargar datos de AsyncStorage
 - Sincronización automática
 - Manejo de tipos genéricos `<T>`
 
 **API**:
 ```typescript
-const [value, setValue] = useMMKVStorage<T>(key: string, defaultValue: T)
+const [value, setValue] = useStorage<T>(key: string, defaultValue: T)
 ```
 
 **Aceptación**: 
 ✅ Hook se puede importar sin errores  
-✅ `setValue()` guarda en MMKV (verificable en console)  
+✅ `setValue()` guarda en AsyncStorage (verificable en console)  
 ✅ Valores persisten al recargar app  
 ✅ TypeScript inferencia correcta
 
@@ -143,8 +143,7 @@ const [value, setValue] = useMMKVStorage<T>(key: string, defaultValue: T)
 En `src/hooks/useFormData.ts`:
 
 **Funcionalidad**:
-- Gestionar datos del formulario con validación real-time
-- Guardar automáticamente en MMKV
+- - Guardar automáticamente en AsyncStorage
 - Validar con Zod schemas
 - Retornar campos no tocados sin errores
 
@@ -159,15 +158,14 @@ const { data, errors, touched, updateField, reset, validate } = useFormData(
 ```
 
 **Comportamiento**:
-- `updateField(field, value)`: valida + guarda en MMKV
+- `updateField(field, value)`: valida + guarda en AsyncStorage
 - `validate()`: valida completo, retorna `{ valid, errors }`
 - `touched`: objeto con campos modificados por usuario
 - Auto-save cada 2 segundos si `autoSave: true`
 
 **Aceptación**:
 ✅ updateField() valida campo individual  
-✅ Errores se muestran solo en campos touched  
-✅ Datos persisten en MMKV  
+✅ Datos persisten en AsyncStorage  
 ✅ validate() retorna objeto correcto  
 ✅ reset() limpia todo
 
@@ -197,7 +195,7 @@ const visibility = useFieldVisibility(formData, customRules?: VisibilityRule)
 #### Tarea 2.4: Crear Tests en App.tsx (30 min)
 
 **En `App.tsx` testea**:
-- ✅ useMMKVStorage guarda/carga datos
+- ✅ useStorage guarda/carga datos
 - ✅ useFormData valida campos
 - ✅ useFormData toca campos correctos
 - ✅ useFieldVisibility funciona
@@ -217,7 +215,7 @@ const visibility = useFieldVisibility(formData, customRules?: VisibilityRule)
 
 ```
 ✓ Los 3 hooks se importan sin errores
-✓ useMMKVStorage persiste datos
+✓ useStorage persiste datos
 ✓ useFormData valida con Zod
 ✓ useFieldVisibility muestra/oculta campos
 ✓ Todos funcionan juntos en App.tsx
@@ -429,7 +427,7 @@ Implementar la primera pantalla: seleccionar cliente y fecha de entrega.
 ✅ Search filtra resultados  
 ✅ onSelect actualiza estado  
 ✅ Validación funciona (rojo si vacío)  
-✅ Guardado automático en MMKV
+✅ Guardado automático en AsyncStorage
 
 ---
 
@@ -447,7 +445,7 @@ Implementar la primera pantalla: seleccionar cliente y fecha de entrega.
 ✅ Seleccionar fecha funciona  
 ✅ Fecha se formatea: "DD/MM/YYYY"  
 ✅ Validación funciona  
-✅ Guardado en MMKV  
+✅ Guardado en AsyncStorage  
 ✅ Sin errores en console
 
 ---
@@ -471,7 +469,7 @@ Implementar la primera pantalla: seleccionar cliente y fecha de entrega.
 #### Tarea 4.5: Offline Functionality (45 min)
 
 **Funcionalidad**:
-- Datos se guardan en MMKV automáticamente
+- Datos se guardan en AsyncStorage automáticamente
 - Al recargar app: datos se recuperan
 - Indicador visual: "guardando..." / "guardado" / "error"
 
@@ -491,7 +489,7 @@ Implementar la primera pantalla: seleccionar cliente y fecha de entrega.
 - ✅ Fecha seleccionable
 - ✅ Botón Continuar responde
 - ✅ Validación funciona
-- ✅ Datos se guardan en MMKV
+- ✅ Datos se guardan en AsyncStorage
 - ✅ Al recargar: datos persisten
 
 **Aceptación**:
@@ -510,7 +508,7 @@ Implementar la primera pantalla: seleccionar cliente y fecha de entrega.
 ✓ Fecha Entrega seleccionable (date picker)
 ✓ Validación real-time (cliente requerido)
 ✓ Botón Continuar disabled/enabled correctamente
-✓ Guardado automático en MMKV funciona
+✓ Guardado automático en AsyncStorage funciona
 ✓ Al recargar: datos se recuperan
 ✓ Indicador de guardado visible
 ✓ Sin console errors
@@ -621,7 +619,7 @@ Implementar form dinámico para items de extintores (add/remove, cascada unidad�
 **Aceptación**:
 ✅ Cada campo valida independently  
 ✅ Errores se muestran solo si touched  
-✅ Guardado en MMKV después de cambiar
+✅ Guardado en AsyncStorage después de cambiar
 
 ---
 
@@ -686,7 +684,7 @@ Implementar form dinámico para items de extintores (add/remove, cascada unidad�
 ✓ Remover items funciona (mín 1)
 ✓ Validación completa funciona
 ✓ Errores se muestran correctamente
-✓ Datos persisten en MMKV
+✓ Datos persisten en AsyncStorage
 ✓ Scroll fluido (sin lag)
 ✓ Touch-friendly (botones 48px)
 ✓ Botón "Continuar" responde
@@ -759,7 +757,7 @@ Completar form: observaciones, préstamo de extintores, y lógica de submit.
 **Aceptación**:
 ✅ Teléfono se puede ingresar  
 ✅ Validación funciona  
-✅ Persiste en MMKV
+✅ Persiste en AsyncStorage
 
 ---
 
@@ -878,7 +876,7 @@ Completar form: observaciones, préstamo de extintores, y lógica de submit.
 
 **Aceptación**:
 ✅ Después de éxito: form se limpia  
-✅ MMKV se limpia  
+✅ AsyncStorage se limpia  
 ✅ Vuelve a estado inicial
 
 ---
@@ -894,7 +892,7 @@ Completar form: observaciones, préstamo de extintores, y lógica de submit.
 - ✅ Validación completa funciona
 - ✅ Toast muestra resultado
 - ✅ Reset después de submit funciona
-- ✅ Datos en MMKV correctos
+- ✅ Datos en AsyncStorage correctos
 
 **Aceptación**:
 ✅ Flujo completo (form → validar → submit) funciona  
@@ -915,7 +913,7 @@ Completar form: observaciones, préstamo de extintores, y lógica de submit.
 ✓ Toast muestra resultado (éxito/error)
 ✓ Loading state visible
 ✓ Reset después de submit funciona
-✓ Datos guardados en MMKV correctamente
+✓ Datos guardados en AsyncStorage correctamente
 ✓ Todo el form completo funciona end-to-end
 
 RESULTADO MOSTRABLE:
@@ -946,7 +944,7 @@ Testing completo: offline, performance, responsive, UX final.
 1. Completar form completo
 2. Desconectar WiFi/datos (airplane mode)
 3. Crear nueva orden
-4. Verificar datos se guardan en MMKV
+4. Verificar datos se guardan en AsyncStorage
 5. Recargar app (sin conexión)
 6. Verificar datos persisten
 7. Reconectar conexión
@@ -954,7 +952,7 @@ Testing completo: offline, performance, responsive, UX final.
 
 **Aceptación**:
 ✅ Form funciona completamente sin conexión  
-✅ Datos se guardan en MMKV  
+✅ Datos se guardan en AsyncStorage  
 ✅ Al recargar: datos persisten  
 ✅ Indicador offline visible  
 ✅ No hay console errors

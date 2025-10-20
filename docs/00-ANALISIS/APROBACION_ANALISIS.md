@@ -19,7 +19,7 @@ Se ha realizado un análisis exhaustivo de la transformación de **OrdenTrabajo.
 
 ### Análisis Técnico
 - ✅ Comparativa: Web vs Mobile
-- ✅ Stack tecnológico seleccionado (MMKV + Element Dropdown + Zod)
+- ✅ Stack tecnológico seleccionado (AsyncStorage + Element Dropdown + Zod)
 - ✅ Arquitectura: 3 hooks reutilizables (código completo)
 - ✅ Componentes: 3+ componentes base (código completo)
 - ✅ Plan: 7 fases con 4 approval points
@@ -34,10 +34,10 @@ Se ha realizado un análisis exhaustivo de la transformación de **OrdenTrabajo.
 
 #### 1. Storage (Offline-First)
 ```
-LIBRERÍA: react-native-mmkv
-RAZÓN: ~30x más rápido que AsyncStorage, sincrónico, encriptación
-ALTERNATIVAS EVALUADAS: AsyncStorage, SQLite, Firebase, Realm
-DECISIÓN: MMKV ✅
+LIBRERÍA: @react-native-async-storage/async-storage
+RAZÓN: Incluido en Expo Go, no requiere build nativo.
+ALTERNATIVAS EVALUADAS: react-native-mmkv, SQLite, Firebase, Realm
+DECISIÓN: AsyncStorage ✅
 ```
 
 #### 2. Dropdown Component
@@ -82,7 +82,7 @@ FASE 4: Header Form (4-5 horas) ✅ APPROVAL POINT 1
 ├─ Cliente dropdown + search
 ├─ Fecha entrega date picker
 ├─ Validación real-time
-├─ Persistencia MMKV
+├─ Persistencia AsyncStorage
 └─ MOSTRAR PARA APROBACIÓN
 
 FASE 5: Detalles Dinámicos (5-6 horas) ✅ APPROVAL POINT 2
@@ -111,7 +111,7 @@ TOTAL: 25-32 horas = ~4-5 días desarrollo
 ## ✨ Características Principales
 
 ### Offline-First
-- ✅ Todos los datos guardados automáticamente en MMKV
+- ✅ Todos los datos guardados automáticamente en AsyncStorage
 - ✅ Funciona 100% sin conexión
 - ✅ Sincronización automática al recuperar conexión
 - ✅ Indicador visual de estado
@@ -145,7 +145,7 @@ TOTAL: 25-32 horas = ~4-5 días desarrollo
 ✓ Cliente seleccionable vía dropdown con search
 ✓ Fecha entrega con date picker nativo
 ✓ Validación real-time: cliente requerido
-✓ Guardado automático en MMKV cada cambio
+✓ Guardado automático en AsyncStorage cada cambio
 ✓ Botón continuar deshabilitado sin cliente
 ✓ Funciona completamente sin internet
 ✓ Botones ≥48px, inputs ≥44px
@@ -158,7 +158,7 @@ TOTAL: 25-32 horas = ~4-5 días desarrollo
 ✓ Dropdowns con search funcionan correctamente
 ✓ Validación por item: número extintor requerido
 ✓ Scroll fluido sin lag
-✓ Items persistidos en MMKV
+✓ Items persistidos en AsyncStorage
 ```
 
 ### Fase 6 (Final)
@@ -204,7 +204,7 @@ TOTAL: 25-32 horas = ~4-5 días desarrollo
 Necesito confirmación que:
 
 1. **Stack Tecnológico**
-   - [ ] Apruebas MMKV para storage
+   - [ ] Apruebas AsyncStorage para storage
    - [ ] Apruebas Element Dropdown para selects
    - [ ] Apruebas Zod para validación
    - [ ] Apruebas DatePicker nativo
@@ -233,7 +233,7 @@ Necesito confirmación que:
 ### Inmediato (Fase 1-3)
 ```bash
 # Instalación
-npx expo install react-native-mmkv
+npx expo install @react-native-async-storage/async-storage
 npx expo install react-native-element-dropdown
 npx expo install zod
 npx expo install @react-native-community/datetimepicker
@@ -290,13 +290,13 @@ c:\dev\react-native\testing-app\
 ## ❓ FAQ Pre-Aprobación
 
 **P: ¿Por qué no usar Firebase?**
-R: MMKV es para datos locales (formulario en progreso), Firebase es para backend.
+R: AsyncStorage es para datos locales (formulario en progreso), Firebase es para backend.
 
 **P: ¿Y si el usuario pierde conexión?**
-R: Los datos se guardan en MMKV. Se sincronizan al recuperar conexión.
+R: Los datos se guardan en AsyncStorage. Se sincronizan al recuperar conexión.
 
 **P: ¿Necesitamos código especial para offline?**
-R: No, MMKV maneja automáticamente. Solo guardar/cargar.
+R: No, AsyncStorage maneja automáticamente. Solo guardar/cargar.
 
 **P: ¿Funcionará en iOS y Android?**
 R: Sí, todo es cross-platform con Expo.
@@ -305,7 +305,7 @@ R: Sí, todo es cross-platform con Expo.
 R: +1.2-1.5MB por librerías (aceptable).
 
 **P: ¿Qué pasa con dispositivos viejos?**
-R: MMKV soporta Android 4.1+, iOS 9+. Expo usa versiones estables.
+R: AsyncStorage es compatible con versiones muy antiguas de Android e iOS. Expo usa versiones estables.
 
 ---
 

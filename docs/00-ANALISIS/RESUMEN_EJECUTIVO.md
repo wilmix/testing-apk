@@ -13,7 +13,7 @@ Transformar **OrdenTrabajo.tsx** (formulario web MUI complejo) en una experienci
 | Grid 6/12 columnas | Inputs minúsculos en mobile | Layout single-column, 44px altura min |
 | Dropdowns MUI nativos | No optimizados para touch | React Native Element Dropdown + search |
 | Validación en submit | Feedback tardío | Validación real-time con Zod |
-| Sin persistencia | Pérdida datos sin conexión | MMKV + offline-first |
+| Sin persistencia | Pérdida datos sin conexión | AsyncStorage + offline-first |
 | Autocomplete complejo | Lento en pantalla pequeña | Dropdown search cached options |
 | Scroll involuntario | Mala UX | Layouts verticales únicos |
 
@@ -21,7 +21,7 @@ Transformar **OrdenTrabajo.tsx** (formulario web MUI complejo) en una experienci
 
 ```
 STACK TÉCNICO RECOMENDADO:
-├─ MMKV (~30x más rápido que AsyncStorage)
+├─ AsyncStorage (compatible con Expo Go)
 ├─ React Native Element Dropdown (Touch-optimized)
 ├─ Zod (Schema validation con mensajes ES)
 ├─ @react-native-community/datetimepicker (Nativo)
@@ -30,7 +30,7 @@ STACK TÉCNICO RECOMENDADO:
 
 ### ✅ Patrones de Diseño
 1. **Progressive Disclosure**: Mostrar campos progresivamente según contexto
-2. **Offline-First**: Guardar en MMKV, sincronizar con conexión
+2. **Offline-First**: Guardar en AsyncStorage, sincronizar con conexión
 3. **Real-time Validation**: Feedback inmediato visual
 4. **Touch-Friendly**: Botones ≥48px, inputs ≥44px, espaciado ≥16px
 
@@ -39,7 +39,7 @@ STACK TÉCNICO RECOMENDADO:
 ```
 src/
 ├─ hooks/
-│  ├─ useMMKVStorage.ts           ← Persistencia MMKV
+│  ├─ useStorage.ts           ← Persistencia AsyncStorage
 │  ├─ useFormData.ts              ← Validación + persistencia
 │  └─ useFieldVisibility.ts       ← Campos condicionales
 ├─ components/
@@ -85,10 +85,10 @@ src/
 FASE 1-2: SETUP (2-3 horas)
 ├─ Instalar dependencias
 ├─ Crear estructura carpetas
-├─ Configurar MMKV + tipos
+├─ Configurar AsyncStorage + tipos
 
 FASE 3: HOOKS (3-4 horas)
-├─ useMMKVStorage (persistencia)
+├─ useStorage (persistencia)
 ├─ useFormData (validación real-time)
 ├─ useFieldVisibility (campos condicionales)
 
@@ -101,7 +101,7 @@ FASE 5: HEADER FORM (4-5 horas) ✅ APPROVAL POINT
 ├─ Cliente dropdown con search
 ├─ Fecha entrega date picker
 ├─ Validación real-time
-├─ Persistencia MMKV
+├─ Persistencia AsyncStorage
 ├─ Test completo
 
 FASE 6: DETALLES DINÁMICOS (5-6 horas) ✅ APPROVAL POINT
@@ -130,7 +130,7 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 ## ✨ Características Clave
 
 ### 1. **Offline-First**
-- Todos los datos guardados en MMKV mientras se completa
+- Todos los datos guardados en AsyncStorage mientras se completa
 - Indicador visual de estado: "sin guardar" / "guardando" / "guardado"
 - Sincronización automática cuando hay conexión
 
@@ -152,7 +152,7 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 - No requiere precisión
 
 ### 5. **Performance**
-- MMKV es ~30x más rápido que AsyncStorage
+- AsyncStorage es compatible con Expo Go
 - Lazy load de opciones
 - Memoización de componentes
 - Scroll fluido con items dinámicos
@@ -163,7 +163,7 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 
 | Componente | Librería | Versión | Por qué |
 |-----------|----------|---------|--------|
-| Storage | react-native-mmkv | Latest | ~30x más rápido, sincrónico |
+| Storage | @react-native-async-storage/async-storage | Latest | Compatible con Expo Go |
 | Dropdowns | react-native-element-dropdown | Latest | Touch-optimized, search |
 | Validación | zod | Latest | Type-safe, mensajes custom ES |
 | Date Picker | @react-native-community/datetimepicker | Latest | Nativo, mejor UX |
@@ -180,7 +180,7 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 ✓ Cliente seleccionable vía dropdown con search
 ✓ Fecha entrega con date picker nativo
 ✓ Validación real-time: cliente requerido
-✓ Guardado automático MMKV
+✓ Guardado automático AsyncStorage
 ✓ Botón continuar deshabilitado sin cliente
 ✓ Funciona sin internet
 ```
@@ -192,7 +192,7 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 ✓ Dropdowns con search funcionan
 ✓ Validación por item
 ✓ Scroll fluido
-✓ Persistencia MMKV de items
+✓ Persistencia AsyncStorage de items
 ```
 
 **Fase 7 (Final)**
@@ -238,14 +238,14 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 - Este archivo - Resumen ejecutivo
 
 ### Documentación Oficial
-- [MMKV React Native](https://github.com/mrousavy/react-native-mmkv)
+- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/)
 - [Element Dropdown](https://github.com/hoaphantn7604/react-native-element-dropdown)
 - [Zod](https://zod.dev)
 - [React Native DateTimePicker](https://github.com/react-native-datetimepicker/datetimepicker)
 - [Expo SDK 54](https://docs.expo.dev)
 
 ### Context7 Documentation (Consultado)
-- MMKV: Trust Score 10/10, 55 code snippets
+- AsyncStorage: Trust Score 9/10, 100+ code snippets
 - Element Dropdown: Trust Score 8.7/10, 26 code snippets
 - Zod: Para validación schema-based
 - DatePicker: Trust Score 9.2/10, 15 code snippets
@@ -262,7 +262,7 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 - ✅ Touch-friendly (botones grandes, sin precisión)
 
 ### vs Otros Enfoques Mobile
-- ✅ MMKV vs AsyncStorage: 30x más rápido
+- ✅ AsyncStorage vs MMKV: Compatible con Expo Go
 - ✅ Element Dropdown vs Picker: mejor UX con search
 - ✅ Zod vs ninguno: type-safe validation
 - ✅ Progressive vs flat: reducir cognitive load
@@ -271,9 +271,9 @@ FASE 8: TESTING (3-4 horas) ✅ APPROVAL POINT
 
 ## 🎓 Notas Técnicas Importantes
 
-1. **MMKV Compilación Nativa**: Funciona perfectamente con Expo, no requiere eject
+1. **AsyncStorage**: Compatible con Expo Go, no requiere eject
 2. **Validación Cascada**: `useEffect` en `useFormData` recalcula opciones dependientes
-3. **Offline Sync**: Al recuperar conexión, esperar response antes de limpiar MMKV
+3. **Offline Sync**: Al recuperar conexión, esperar response antes de limpiar AsyncStorage
 4. **Performance**: Memoizar componentes form para evitar re-renders innecesarios
 5. **Accesibilidad**: Labels claros, touch targets ≥48px, alto contraste en errores
 

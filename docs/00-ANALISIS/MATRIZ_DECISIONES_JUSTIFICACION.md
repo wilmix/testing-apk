@@ -10,19 +10,18 @@
 ┌─────────────────────────┬──────────────┬─────────────┬──────────────┐
 │ Opción                  │ Velocidad    │ Offline OK  │ Sync         │
 ├─────────────────────────┼──────────────┼─────────────┼──────────────┤
-│ AsyncStorage            │ ⭐ 1x        │ ✓ Sí        │ Manual       │
+│ AsyncStorage ✅ ELEGIDA │ ⭐ 1x        │ ✓ Sí        │ Manual       │
 │ SQLite                  │ ⭐⭐⭐ 10x    │ ✓ Sí        │ Manual       │
-│ MMKV ✅ ELEGIDA         │ ⭐⭐⭐⭐ 30x  │ ✓ Sí        │ Manual       │
+│ MMKV                    │ ⭐⭐⭐⭐ 30x  │ ✓ Sí        │ Manual       │
 │ Firebase Realtime DB    │ ⭐⭐⭐⭐⭐ 50x │ ✗ No        │ Auto         │
 │ Realm                   │ ⭐⭐⭐ 10x    │ ✓ Sí        │ Manual       │
 └─────────────────────────┴──────────────┴─────────────┴──────────────┘
 
-ELEGIDA: MMKV
-- Velocidad: ~30x vs AsyncStorage (crítico para field workers)
-- Síncrono + asincrónico
-- Encriptación nativa
-- Expo compatible
-- Sin necesidad de eject
+ELEGIDA: AsyncStorage
+- Compatible con Expo Go
+- No requiere build nativo
+- Suficiente para MVP
+- API Asíncrona simple
 ```
 
 ### Dropdown/Select Component
@@ -101,7 +100,7 @@ ELEGIDA: @react-native-community/datetimepicker
     │ updateField()               │
     ├─────────────────────────────┤
     │ 1. Validate (Zod)           │  ← Instant feedback
-    │ 2. Save to MMKV             │  ← Persist locally
+    │ 2. Save to AsyncStorage             │  ← Persist locally
     │ 3. Update UI                │  ← Visual confirmation
     └────────┬────────────────────┘
              │
@@ -110,7 +109,7 @@ ELEGIDA: @react-native-community/datetimepicker
     ↓                   ↓
   ONLINE:            OFFLINE:
   Upload to API      Queue locally
-  + Clear cache      (MMKV)
+  + Clear cache      (AsyncStorage)
 ```
 
 ### 2. **Progressive Disclosure**
@@ -226,16 +225,16 @@ MOBILE: Respeta comodidad de interacción vertical
 ┌──────────────────────────────┐  ┌──────────────────────────────┐
 │   useFormData (Hook)         │  │ useFieldVisibility (Hook)    │
 ├──────────────────────────────┤  ├──────────────────────────────┤
-│ 1. Load from MMKV            │  │ Evalúa reglas:               │
+│ 1. Load from AsyncStorage            │  │ Evalúa reglas:               │
 │ 2. Validate with Zod         │  │ - Si cliente = BANCO SO...   │
 │ 3. Update state              │  │   → mostrar agencia          │
-│ 4. Save to MMKV (auto)       │  │ - Si checkbox = true         │
+│ 4. Save to AsyncStorage (auto)       │  │ - Si checkbox = true         │
 │ 5. Return API                │  │   → mostrar cantidad         │
 └──────────────────────────────┘  └──────────────────────────────┘
      │                                        │
      ↓                                        ↓
 ┌──────────────────────────────┐  ┌──────────────────────────────┐
-│   MMKV Storage               │  │   Conditional Rendering      │
+│   AsyncStorage               │  │   Conditional Rendering      │
 ├──────────────────────────────┤  ├──────────────────────────────┤
 │ storage.set(                 │  │ {isVisible('agencia') && (   │
 │   'orden:draft',             │  │   <FormDropdown ... />       │
@@ -248,20 +247,20 @@ MOBILE: Respeta comodidad de interacción vertical
 
 ## 🎯 Decisiones Clave Justificadas
 
-### 1. "¿Por qué MMKV en lugar de SQLite?"
+### 1. "¿Por qué AsyncStorage en lugar de SQLite?"
 ```
 SQLite:
 - Ventaja: Queries complejas
 - Desventaja: Overkill para key-value simple
 
-MMKV:
-- Ventaja: 30x más rápido, sincrónico, simple
+AsyncStorage:
+- Ventaja: Simple, asíncrono, compatible con Expo Go
 - Ideal para: Formularios, preferencias, caché
 
-DECISIÓN: MMKV
+DECISIÓN: AsyncStorage
 - Formulario es key-value (cliente, fecha, items)
 - No necesita queries complejas
-- Velocidad crítica en field workers
+- Compatibilidad con Expo Go es crítica
 ```
 
 ### 2. "¿Por qué no React Hook Form?"

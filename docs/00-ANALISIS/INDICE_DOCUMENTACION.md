@@ -41,7 +41,7 @@
 **Contiene**:
 - ✅ Comparativa web vs mobile
 - ✅ Problemas identificados y soluciones
-- ✅ Stack tecnológico (MMKV, Element Dropdown, Zod)
+- ✅ Stack tecnológico (AsyncStorage, Element Dropdown, Zod)
 - ✅ Patrones de diseño (Progressive, Offline, Real-time)
 - ✅ Estructura de carpetas propuesta
 - ✅ 3 Hooks propuestos (con descripción)
@@ -65,12 +65,12 @@
 **Contiene**:
 - ✅ Código antes/después (Web vs Mobile)
 - ✅ Stack detallado (instalación, uso)
-  - MMKV storage
+  - AsyncStorage
   - Element Dropdown
   - Zod validation
   - Date Picker nativo
 - ✅ 3 Hooks completos con código
-  - useMMKVStorage
+  - useStorage
   - useFormData (con validación real-time)
   - useFieldVisibility (campos condicionales)
 - ✅ 3 Componentes base con código
@@ -212,7 +212,7 @@ IMPLEMENTATION (referencia):
 ## 📑 Índice por Sección
 
 ### Storage Solution
-- 📖 GUIA_TECNICA: "1. MMKV Storage"
+- 📖 GUIA_TECNICA: "1. AsyncStorage"
 - 🎯 MATRIZ: "Storage Solution" tabla
 - 📊 ANALISIS: "Stack Tecnológico"
 
@@ -228,7 +228,7 @@ IMPLEMENTATION (referencia):
 
 ### Hooks
 - 📖 GUIA_TECNICA: "🎣 Hooks Propuestos - Implementación"
-  - Hook 1: useMMKVStorage
+  - Hook 1: useStorage
   - Hook 2: useFormData
   - Hook 3: useFieldVisibility
 - 📊 ANALISIS: "🏗️ Hooks Reutilizables"
@@ -277,7 +277,7 @@ IMPLEMENTATION (referencia):
 
 | Tema | Documento 1 | Documento 2 | Documento 3 |
 |------|------------|------------|------------|
-| MMKV | GUIA sec 1 | MATRIZ tab | ANALISIS tab |
+| AsyncStorage | GUIA sec 1 | MATRIZ tab | ANALISIS tab |
 | Element Dropdown | GUIA sec 2 | MATRIZ tab | ANALISIS tab |
 | Zod | GUIA sec 3 | MATRIZ tab | ANALISIS tab |
 | Progressive | ANALISIS sec | MATRIZ sec | README sec |
@@ -309,7 +309,7 @@ IMPLEMENTATION (referencia):
 - [ ] Leí README_ORDEN_TRABAJO_MOBILE.md
 - [ ] Leí RESUMEN_EJECUTIVO.md
 - [ ] Leí ANALISIS_ORDEN_TRABAJO_MOBILE.md (Arquitectura section)
-- [ ] Entiendo el Stack: MMKV + Element Dropdown + Zod
+- [ ] Entiendo el Stack: AsyncStorage + Element Dropdown + Zod
 - [ ] Entiendo los 7 Pasos de implementación
 - [ ] Entiendo los 4 Approval Points
 - [ ] Tengo clara la estructura de carpetas
@@ -319,7 +319,7 @@ IMPLEMENTATION (referencia):
 - [ ] Leí GUIA_TECNICA - Hooks section
 - [ ] Tengo código copy-paste de los 3 hooks
 - [ ] Tengo código copy-paste de los 3 componentes
-- [ ] Entiendo cómo MMKV persiste datos
+- [ ] Entiendo cómo AsyncStorage persiste datos
 - [ ] Entiendo cómo Zod valida
 
 ### Antes de Presentar Fase 4
@@ -327,7 +327,7 @@ IMPLEMENTATION (referencia):
 - [ ] ANALISIS - Plan Implementación Fase 4
 - [ ] Todo funciona sin errores
 - [ ] Validación real-time con Zod
-- [ ] Guardado automático en MMKV
+- [ ] Guardado automático en AsyncStorage
 - [ ] Botones y inputs touch-friendly
 
 ---
@@ -338,9 +338,9 @@ IMPLEMENTATION (referencia):
 → Ver GUIA_TECNICA - "3. Zod Validation" (ejemplo básico)
 → Luego MATRIZ - "Validation Library" (por qué Zod)
 
-### Para quien es nuevo en MMKV
-→ Ver GUIA_TECNICA - "1. MMKV Storage" (instalación y uso)
-→ Luego GUIA - "🎣 Hook 1: useMMKVStorage" (integración React)
+### Para quien es nuevo en AsyncStorage
+→ Ver GUIA_TECNICA - "1. AsyncStorage" (instalación y uso)
+→ Luego GUIA - "🎣 Hook 1: useStorage" (integración React)
 
 ### Para quien es nuevo en Element Dropdown
 → Ver GUIA_TECNICA - "2. React Native Element Dropdown"
@@ -356,8 +356,8 @@ IMPLEMENTATION (referencia):
 
 ```
 Durante Desarrollo:
-├─ Atascado en MMKV?
-│  └─ GUIA: "1. MMKV Storage" + code examples
+├─ Atascado en AsyncStorage?
+│  └─ GUIA: "1. AsyncStorage" + code examples
 ├─ Atascado en validación?
 │  └─ GUIA: "3. Zod Validation" + code examples
 ├─ Atascado en componentes?

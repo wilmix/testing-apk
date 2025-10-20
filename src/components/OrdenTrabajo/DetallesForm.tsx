@@ -108,30 +108,72 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
   }, [data, onDataChange])
 
   /**
+   * Agregar extintor manualmente (desde el scanner)
+   */
+  const handleManualAddFromScanner = useCallback(() => {
+    setShowQRScanner(false)
+    // Agregar un pequeño delay para que el modal se cierre primero
+    setTimeout(() => {
+      handleAddDetalle()
+    }, 100)
+  }, [handleAddDetalle])
+
+  /**
    * Agregar extintor desde QR
    */
   const handleQRScanned = useCallback((qrData: Partial<DetalleExtintor>) => {
-    const newDetalle: DetalleExtintor = {
-      id: generateId(),
-      extintorNro: qrData.extintorNro || '',
-      capacidadUnidad: qrData.capacidadUnidad || '',
-      capacidadValor: qrData.capacidadValor || '',
-      marca: qrData.marca || '',
-      tipo: qrData.tipo || '',
+    // Verificar si el primer extintor está completamente vacío
+    const firstDetalle = data.detalles[0]
+    const isFirstDetalleEmpty = firstDetalle &&
+      !firstDetalle.extintorNro &&
+      !firstDetalle.capacidadUnidad &&
+      !firstDetalle.capacidadValor &&
+      !firstDetalle.marca &&
+      !firstDetalle.tipo
+
+    if (isFirstDetalleEmpty && data.detalles.length === 1) {
+      // Reemplazar el primer extintor vacío con los datos del QR
+      const updatedDetalle: DetalleExtintor = {
+        ...firstDetalle,
+        extintorNro: qrData.extintorNro || '',
+        capacidadUnidad: qrData.capacidadUnidad || '',
+        capacidadValor: qrData.capacidadValor || '',
+        marca: qrData.marca || '',
+        tipo: qrData.tipo || '',
+      }
+
+      const updatedData = { ...data, detalles: [updatedDetalle] }
+      onDataChange(updatedData)
+      setExpandedDetalleId(updatedDetalle.id)
+
+      // No marcar campos como tocados porque vienen del QR
+      setTouchedDetalles((prev) => ({
+        ...prev,
+        [updatedDetalle.id]: {},
+      }))
+    } else {
+      // Agregar nuevo extintor al final
+      const newDetalle: DetalleExtintor = {
+        id: generateId(),
+        extintorNro: qrData.extintorNro || '',
+        capacidadUnidad: qrData.capacidadUnidad || '',
+        capacidadValor: qrData.capacidadValor || '',
+        marca: qrData.marca || '',
+        tipo: qrData.tipo || '',
+      }
+
+      const updatedDetalles = [...data.detalles, newDetalle]
+      const updatedData = { ...data, detalles: updatedDetalles }
+
+      onDataChange(updatedData)
+      setExpandedDetalleId(newDetalle.id)
+
+      // No marcar campos como tocados porque vienen del QR
+      setTouchedDetalles((prev) => ({
+        ...prev,
+        [newDetalle.id]: {},
+      }))
     }
-
-    const updatedDetalles = [...data.detalles, newDetalle]
-    const updatedData = { ...data, detalles: updatedDetalles }
-
-    onDataChange(updatedData)
-    setExpandedDetalleId(newDetalle.id)
-    setShowQRScanner(false)
-
-    // No marcar campos como tocados porque vienen del QR
-    setTouchedDetalles((prev) => ({
-      ...prev,
-      [newDetalle.id]: {},
-    }))
   }, [data, onDataChange])
 
   /**
@@ -441,6 +483,7 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
         visible={showQRScanner}
         onClose={() => setShowQRScanner(false)}
         onQRScanned={handleQRScanned}
+        onManualAdd={handleManualAddFromScanner}
       />
     </ScrollView>
   )

@@ -43,6 +43,8 @@ export interface QRScannerProps {
   onClose: () => void
   /** Callback cuando se escanea un QR válido */
   onQRScanned: (data: Partial<DetalleExtintor>) => void
+  /** Callback cuando se quiere agregar manualmente */
+  onManualAdd?: () => void
 }
 
 /**
@@ -55,18 +57,23 @@ export const QRScanner: React.FC<QRScannerProps> = ({
   visible,
   onClose,
   onQRScanned,
+  onManualAdd,
 }) => {
   const { theme } = useTheme()
   const { parseQRData } = useQRReader()
   const [permission, requestPermission] = useCameraPermissions()
   const [scanning, setScanning] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [scannedCount, setScannedCount] = useState(0)
 
   // Reset estado cuando se abre/cierra
   useEffect(() => {
     if (visible) {
       setScanning(true)
       setError(null)
+      setSuccessMessage(null)
+      setScannedCount(0)
     }
   }, [visible])
 
@@ -84,9 +91,17 @@ export const QRScanner: React.FC<QRScannerProps> = ({
     const parseResult = parseQRData(result.data)
 
     if (parseResult.success && parseResult.data) {
-      // QR válido - llamar callback y cerrar
+      // QR válido - llamar callback y mostrar mensaje
       onQRScanned(parseResult.data)
-      onClose()
+      setScannedCount(prev => prev + 1)
+      setSuccessMessage(`✅ Extintor #${scannedCount + 1} agregado`)
+      setError(null)
+
+      // Limpiar mensaje después de 1.5 segundos y permitir escanear de nuevo
+      setTimeout(() => {
+        setSuccessMessage(null)
+        setScanning(true)
+      }, 1500)
     } else {
       // QR inválido - mostrar error y permitir reintentar
       setError(parseResult.error || 'Error al leer QR')
@@ -182,8 +197,20 @@ export const QRScanner: React.FC<QRScannerProps> = ({
               </Text>
             </View>
 
+            {/* Success message */}
+            {successMessage && (
+              <View style={[styles.successContainer, { backgroundColor: theme.successBg }]}>
+                <Text style={[styles.successText, { color: theme.success }]}>
+                  {successMessage}
+                </Text>
+                <Text style={[styles.successSubtext, { color: theme.textSecondary }]}>
+                  Escanea el siguiente o finaliza
+                </Text>
+              </View>
+            )}
+
             {/* Error message */}
-            {error && (
+            {error && !successMessage && (
               <View style={[styles.errorContainer, { backgroundColor: theme.errorBg }]}>
                 <Text style={[styles.errorText, { color: theme.error }]}>
                   {error}
@@ -194,11 +221,34 @@ export const QRScanner: React.FC<QRScannerProps> = ({
               </View>
             )}
 
-            {/* Footer con instrucciones */}
+            {/* Footer con botones */}
             <View style={[styles.footer, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-                El QR debe contener información del extintor en formato JSON
+              <Text style={[styles.footerText, { color: theme.textSecondary, marginBottom: 12 }]}>
+                {scannedCount > 0
+                  ? `${scannedCount} extintor${scannedCount !== 1 ? 'es' : ''} escaneado${scannedCount !== 1 ? 's' : ''}`
+                  : 'Escanea múltiples QR o agrega manualmente'
+                }
               </Text>
+              <View style={styles.buttonRow}>
+                {onManualAdd && (
+                  <TouchableOpacity
+                    style={[styles.footerButton, styles.manualButton, { backgroundColor: theme.buttonSecondary }]}
+                    onPress={onManualAdd}
+                  >
+                    <Text style={[styles.footerButtonText, { color: theme.buttonSecondaryText }]}>
+                      ➕ Agregar sin QR
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  style={[styles.footerButton, styles.finishButton, { backgroundColor: theme.buttonPrimary }]}
+                  onPress={onClose}
+                >
+                  <Text style={[styles.footerButtonText, { color: theme.buttonPrimaryText }]}>
+                    ✅ Finalizar
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </CameraView>
@@ -269,6 +319,22 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
 
+  // Success
+  successContainer: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  successText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  successSubtext: {
+    fontSize: 14,
+  },
+
   // Error
   errorContainer: {
     margin: 16,
@@ -293,6 +359,28 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
     textAlign: 'center',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  footerButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  manualButton: {
+    // Estilo específico del botón manual si necesario
+  },
+  finishButton: {
+    // Estilo específico del botón finalizar si necesario
+  },
+  footerButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 
   // Permission screen

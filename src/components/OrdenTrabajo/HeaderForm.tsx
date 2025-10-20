@@ -4,20 +4,20 @@ import { FormDropdown, FormDatePicker, FormInput, DropdownItem } from '../index'
 import { CLIENTES } from '../../constants/ordenTrabajoConstants'
 import { validateData, HeaderSchema } from '../../services/validationService'
 import type { OrdenTrabajoFormData } from '../../types/ordenTrabajo'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface HeaderFormProps {
   data: OrdenTrabajoFormData
   onDataChange: (data: OrdenTrabajoFormData) => void
   onContinue: () => void
-  isDark?: boolean
 }
 
 export const HeaderForm: React.FC<HeaderFormProps> = ({
   data,
   onDataChange,
   onContinue,
-  isDark = false,
 }) => {
+  const { theme } = useTheme()
   // Touched states
   const [touched, setTouched] = useState({
     cliente: false,
@@ -86,15 +86,15 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
 
   return (
     <ScrollView
-      style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}
+      style={[styles.container, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.contentContainer}
     >
       {/* Header */}
-      <View style={styles.headerSection}>
-        <Text style={[styles.title, isDark ? styles.darkText : styles.lightText]}>
+      <View style={[styles.headerSection, { borderBottomColor: theme.info }]}>
+        <Text style={[styles.title, { color: theme.text }]}>
           Orden de Trabajo
         </Text>
-        <Text style={[styles.subtitle, isDark ? styles.darkText : styles.lightText]}>
+        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
           Información del cliente
         </Text>
       </View>
@@ -137,8 +137,8 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
         )}
 
         {/* Info Text */}
-        <View style={styles.infoBox}>
-          <Text style={[styles.infoText, isDark ? styles.darkText : styles.lightText]}>
+        <View style={[styles.infoBox, { backgroundColor: theme.infoBg, borderLeftColor: theme.info }]}>
+          <Text style={[styles.infoText, { color: theme.text }]}>
             ℹ️ {showAgencia ? 'Especifique la agencia de Banco Solidario' : 'Información básica del cliente'}
           </Text>
         </View>
@@ -148,12 +148,21 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
       <TouchableOpacity
         style={[
           styles.continueButton,
-          isFormValid ? styles.continueButtonEnabled : styles.continueButtonDisabled,
+          {
+            backgroundColor: isFormValid ? theme.buttonPrimary : theme.buttonDisabled,
+          },
         ]}
         onPress={handleContinue}
         disabled={!isFormValid}
       >
-        <Text style={styles.continueButtonText}>
+        <Text
+          style={[
+            styles.continueButtonText,
+            {
+              color: isFormValid ? theme.buttonPrimaryText : theme.buttonDisabledText,
+            },
+          ]}
+        >
           Continuar →
         </Text>
       </TouchableOpacity>
@@ -163,13 +172,17 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
         <View
           style={[
             styles.statusBox,
-            validation.valid ? styles.statusValid : styles.statusInvalid,
+            {
+              backgroundColor: validation.valid ? theme.successBg : theme.errorBg,
+            },
           ]}
         >
           <Text
             style={[
               styles.statusText,
-              validation.valid ? styles.statusValidText : styles.statusInvalidText,
+              {
+                color: validation.valid ? theme.success : theme.error,
+              },
             ]}
           >
             {validation.valid ? '✅ Formulario válido' : '❌ Hay errores en el formulario'}
@@ -184,12 +197,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  darkContainer: {
-    backgroundColor: '#1a1a1a',
-  },
-  lightContainer: {
-    backgroundColor: '#f5f5f5',
-  },
   contentContainer: {
     padding: 20,
     paddingBottom: 40,
@@ -198,7 +205,6 @@ const styles = StyleSheet.create({
     marginBottom: 28,
     paddingBottom: 16,
     borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
   },
   title: {
     fontSize: 28,
@@ -208,12 +214,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     opacity: 0.7,
-  },
-  darkText: {
-    color: '#ffffff',
-  },
-  lightText: {
-    color: '#000000',
   },
   formSection: {
     marginBottom: 24,
@@ -225,10 +225,8 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingVertical: 12,
     paddingHorizontal: 12,
-    backgroundColor: '#f0f8ff',
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
   },
   infoText: {
     fontSize: 13,
@@ -240,14 +238,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  continueButtonEnabled: {
-    backgroundColor: '#34C759',
-  },
-  continueButtonDisabled: {
-    backgroundColor: '#cccccc',
-  },
   continueButtonText: {
-    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -256,20 +247,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  statusValid: {
-    backgroundColor: '#e8f5e9',
-  },
-  statusInvalid: {
-    backgroundColor: '#ffebee',
-  },
   statusText: {
     fontSize: 14,
     fontWeight: '600',
-  },
-  statusValidText: {
-    color: '#388e3c',
-  },
-  statusInvalidText: {
-    color: '#d32f2f',
   },
 })

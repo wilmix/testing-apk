@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, TextInput, Text, StyleSheet } from 'react-native'
 import { ValidationIcon } from '../Feedback/ValidationIcon'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface FormInputProps {
   label?: string
@@ -23,31 +24,50 @@ export const FormInput: React.FC<FormInputProps> = ({
   keyboardType = 'default',
   editable = true,
 }) => {
+  const { theme } = useTheme()
   const isValid = touched && !error
   const isInvalid = touched && !!error
 
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <View style={styles.inputWrapper}>
+      {label && (
+        <Text style={[styles.label, { color: theme.text }]}>
+          {label}
+        </Text>
+      )}
+      <View
+        style={[
+          styles.inputWrapper,
+          {
+            backgroundColor: theme.inputBg,
+            borderColor: isInvalid
+              ? theme.errorBorder
+              : isValid
+              ? theme.successBorder
+              : theme.inputBorder,
+          },
+        ]}
+      >
         <TextInput
           style={[
             styles.input,
-            isInvalid && styles.inputError,
-            isValid && styles.inputValid,
-            !editable && styles.inputDisabled,
+            {
+              color: editable ? theme.text : theme.inputDisabledText,
+            },
           ]}
           value={value}
           onChangeText={onChange}
           placeholder={placeholder}
           keyboardType={keyboardType}
           editable={editable}
-          placeholderTextColor="#999"
+          placeholderTextColor={theme.placeholder}
         />
         <ValidationIcon isValid={isValid} isInvalid={isInvalid} />
       </View>
       {error && touched && (
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={[styles.errorText, { color: theme.error }]}>
+          {error}
+        </Text>
       )}
     </View>
   )
@@ -60,37 +80,22 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
     borderWidth: 1,
-    borderColor: '#ddd',
     paddingHorizontal: 12,
   },
   input: {
     flex: 1,
     height: 44, // Touch-friendly
     fontSize: 16,
-    color: '#333',
-  },
-  inputError: {
-    borderColor: '#d32f2f',
-  },
-  inputValid: {
-    borderColor: '#388e3c',
-  },
-  inputDisabled: {
-    backgroundColor: '#f0f0f0',
-    color: '#999',
   },
   errorText: {
     fontSize: 12,
-    color: '#d32f2f',
     marginTop: 4,
   },
 })

@@ -1,5 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface ValidationIconProps {
   isValid?: boolean
@@ -10,18 +11,34 @@ export const ValidationIcon: React.FC<ValidationIconProps> = ({
   isValid,
   isInvalid,
 }) => {
+  const { theme } = useTheme()
+
   if (isValid) {
     return (
-      <View style={[styles.icon, styles.validIcon]}>
-        <Text style={styles.validText}>✓</Text>
+      <View
+        style={[
+          styles.icon,
+          { backgroundColor: theme.successBg },
+        ]}
+      >
+        <Text style={[styles.iconText, { color: theme.success }]}>
+          ✓
+        </Text>
       </View>
     )
   }
 
   if (isInvalid) {
     return (
-      <View style={[styles.icon, styles.invalidIcon]}>
-        <Text style={styles.invalidText}>✗</Text>
+      <View
+        style={[
+          styles.icon,
+          { backgroundColor: theme.errorBg },
+        ]}
+      >
+        <Text style={[styles.iconText, { color: theme.error }]}>
+          ✗
+        </Text>
       </View>
     )
   }
@@ -38,20 +55,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginLeft: 8,
   },
-  validIcon: {
-    backgroundColor: '#e8f5e9',
-  },
-  validText: {
+  iconText: {
     fontSize: 18,
-    color: '#388e3c',
-    fontWeight: 'bold',
-  },
-  invalidIcon: {
-    backgroundColor: '#ffebee',
-  },
-  invalidText: {
-    fontSize: 18,
-    color: '#d32f2f',
     fontWeight: 'bold',
   },
 })

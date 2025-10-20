@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useState, useEffect } from 'react'
 import { StorageUtils } from './src/services/mmkvService'
 import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } from './src/services/validationService'
@@ -7,6 +7,7 @@ import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from '
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
 import { useFieldVisibility } from './src/hooks'
 import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm, DetallesForm } from './src/components'
+import { ThemeProvider, useTheme } from './src/contexts/ThemeContext'
 
 /**
  * ============================================================================
@@ -40,10 +41,8 @@ import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm, De
  * ✅ DetallesForm component (lista dinámica, cascada, validación)
  */
 
-export default function App() {
-  const systemTheme = useColorScheme()
-  const [theme, setTheme] = useState(systemTheme || 'light')
-  const isDark = theme === 'dark'
+function AppContent() {
+  const { theme, isDark } = useTheme()
 
   // Estado de debugging
   const [debugInfo, setDebugInfo] = useState<string[]>([])
@@ -235,9 +234,7 @@ export default function App() {
     }
   }
 
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark')
-  }
+  // Theme is now automatically detected by ThemeProvider
 
   const clearDebug = async () => {
     setDebugInfo([])
@@ -297,7 +294,7 @@ export default function App() {
   // Si está en modo HeaderForm, mostrar solo eso
   if (showHeaderForm) {
     return (
-      <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <HeaderForm
           data={headerFormData}
           onDataChange={setHeaderFormData}
@@ -309,17 +306,13 @@ export default function App() {
               addDebugLog(`   Agencia: ${headerFormData.agencia}`)
             }
           }}
-          isDark={isDark}
         />
-        <View style={[styles.actionsContainer, isDark ? styles.darkActionsContainer : styles.lightActionsContainer]}>
+        <View style={[styles.actionsContainer, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[styles.button, { backgroundColor: theme.buttonSecondary }]}
             onPress={() => setShowHeaderForm(false)}
           >
-            <Text style={styles.buttonText}>← Volver</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={toggleTheme}>
-            <Text style={styles.buttonText}>🌓 Tema</Text>
+            <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>← Volver</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -329,7 +322,7 @@ export default function App() {
   // Si está en modo DetallesForm, mostrar solo eso
   if (showDetallesForm) {
     return (
-      <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <DetallesForm
           data={detallesFormData}
           onDataChange={setDetallesFormData}
@@ -340,17 +333,13 @@ export default function App() {
               addDebugLog(`     Extintor ${i + 1}: ${d.extintorNro} (${d.capacidadValor})`)
             })
           }}
-          isDark={isDark}
         />
-        <View style={[styles.actionsContainer, isDark ? styles.darkActionsContainer : styles.lightActionsContainer]}>
+        <View style={[styles.actionsContainer, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[styles.button, { backgroundColor: theme.buttonSecondary }]}
             onPress={() => setShowDetallesForm(false)}
           >
-            <Text style={styles.buttonText}>← Volver</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={toggleTheme}>
-            <Text style={styles.buttonText}>🌓 Tema</Text>
+            <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>← Volver</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -358,14 +347,14 @@ export default function App() {
   }
 
   return (
-    <View style={[styles.container, isDark ? styles.darkContainer : styles.lightContainer]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, isDark ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.title, { color: theme.text }]}>
             FASE 1 + 2: SETUP + HOOKS
           </Text>
-          <Text style={[styles.subtitle, isDark ? styles.darkText : styles.lightText]}>
+          <Text style={[styles.subtitle, { color: theme.text }]}>
             Tests con AsyncStorage (Expo Go compatible)
           </Text>
         </View>
@@ -391,12 +380,12 @@ export default function App() {
         </View>
 
         {/* Debug Logs */}
-        <View style={[styles.debugSection, isDark ? styles.darkDebugSection : styles.lightDebugSection]}>
-          <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+        <View style={[styles.debugSection, { backgroundColor: theme.surfaceVariant }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
             📋 Debug Logs
           </Text>
           {debugInfo.length === 0 ? (
-            <Text style={[styles.debugText, isDark ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.debugText, { color: theme.text }]}>
               Esperando tests...
             </Text>
           ) : (
@@ -405,7 +394,7 @@ export default function App() {
                 key={index}
                 style={[
                   styles.debugText,
-                  isDark ? styles.darkText : styles.lightText,
+                  { color: theme.text },
                   log.includes('ERROR') && styles.errorText
                 ]}
               >
@@ -417,11 +406,11 @@ export default function App() {
 
         {/* AsyncStorage Status */}
         {storageStatus ? (
-          <View style={[styles.mmkvSection, isDark ? styles.darkMmkvSection : styles.lightMmkvSection]}>
-            <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          <View style={[styles.mmkvSection, { backgroundColor: theme.infoBg }]}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
               💾 AsyncStorage Status
             </Text>
-            <Text style={[styles.debugText, isDark ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.debugText, { color: theme.text }]}>
               {storageStatus}
             </Text>
           </View>
@@ -429,14 +418,14 @@ export default function App() {
 
         {/* Test Data */}
         {testData ? (
-          <View style={[styles.dataSection, isDark ? styles.darkDataSection : styles.lightDataSection]}>
-            <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          <View style={[styles.dataSection, { backgroundColor: theme.successBg }]}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
               📊 Test Data
             </Text>
-            <Text style={[styles.debugText, isDark ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.debugText, { color: theme.text }]}>
               Cliente: {testData.cliente}
             </Text>
-            <Text style={[styles.debugText, isDark ? styles.darkText : styles.lightText]}>
+            <Text style={[styles.debugText, { color: theme.text }]}>
               Detalles: {testData.detalles.length} extintor(es)
             </Text>
           </View>
@@ -444,14 +433,14 @@ export default function App() {
 
         {/* Validation Results */}
         {testValidation ? (
-          <View style={[styles.validationSection, isDark ? styles.darkValidationSection : styles.lightValidationSection]}>
-            <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          <View style={[styles.validationSection, { backgroundColor: theme.warningBg }]}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
               ✓ Validación
             </Text>
             <Text
               style={[
                 styles.debugText,
-                isDark ? styles.darkText : styles.lightText,
+                { color: theme.text },
                 testValidation.headerValid ? styles.validText : styles.errorText
               ]}
             >
@@ -460,7 +449,7 @@ export default function App() {
             <Text
               style={[
                 styles.debugText,
-                isDark ? styles.darkText : styles.lightText,
+                { color: theme.text },
                 testValidation.detallesValid ? styles.validText : styles.errorText
               ]}
             >
@@ -471,14 +460,14 @@ export default function App() {
 
         {/* FASE 3 - Components Preview */}
         {fase3Tests ? (
-          <View style={[styles.componentsSection, isDark ? styles.darkComponentsSection : styles.lightComponentsSection]}>
-            <Text style={[styles.sectionTitle, isDark ? styles.darkText : styles.lightText]}>
+          <View style={[styles.componentsSection, { backgroundColor: theme.surface }]}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
               📱 FASE 3: Componentes Base
             </Text>
             
             {/* FormInput Demo */}
-            <View style={[styles.componentDemo, isDark ? styles.darkComponentDemo : styles.lightComponentDemo]}>
-              <Text style={[styles.componentName, isDark ? styles.darkText : styles.lightText]}>
+            <View style={[styles.componentDemo, { backgroundColor: theme.surfaceVariant, borderColor: theme.border }]}>
+              <Text style={[styles.componentName, { color: theme.text }]}>
                 FormInput
               </Text>
               <FormInput
@@ -509,8 +498,8 @@ export default function App() {
             </View>
 
             {/* FormDropdown Demo */}
-            <View style={[styles.componentDemo, isDark ? styles.darkComponentDemo : styles.lightComponentDemo]}>
-              <Text style={[styles.componentName, isDark ? styles.darkText : styles.lightText]}>
+            <View style={[styles.componentDemo, { backgroundColor: theme.surfaceVariant, borderColor: theme.border }]}>
+              <Text style={[styles.componentName, { color: theme.text }]}>
                 FormDropdown
               </Text>
               <FormDropdown
@@ -525,8 +514,8 @@ export default function App() {
             </View>
 
             {/* FormDatePicker Demo */}
-            <View style={[styles.componentDemo, isDark ? styles.darkComponentDemo : styles.lightComponentDemo]}>
-              <Text style={[styles.componentName, isDark ? styles.darkText : styles.lightText]}>
+            <View style={[styles.componentDemo, { backgroundColor: theme.surfaceVariant, borderColor: theme.border }]}>
+              <Text style={[styles.componentName, { color: theme.text }]}>
                 FormDatePicker
               </Text>
               <FormDatePicker
@@ -539,8 +528,8 @@ export default function App() {
             </View>
 
             {/* ValidationIcon Demo */}
-            <View style={[styles.componentDemo, isDark ? styles.darkComponentDemo : styles.lightComponentDemo]}>
-              <Text style={[styles.componentName, isDark ? styles.darkText : styles.lightText]}>
+            <View style={[styles.componentDemo, { backgroundColor: theme.surfaceVariant, borderColor: theme.border }]}>
+              <Text style={[styles.componentName, { color: theme.text }]}>
                 ValidationIcon
               </Text>
               <View style={styles.iconRow}>
@@ -563,27 +552,36 @@ export default function App() {
       </ScrollView>
 
       {/* Bottom Actions */}
-      <View style={[styles.actionsContainer, isDark ? styles.darkActionsContainer : styles.lightActionsContainer]}>
-        <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={toggleTheme}>
-          <Text style={styles.buttonText}>🌓 Tema</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: '#FF9500' }]} 
+      <View style={[styles.actionsContainer, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#FF9500' }]}
           onPress={() => setShowHeaderForm(true)}
         >
           <Text style={styles.buttonText}>📝 HeaderForm</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.button, { backgroundColor: '#34C759' }]} 
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#34C759' }]}
           onPress={() => setShowDetallesForm(true)}
         >
           <Text style={styles.buttonText}>📋 DetallesForm</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={clearDebug}>
-          <Text style={styles.buttonText}>🔄 Reiniciar</Text>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.buttonSecondary }]}
+          onPress={clearDebug}
+        >
+          <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>🔄 Reiniciar</Text>
         </TouchableOpacity>
       </View>
     </View>
+  )
+}
+
+// Wrapper principal con ThemeProvider
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   )
 }
 

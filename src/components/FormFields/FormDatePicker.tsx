@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { ValidationIcon } from '../Feedback/ValidationIcon'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export interface FormDatePickerProps {
   label?: string
@@ -26,6 +27,7 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
   minimumDate,
   maximumDate,
 }) => {
+  const { theme } = useTheme()
   const [showPicker, setShowPicker] = useState(false)
   const isValid = touched && !error
   const isInvalid = touched && !!error
@@ -49,14 +51,23 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
 
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={[styles.label, { color: theme.text }]}>
+          {label}
+        </Text>
+      )}
       <View style={styles.datePickerWrapper}>
         <TouchableOpacity
           style={[
             styles.dateButton,
-            isInvalid && styles.dateButtonError,
-            isValid && styles.dateButtonValid,
-            !editable && styles.dateButtonDisabled,
+            {
+              backgroundColor: editable ? theme.inputBg : theme.inputDisabled,
+              borderColor: isInvalid
+                ? theme.errorBorder
+                : isValid
+                ? theme.successBorder
+                : theme.inputBorder,
+            },
           ]}
           onPress={() => editable && setShowPicker(true)}
           disabled={!editable}
@@ -64,7 +75,13 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
           <Text
             style={[
               styles.dateButtonText,
-              !value && styles.dateButtonPlaceholder,
+              {
+                color: !value
+                  ? theme.placeholder
+                  : editable
+                  ? theme.text
+                  : theme.inputDisabledText,
+              },
             ]}
           >
             {displayValue}
@@ -85,18 +102,38 @@ export const FormDatePicker: React.FC<FormDatePickerProps> = ({
       )}
 
       {Platform.OS === 'ios' && showPicker && (
-        <View style={styles.iosPicker}>
+        <View
+          style={[
+            styles.iosPicker,
+            {
+              backgroundColor: theme.surface,
+              borderTopColor: theme.border,
+            },
+          ]}
+        >
           <TouchableOpacity
-            style={styles.iosPickerButton}
+            style={[
+              styles.iosPickerButton,
+              { backgroundColor: theme.buttonSecondary },
+            ]}
             onPress={() => setShowPicker(false)}
           >
-            <Text style={styles.iosPickerButtonText}>Listo</Text>
+            <Text
+              style={[
+                styles.iosPickerButtonText,
+                { color: theme.buttonSecondaryText },
+              ]}
+            >
+              Listo
+            </Text>
           </TouchableOpacity>
         </View>
       )}
 
       {error && touched && (
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={[styles.errorText, { color: theme.error }]}>
+          {error}
+        </Text>
       )}
     </View>
   )
@@ -109,7 +146,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
     marginBottom: 6,
   },
   datePickerWrapper: {
@@ -119,52 +155,32 @@ const styles = StyleSheet.create({
   dateButton: {
     flex: 1,
     height: 44, // Touch-friendly
-    backgroundColor: '#f5f5f5',
     borderRadius: 8,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
     justifyContent: 'center',
-  },
-  dateButtonError: {
-    borderColor: '#d32f2f',
-  },
-  dateButtonValid: {
-    borderColor: '#388e3c',
-  },
-  dateButtonDisabled: {
-    backgroundColor: '#f0f0f0',
   },
   dateButtonText: {
     fontSize: 16,
-    color: '#333',
-  },
-  dateButtonPlaceholder: {
-    color: '#999',
   },
   iosPicker: {
-    backgroundColor: '#f5f5f5',
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
     paddingBottom: 20,
   },
   iosPickerButton: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#007AFF',
     marginHorizontal: 16,
     marginTop: 12,
     borderRadius: 8,
   },
   iosPickerButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
   },
   errorText: {
     fontSize: 12,
-    color: '#d32f2f',
     marginTop: 4,
   },
 })

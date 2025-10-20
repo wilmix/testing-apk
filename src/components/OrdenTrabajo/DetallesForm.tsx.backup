@@ -1,17 +1,17 @@
 /**
  * FASE 5: DetallesForm Component
- *
+ * 
  * Componente dinámico para agregar/remover extintores
  * - Lista de extintores con opción de agregar más
  * - Cascada: Unidad dropdown → Capacidad dropdown (opciones filtradas)
  * - Validación real-time con DetalleExtintorSchema
  * - Persistencia en AsyncStorage
- * - Theming automático con useTheme() hook
- *
+ * 
  * Props:
  * - data: OrdenTrabajoFormData (contiene detalles array)
  * - onDataChange: (data: OrdenTrabajoFormData) => void
  * - onContinue: () => void
+ * - isDark: boolean
  */
 
 import React, { useState, useCallback } from 'react'
@@ -26,7 +26,7 @@ import type { OrdenTrabajoFormData, DetalleExtintor } from '../../types/ordenTra
 import { CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from '../../constants/ordenTrabajoConstants'
 import { validateData, DetallesSchema } from '../../services/validationService'
 import { FormInput } from '../FormFields/FormInput'
-import { FormDropdown } from '../FormFields/FormDropdown'
+import { FormDropdown } from '../FormDropdown'
 import { ValidationIcon } from '../Feedback/ValidationIcon'
 import { useTheme } from '../../contexts/ThemeContext'
 
@@ -187,22 +187,22 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
     <ScrollView
       style={[
         styles.container,
-        { backgroundColor: theme.background },
+        isDark ? styles.darkContainer : styles.lightContainer,
       ]}
     >
       {/* Título y descripción */}
-      <View style={[styles.headerSection, { borderBottomColor: theme.info }]}>
-        <Text style={[styles.title, { color: theme.text }]}>
+      <View style={styles.headerSection}>
+        <Text style={[styles.title, isDark ? styles.darkText : styles.lightText]}>
           📋 Detalles de Extintores
         </Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+        <Text style={[styles.subtitle, isDark ? styles.darkSubtitle : styles.lightSubtitle]}>
           Agrega los extintores a recargar
         </Text>
       </View>
 
       {/* Info box */}
-      <View style={[styles.infoBox, { backgroundColor: theme.infoBg, borderLeftColor: theme.info }]}>
-        <Text style={[styles.infoText, { color: theme.text }]}>
+      <View style={[styles.infoBox, isDark ? styles.darkInfoBox : styles.lightInfoBox]}>
+        <Text style={[styles.infoText, isDark ? styles.darkText : styles.lightText]}>
           ℹ️ Mínimo 1 extintor. Cascada: selecciona Unidad primero, luego Capacidad
         </Text>
       </View>
@@ -226,14 +226,14 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
                 style={[
                   styles.detalleHeader,
                   isExpanded ? styles.detalleHeaderExpanded : styles.detalleHeaderCollapsed,
-                  { backgroundColor: theme.surface, borderColor: theme.border },
+                  isDark ? styles.darkDetalleHeader : styles.lightDetalleHeader,
                 ]}
                 onPress={() =>
                   setExpandedDetalleId(isExpanded ? null : detalle.id)
                 }
               >
                 <View style={styles.detalleHeaderContent}>
-                  <Text style={[styles.detalleHeaderTitle, { color: theme.text }]}>
+                  <Text style={[styles.detalleHeaderTitle, isDark ? styles.darkText : styles.lightText]}>
                     {isExpanded ? '▼' : '▶'} Extintor {index + 1}: {detalle.extintorNro || '(sin número)'}
                   </Text>
                   <ValidationIcon
@@ -248,7 +248,7 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
                 <View
                   style={[
                     styles.detalleContent,
-                    { backgroundColor: theme.surfaceVariant },
+                    isDark ? styles.darkDetalleContent : styles.lightDetalleContent,
                   ]}
                 >
                   {/* Número de extintor */}
@@ -333,10 +333,10 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
                   {/* Botón remover */}
                   {data.detalles.length > 1 && (
                     <TouchableOpacity
-                      style={[styles.removeButton, { backgroundColor: theme.errorBg, borderColor: theme.errorBorder }]}
+                      style={[styles.removeButton, isDark ? styles.darkRemoveButton : styles.lightRemoveButton]}
                       onPress={() => handleRemoveDetalle(detalle.id)}
                     >
-                      <Text style={[styles.removeButtonText, { color: theme.error }]}>🗑️ Remover este extintor</Text>
+                      <Text style={styles.removeButtonText}>🗑️ Remover este extintor</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -348,25 +348,25 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
 
       {/* Botón agregar extintor */}
       <TouchableOpacity
-        style={[styles.addButton, { backgroundColor: theme.infoBg, borderColor: theme.info }]}
+        style={[styles.addButton, isDark ? styles.darkAddButton : styles.lightAddButton]}
         onPress={handleAddDetalle}
       >
-        <Text style={[styles.addButtonText, { color: theme.info }]}>➕ Agregar otro extintor</Text>
+        <Text style={styles.addButtonText}>➕ Agregar otro extintor</Text>
       </TouchableOpacity>
 
       {/* Status de validación */}
-      <View style={[styles.validationBox, { backgroundColor: theme.surfaceVariant }]}>
+      <View style={[styles.validationBox, isDark ? styles.darkValidationBox : styles.lightValidationBox]}>
         {isFormValid ? (
           <>
-            <Text style={[styles.validationTitle, { color: theme.success }]}>✅ Lista válida</Text>
-            <Text style={[styles.validationDetail, { color: theme.text }]}>
+            <Text style={[styles.validationTitle, styles.validText]}>✅ Lista válida</Text>
+            <Text style={[styles.validationDetail, isDark ? styles.darkText : styles.lightText]}>
               {data.detalles.length} extintor{data.detalles.length !== 1 ? 'es' : ''} agregado{data.detalles.length !== 1 ? 's' : ''}
             </Text>
           </>
         ) : (
           <>
-            <Text style={[styles.validationTitle, { color: theme.error }]}>❌ Hay errores</Text>
-            <Text style={[styles.validationDetail, { color: theme.text }]}>
+            <Text style={[styles.validationTitle, styles.errorText]}>❌ Hay errores</Text>
+            <Text style={[styles.validationDetail, isDark ? styles.darkText : styles.lightText]}>
               Completa todos los campos requeridos
             </Text>
           </>
@@ -375,8 +375,8 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
 
       {/* Info box (solo si válido) */}
       {isFormValid && (
-        <View style={[styles.successBox, { backgroundColor: theme.successBg }]}>
-          <Text style={[styles.successText, { color: theme.success }]}>
+        <View style={[styles.successBox, isDark ? styles.darkSuccessBox : styles.lightSuccessBox]}>
+          <Text style={[styles.successText, isDark ? styles.darkText : styles.lightText]}>
             ✨ Listo para continuar
           </Text>
         </View>
@@ -387,12 +387,12 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
         style={[
           styles.continueButton,
           isFormValid ? styles.continueButtonEnabled : styles.continueButtonDisabled,
-          { backgroundColor: theme.buttonSecondary },
+          isDark ? styles.darkContinueButton : styles.lightContinueButton,
         ]}
         onPress={onContinue}
         disabled={!isFormValid}
       >
-        <Text style={[styles.continueButtonText, { color: theme.buttonSecondaryText }]}>
+        <Text style={styles.continueButtonText}>
           {isFormValid ? '✅ Continuar →' : '⏳ Completa los campos'}
         </Text>
       </TouchableOpacity>

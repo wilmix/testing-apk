@@ -29,6 +29,7 @@ import { FormInput } from '../FormFields/FormInput'
 import { FormDropdown } from '../FormFields/FormDropdown'
 import { ValidationIcon } from '../Feedback/ValidationIcon'
 import { useTheme } from '../../contexts/ThemeContext'
+import { QRScanner } from '../QR/QRScanner'
 
 /**
  * Generar ID único simple
@@ -54,6 +55,7 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
   const [expandedDetalleId, setExpandedDetalleId] = useState<string | null>(
     data.detalles.length > 0 ? data.detalles[0].id : null
   )
+  const [showQRScanner, setShowQRScanner] = useState(false)
 
   // Validar todo el array de detalles
   const validation = validateData(DetallesSchema, {
@@ -99,6 +101,33 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
 
     onDataChange(updatedData)
     setExpandedDetalleId(newDetalle.id)
+    setTouchedDetalles((prev) => ({
+      ...prev,
+      [newDetalle.id]: {},
+    }))
+  }, [data, onDataChange])
+
+  /**
+   * Agregar extintor desde QR
+   */
+  const handleQRScanned = useCallback((qrData: Partial<DetalleExtintor>) => {
+    const newDetalle: DetalleExtintor = {
+      id: generateId(),
+      extintorNro: qrData.extintorNro || '',
+      capacidadUnidad: qrData.capacidadUnidad || '',
+      capacidadValor: qrData.capacidadValor || '',
+      marca: qrData.marca || '',
+      tipo: qrData.tipo || '',
+    }
+
+    const updatedDetalles = [...data.detalles, newDetalle]
+    const updatedData = { ...data, detalles: updatedDetalles }
+
+    onDataChange(updatedData)
+    setExpandedDetalleId(newDetalle.id)
+    setShowQRScanner(false)
+
+    // No marcar campos como tocados porque vienen del QR
     setTouchedDetalles((prev) => ({
       ...prev,
       [newDetalle.id]: {},
@@ -192,18 +221,28 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
     >
       {/* Título y descripción */}
       <View style={[styles.headerSection, { borderBottomColor: theme.info }]}>
-        <Text style={[styles.title, { color: theme.text }]}>
-          📋 Detalles de Extintores
-        </Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Agrega los extintores a recargar
-        </Text>
+        <View style={styles.headerTitleRow}>
+          <View style={styles.headerTitleContainer}>
+            <Text style={[styles.title, { color: theme.text }]}>
+              📋 Detalles de Extintores
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+              Agrega los extintores a recargar
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.qrButton, { backgroundColor: theme.infoBg, borderColor: theme.info }]}
+            onPress={() => setShowQRScanner(true)}
+          >
+            <Text style={[styles.qrButtonText, { color: theme.info }]}>📷 QR</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Info box */}
       <View style={[styles.infoBox, { backgroundColor: theme.infoBg, borderLeftColor: theme.info }]}>
         <Text style={[styles.infoText, { color: theme.text }]}>
-          ℹ️ Mínimo 1 extintor. Cascada: selecciona Unidad primero, luego Capacidad
+          ℹ️ Escanea QR o agrega manualmente. Mínimo 1 extintor. Cascada: selecciona Unidad primero, luego Capacidad
         </Text>
       </View>
 
@@ -396,6 +435,13 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
           {isFormValid ? '✅ Continuar →' : '⏳ Completa los campos'}
         </Text>
       </TouchableOpacity>
+
+      {/* QR Scanner Modal */}
+      <QRScanner
+        visible={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onQRScanned={handleQRScanned}
+      />
     </ScrollView>
   )
 }
@@ -419,6 +465,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#007AFF',
   },
+  headerTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerTitleContainer: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -427,6 +481,17 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     opacity: 0.7,
+  },
+  qrButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginLeft: 12,
+  },
+  qrButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   darkText: {
     color: '#ffffff',

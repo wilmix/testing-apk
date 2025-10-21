@@ -21,3 +21,6 @@ export type { HeaderFormProps } from './OrdenTrabajo/HeaderForm'
 
 export { DetallesForm } from './OrdenTrabajo/DetallesForm'
 export type { DetallesFormProps } from './OrdenTrabajo/DetallesForm'
+
+export { FinalForm } from './OrdenTrabajo/FinalForm'
+export type { FinalFormProps } from './OrdenTrabajo/FinalForm'

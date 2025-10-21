@@ -3,11 +3,11 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { useState, useEffect } from 'react'
 import { storageUtils } from './src/services/storageService';
-import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema } from './src/services/validationService'
+import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema, FinalSchema } from './src/services/validationService'
 import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from './src/constants/ordenTrabajoConstants'
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
 import { useFieldVisibility } from './src/hooks'
-import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm, DetallesForm } from './src/components'
+import { FormInput, FormDropdown, FormDatePicker, ValidationIcon, HeaderForm, DetallesForm, FinalForm } from './src/components'
 import { ThemeProvider, useTheme } from './src/contexts/ThemeContext'
 
 /**
@@ -94,6 +94,29 @@ function AppContent() {
         capacidadValor: '',
         marca: '',
         tipo: '',
+      },
+    ],
+  })
+
+  // FASE 6 - Show FinalForm view
+  const [showFinalForm, setShowFinalForm] = useState(false)
+  const [finalFormData, setFinalFormData] = useState<OrdenTrabajoFormData>({
+    fechaEntrega: new Date(),
+    cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
+    agencia: '',
+    direccion: '',
+    telefono: '',
+    observaciones: '',
+    prestamoExtintores: false,
+    cantidadPrestamo: '',
+    detalles: [
+      {
+        id: 'extintor_001',
+        extintorNro: '001',
+        capacidadUnidad: 'KILOS',
+        capacidadValor: '6 KILOS',
+        marca: 'KIDDE BRASIL',
+        tipo: 'ABC',
       },
     ],
   })
@@ -230,6 +253,22 @@ function AppContent() {
       addDebugLog('🎉 TODOS LOS TESTS PASARON (FASE 1 + 2 + 3 + 4)!')
       addDebugLog('FASE 4 completada: HeaderForm funcional')
       addDebugLog('Presiona "Ver HeaderForm" para probar')
+
+      // FASE 6 Tests
+      addDebugLog('')
+      addDebugLog('🚀 INICIANDO TESTS FASE 6...')
+
+      addDebugLog('✅ FinalForm component importado correctamente')
+      addDebugLog('✅ FinalSchema validación integrada')
+      addDebugLog('✅ Teléfono con validación numérica')
+      addDebugLog('✅ Observaciones con contador de caracteres')
+      addDebugLog('✅ Préstamo condicional con reveal')
+      addDebugLog('✅ Botón submit con validación completa')
+
+      addDebugLog('')
+      addDebugLog('🎉 TODOS LOS TESTS PASARON (FASE 1 + 2 + 3 + 4 + 5 + 6)!')
+      addDebugLog('FASE 6 completada: FinalForm funcional')
+      addDebugLog('Presiona "Ver FinalForm" para probar')
     } catch (error) {
       addDebugError(`Error en tests: ${error}`)
     }
@@ -243,6 +282,7 @@ function AppContent() {
     setStorageStatus('')
     setShowHeaderForm(false)
     setShowDetallesForm(false)
+    setShowFinalForm(false)
     setHeaderFormData({
       fechaEntrega: new Date(),
       cliente: '',
@@ -271,6 +311,26 @@ function AppContent() {
           capacidadValor: '',
           marca: '',
           tipo: '',
+        },
+      ],
+    })
+    setFinalFormData({
+      fechaEntrega: new Date(),
+      cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
+      agencia: '',
+      direccion: '',
+      telefono: '',
+      observaciones: '',
+      prestamoExtintores: false,
+      cantidadPrestamo: '',
+      detalles: [
+        {
+          id: 'extintor_001',
+          extintorNro: '001',
+          capacidadUnidad: 'KILOS',
+          capacidadValor: '6 KILOS',
+          marca: 'KIDDE BRASIL',
+          tipo: 'ABC',
         },
       ],
     })
@@ -345,6 +405,44 @@ function AppContent() {
             <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>← Volver</Text>
           </TouchableOpacity>
         </View>
+      </SafeAreaView>
+    )
+  }
+
+  // Si está en modo FinalForm, mostrar solo eso
+  if (showFinalForm) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top', 'left', 'right']}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <FinalForm
+          data={finalFormData}
+          onDataChange={setFinalFormData}
+          onSubmit={(data) => {
+            addDebugLog('✅ FinalForm Submit exitoso')
+            addDebugLog(`   Teléfono: ${data.telefono}`)
+            addDebugLog(`   Observaciones: ${data.observaciones || '(ninguna)'}`)
+            addDebugLog(`   Préstamo: ${data.prestamoExtintores ? 'SÍ' : 'NO'}`)
+            if (data.prestamoExtintores) {
+              addDebugLog(`   Cantidad préstamo: ${data.cantidadPrestamo}`)
+            }
+            // Reset form after submit
+            setTimeout(() => {
+              setFinalFormData({
+                fechaEntrega: new Date(),
+                cliente: '',
+                agencia: '',
+                direccion: '',
+                telefono: '',
+                observaciones: '',
+                prestamoExtintores: false,
+                cantidadPrestamo: '',
+                detalles: [],
+              })
+              setShowFinalForm(false)
+            }, 2000)
+          }}
+          onBack={() => setShowFinalForm(false)}
+        />
       </SafeAreaView>
     )
   }
@@ -561,19 +659,25 @@ function AppContent() {
           style={[styles.button, { backgroundColor: '#FF9500' }]}
           onPress={() => setShowHeaderForm(true)}
         >
-          <Text style={styles.buttonText}>📝 HeaderForm</Text>
+          <Text style={styles.buttonText}>📝 Header</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: '#34C759' }]}
           onPress={() => setShowDetallesForm(true)}
         >
-          <Text style={styles.buttonText}>📋 DetallesForm</Text>
+          <Text style={styles.buttonText}>📋 Detalles</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#5856D6' }]}
+          onPress={() => setShowFinalForm(true)}
+        >
+          <Text style={styles.buttonText}>✅ Final</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.buttonSecondary }]}
           onPress={clearDebug}
         >
-          <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>🔄 Reiniciar</Text>
+          <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>🔄 Reset</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

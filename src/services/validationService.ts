@@ -145,3 +145,37 @@ export const HeaderSchema = z.object({
 export const DetallesSchema = z.object({
   detalles: z.array(DetalleExtintorSchema).min(1, 'Al menos 1 extintor requerido')
 })
+
+/**
+ * Schema para validación de sección final (teléfono, observaciones, préstamo)
+ */
+export const FinalSchema = z.object({
+  telefono: z
+    .string()
+    .min(1, 'Teléfono requerido')
+    .regex(/^\d+$/, 'Teléfono debe contener solo números')
+    .min(7, 'Teléfono debe tener al menos 7 dígitos')
+    .max(15, 'Teléfono debe tener máximo 15 dígitos'),
+  observaciones: z
+    .string()
+    .max(500, 'Máximo 500 caracteres')
+    .optional()
+    .or(z.literal('')),
+  prestamoExtintores: z.boolean(),
+  cantidadPrestamo: z.string().optional().or(z.literal(''))
+})
+  .refine(
+    (data) => {
+      if (data.prestamoExtintores) {
+        return data.cantidadPrestamo &&
+               /^\d+$/.test(data.cantidadPrestamo) &&
+               parseInt(data.cantidadPrestamo) >= 1 &&
+               parseInt(data.cantidadPrestamo) <= 99
+      }
+      return true
+    },
+    {
+      message: 'Cantidad debe ser un número entre 1 y 99',
+      path: ['cantidadPrestamo']
+    }
+  )

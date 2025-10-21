@@ -15,9 +15,15 @@ export interface DetalleExtintor {
 }
 
 /**
+ * Estado de una orden de trabajo
+ */
+export type EstadoOrden = 'completada' | 'anulada'
+
+/**
  * Datos principales del formulario de Orden de Trabajo
  */
 export interface OrdenTrabajoFormData {
+  // Campos existentes
   fechaEntrega: Date
   cliente: string
   agencia: string // Para BANCO SOLIDARIO
@@ -27,6 +33,12 @@ export interface OrdenTrabajoFormData {
   prestamoExtintores: boolean
   cantidadPrestamo: string
   detalles: DetalleExtintor[]
+
+  // 🆕 Nuevos campos FASE 7
+  id?: string                    // ID de la orden (ej: "001", "002")
+  estado?: EstadoOrden           // Estado: completada | anulada (opcional para compatibilidad con App.tsx legacy)
+  fechaCreacion?: Date           // Timestamp de creación (opcional para compatibilidad con App.tsx legacy)
+  fechaModificacion?: Date       // Última modificación
 }
 
 /**

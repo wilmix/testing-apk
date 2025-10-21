@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router'
 import { useTheme } from '../src/contexts/ThemeContext'
 import { ordenService } from '../src/services/ordenService'
 import type { OrdenTrabajoFormData } from '../src/types/ordenTrabajo'
+import { OrdenCard } from '../src/components/OrdenTrabajo/OrdenCard'
 
 export default function TestScreen() {
   const router = useRouter()
@@ -18,6 +19,8 @@ export default function TestScreen() {
 
   const [logs, setLogs] = useState<string[]>([])
   const [ordenCount, setOrdenCount] = useState<number>(0)
+  const [showCards, setShowCards] = useState<boolean>(false)
+  const [ordenes, setOrdenes] = useState<OrdenTrabajoFormData[]>([])
 
   const addLog = (message: string) => {
     console.log(message)
@@ -153,19 +156,20 @@ export default function TestScreen() {
   const listarOrdenes = async () => {
     try {
       setLogs([])
+      setShowCards(false)
       addLog('📋 LISTANDO TODAS LAS ÓRDENES...')
       addLog('')
 
-      const ordenes = await ordenService.getOrdenes()
+      const ordenesData = await ordenService.getOrdenes()
 
-      if (ordenes.length === 0) {
+      if (ordenesData.length === 0) {
         addLog('ℹ️  No hay órdenes creadas')
         addLog('   Presiona "Test CRUD" para crear una orden de prueba')
       } else {
-        addLog(`✅ Total: ${ordenes.length} orden(es)`)
+        addLog(`✅ Total: ${ordenesData.length} orden(es)`)
         addLog('')
 
-        ordenes.forEach((orden, i) => {
+        ordenesData.forEach((orden, i) => {
           addLog(`─────────────────────────────────────`)
           addLog(`Orden #${orden.id}`)
           addLog(`Cliente: ${orden.cliente}`)
@@ -183,7 +187,7 @@ export default function TestScreen() {
         addLog(`─────────────────────────────────────`)
       }
 
-      setOrdenCount(ordenes.length)
+      setOrdenCount(ordenesData.length)
     } catch (error) {
       addError(`Error al listar órdenes: ${error}`)
     }
@@ -221,6 +225,18 @@ export default function TestScreen() {
     setLogs([])
   }
 
+  const verCards = async () => {
+    try {
+      const ordenesData = await ordenService.getOrdenes()
+      setOrdenes(ordenesData)
+      setOrdenCount(ordenesData.length)
+      setShowCards(true)
+      setLogs([])
+    } catch (error) {
+      addError(`Error al cargar cards: ${error}`)
+    }
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['top']}>
       {/* Header */}
@@ -246,30 +262,65 @@ export default function TestScreen() {
         )}
       </View>
 
-      {/* Logs */}
+      {/* Logs o Cards */}
       <ScrollView style={styles.logsContainer} contentContainerStyle={styles.logsContent}>
-        {logs.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: isDark ? '#888' : '#666' }]}>
-              Presiona un botón para iniciar las pruebas
-            </Text>
-          </View>
+        {showCards ? (
+          // Vista de Cards
+          <>
+            {ordenes.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={[styles.emptyText, { color: isDark ? '#888' : '#666' }]}>
+                  No hay órdenes para mostrar
+                </Text>
+                <Text style={[styles.emptyHint, { color: isDark ? '#666' : '#999' }]}>
+                  Presiona "Test CRUD" para crear una orden
+                </Text>
+              </View>
+            ) : (
+              <>
+                <Text style={[styles.cardsTitle, { color: theme.text }]}>
+                  📋 Vista de Cards ({ordenes.length})
+                </Text>
+                {ordenes.map((orden) => (
+                  <OrdenCard
+                    key={orden.id}
+                    orden={orden}
+                    onPress={() => {
+                      addLog(`Presionaste Orden #${orden.id}`)
+                    }}
+                    isDark={isDark}
+                  />
+                ))}
+              </>
+            )}
+          </>
         ) : (
-          logs.map((log, index) => (
-            <Text
-              key={index}
-              style={[
-                styles.logText,
-                { color: theme.text },
-                log.startsWith('❌') && styles.errorLog,
-                log.startsWith('✅') && styles.successLog,
-                log.startsWith('🎉') && styles.celebrationLog,
-                log.includes('═══') && styles.separatorLog
-              ]}
-            >
-              {log}
-            </Text>
-          ))
+          // Vista de Logs
+          <>
+            {logs.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={[styles.emptyText, { color: isDark ? '#888' : '#666' }]}>
+                  Presiona un botón para iniciar las pruebas
+                </Text>
+              </View>
+            ) : (
+              logs.map((log, index) => (
+                <Text
+                  key={index}
+                  style={[
+                    styles.logText,
+                    { color: theme.text },
+                    log.startsWith('❌') && styles.errorLog,
+                    log.startsWith('✅') && styles.successLog,
+                    log.startsWith('🎉') && styles.celebrationLog,
+                    log.includes('═══') && styles.separatorLog
+                  ]}
+                >
+                  {log}
+                </Text>
+              ))
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -284,9 +335,9 @@ export default function TestScreen() {
 
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: '#34C759' }]}
-          onPress={listarOrdenes}
+          onPress={verCards}
         >
-          <Text style={styles.actionButtonText}>📋 Listar</Text>
+          <Text style={styles.actionButtonText}>🎴 Ver Cards</Text>
         </TouchableOpacity>
       </View>
 
@@ -366,6 +417,18 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     fontStyle: 'italic',
+  },
+  emptyHint: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  cardsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    paddingHorizontal: 16,
   },
   logText: {
     fontSize: 12,

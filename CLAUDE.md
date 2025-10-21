@@ -42,12 +42,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Component | Library | Version | Notes |
 |-----------|---------|---------|-------|
 | Framework | React Native + Expo | 0.81.4 / ~54.0.13 | Cross-platform |
+| **Navigation** | **Expo Router + Stack** | **~6.0.13** | **File-based routing, Stack Navigation** |
 | Language | TypeScript | ~5.9.2 | Strict mode enabled |
 | Storage | AsyncStorage | 2.2.0 | Offline-first, included in Expo Go |
 | Dropdowns | react-native-element-dropdown | 2.12.4 | Touch-optimized with search |
 | Validation | Zod | 3.25.76 | Type-safe, Spanish messages |
 | Date Picker | @react-native-community/datetimepicker | 8.4.4 | Native iOS/Android |
-| QR Scanner | expo-camera | 8.4.4 | Escaneo QR, permisos, Expo Go |
+| QR Scanner | expo-camera | ~17.0.8 | Escaneo QR, permisos, Expo Go |
+| Haptics | expo-haptics | ~15.0.7 | Vibration feedback |
 | Safe Area | react-native-safe-area-context | ~5.6.0 | Cross-platform (Android + iOS) |
 | Theming | React Context | Built-in | Dark/Light mode automático |
 | State | React Hooks | Built-in | Simple, no Redux |
@@ -97,78 +99,120 @@ Commit emoji convention:
 ### Directory Structure
 
 ```
+app/                              # 🆕 Expo Router file-based routing
+├── _layout.tsx                   # Root Stack Navigation
+├── index.tsx                     # Lista de Órdenes (Home)
+├── about.tsx                     # About screen
+├── configuracion.tsx             # Configuración screen
+├── test.tsx                      # Testing screen (dev only)
+├── orden/
+│   ├── _layout.tsx               # Stack para detalles
+│   └── [id].tsx                  # Detalles de orden (dynamic route)
+└── nueva-orden/
+    ├── _layout.tsx               # Stack para formulario
+    ├── paso1.tsx                 # Cliente + Fecha + Ubicación
+    └── paso2.tsx                 # Extintores + Info Final
+
 src/
 ├── types/
-│   └── ordenTrabajo.ts           # TypeScript interfaces for form data
+│   └── ordenTrabajo.ts           # TypeScript interfaces + EstadoOrden
 ├── constants/
-│   └── ordenTrabajoConstants.ts  # Static data: CLIENTES, MARCAS, TIPOS, etc.
+│   ├── ordenTrabajoConstants.ts  # Static data: CLIENTES, MARCAS, TIPOS, etc.
+│   └── hapticConfig.ts           # Haptic feedback configuration
 ├── services/
-│   ├── storageService.ts             # AsyncStorage utilities (StorageUtils)
-│   └── validationService.ts      # Zod schemas + validateData()
+│   ├── storageService.ts         # AsyncStorage utilities (StorageUtils)
+│   ├── validationService.ts      # Zod schemas + validateData()
+│   ├── ordenService.ts           # 🆕 CRUD operations for órdenes
+│   └── migrationService.ts       # 🆕 Data migration (legacy → v1)
 ├── hooks/
-│   ├── useStorage.ts         # Generic AsyncStorage hook
+│   ├── useStorage.ts             # Generic AsyncStorage hook
 │   ├── useFormData.ts            # Form state + validation + persistence
-│   └── useFieldVisibility.ts    # Conditional field visibility logic
+│   ├── useFieldVisibility.ts    # Conditional field visibility logic
+│   ├── useQRReader.ts            # QR scanner with validation
+│   └── useHapticFeedback.ts      # Haptic feedback wrapper
+├── contexts/
+│   └── ThemeContext.tsx          # Theme provider (light/dark)
 ├── components/
 │   ├── FormFields/               # Reusable form inputs
 │   │   ├── FormInput.tsx         # Text input with validation
 │   │   ├── FormDropdown.tsx      # Searchable dropdown
 │   │   └── FormDatePicker.tsx    # Native date picker
 │   ├── Feedback/
-│   │   └── ValidationIcon.tsx    # Visual validation feedback
+│   │   ├── ValidationIcon.tsx    # Visual validation feedback
+│   │   └── FeedbackOverlay.tsx   # Full-screen feedback
+│   ├── Navigation/               # 🆕 Navigation components
+│   │   └── FAB.tsx               # Floating Action Button
+│   ├── QR/                       # 🆕 QR Scanner
+│   │   └── QRScanner.tsx         # Camera + QR detection
 │   └── OrdenTrabajo/             # Feature components
-│       ├── HeaderForm.tsx        # Cliente + Fecha + Agencia (conditional)
-│       └── DetallesForm.tsx      # Dynamic list of extintores
+│       ├── HeaderForm.tsx        # Cliente + Fecha + Ubicación (conditional)
+│       ├── DetallesForm.tsx      # Dynamic list of extintores
+│       ├── FinalForm.tsx         # Teléfono + Observaciones + Préstamo
+│       ├── OrdenCard.tsx         # 🆕 Card for orden in list
+│       └── SearchBar.tsx         # 🆕 Search with filters
 └── components/index.ts           # Barrel exports
 ```
 
 ### Key Architectural Patterns
 
-**1. Form Data Management (Progressive Disclosure)**
-- Form split into logical sections: Header → Detalles → Final
-- `HeaderForm`: Client, delivery date, agency (conditional on client)
-- `DetallesForm`: Dynamic list of fire extinguisher details with add/remove
-- Conditional fields based on selected values (e.g., agency only for "BANCO SOLIDARIO")
+**1. Navigation Architecture (Expo Router + Stack)**
+- **File-based routing**: Routes defined by file structure in `app/` folder
+- **Stack Navigation**: Native headers, back navigation, no Drawer (Expo Go compatibility)
+- **Nested Stacks**: Groups like `orden/` and `nueva-orden/` have their own Stack layouts
+- **Dynamic routes**: `[id].tsx` for parametrized routes (e.g., `/orden/001`)
+- **Reason for Stack over Drawer**: `react-native-reanimated` issues with Expo Go, simpler implementation
 
-**2. Offline-First with AsyncStorage**
-- All form data persists automatically to AsyncStorage
+**2. CRUD Operations with ordenService**
+- Centralized service for all orden operations: `createOrden()`, `getOrdenes()`, `updateOrden()`, `deleteOrden()`
+- ID-based storage: Each orden stored separately (`ordenes:data:{id}`)
+- Index list: `ordenes:list` maintains array of all orden IDs
+- Auto-incrementing IDs: `ordenes:lastId` tracks next ID
+- Search functionality: `searchByCliente()`, `searchByNumero()`
+
+**3. Form Data Management (Progressive Disclosure)**
+- **2-step form**: Paso 1 (Cliente) → Paso 2 (Extintores + Final)
+- **Temporary storage**: `temp_nueva_orden` for in-progress forms, `temp_edit_orden` for edits
+- `HeaderForm`: Client, delivery date, agency/direccion (conditional on client)
+- `DetallesForm`: Dynamic list of fire extinguisher details with add/remove + QR scanner
+- `FinalForm`: Teléfono, observaciones, préstamo de extintores
+- Conditional fields based on selected values (e.g., agency only for "BANCO SOLIDARIO S.A.")
+
+**4. Offline-First with AsyncStorage**
+- All data persists automatically to AsyncStorage (Expo Go compatible)
 - `StorageUtils` service provides type-safe wrappers: `getJSON<T>()`, `setJSON()`, `remove()`
 - `useFormData` hook integrates auto-save with debouncing (500ms default)
-- Data loads on mount, saves on change
+- Migration service: `migrationService` handles data schema updates
 
-**3. Real-time Validation with Zod**
-- Schemas defined in `validationService.ts`: `HeaderSchema`, `DetallesSchema`, `DetalleExtintorSchema`
+**5. Real-time Validation with Zod**
+- Schemas defined in `validationService.ts`: `HeaderSchema`, `DetallesSchema`, `FinalSchema`, `OrdenTrabajoSchemaComplete`
 - `validateData()` function returns `{ valid: boolean, errors: Record<string, string> }`
 - Validation occurs on field blur (touched) and before submit
 - Spanish error messages configured in Zod schemas
 
-**4. Custom Hooks Pattern**
+**6. Custom Hooks Pattern**
 - `useFormData<T>`: Generic hook managing form state, errors, touched fields, validation, and persistence
-  - Returns: `{ data, errors, touched, updateField, updateMultiple, reset, validate, setTouched }`
-  - Auto-saves to AsyncStorage with configurable debounce
-- `useFieldVisibility`: Encapsulates conditional field logic (e.g., show agencia if client === "BANCO SOLIDARIO")
-- `useStorage<T>`: Low-level AsyncStorage wrapper for any key-value storage needs
+- `useFieldVisibility`: Encapsulates conditional field logic
+- `useStorage<T>`: Low-level AsyncStorage wrapper
+- `useQRReader`: QR scanning with validation and auto-fill
+- `useHapticFeedback`: Wrapper for expo-haptics with configuration
 
-**5. Component Composition**
+**7. Component Composition**
 - Atomic components in `FormFields/`: `FormInput`, `FormDropdown`, `FormDatePicker`
-- Each form field component accepts:
-  - `value`, `onValueChange`
-  - `label`, `placeholder`
-  - `error`, `touched` (for validation UI)
-  - `isDark` (for theme)
+- Feature components: `OrdenCard`, `SearchBar`, `FAB`
+- Each component accepts `isDark` prop for theming
 - `ValidationIcon` provides visual feedback (🟢 valid, 🔴 error)
 
-**6. Dynamic Lists in DetallesForm**
+**8. Dynamic Lists & QR Integration**
 - Each fire extinguisher is a `DetalleExtintor` object with unique `id`
-- Add/remove buttons manage the `detalles` array
+- Add/remove/QR scan buttons manage the `detalles` array
 - Cascading dropdowns: selecting `capacidadUnidad` filters `capacidadValor` options
 - Collapsible items with header showing extintor number
-- Per-item validation using `DetalleExtintorSchema`
+- QR scanner auto-fills extintor data from JSON payload
 
-**7. Dark Mode Support**
-- `useColorScheme()` detects system theme
-- All components accept `isDark` prop
-- Styles adjust for light/dark: background, text color, border color
+**9. Dark Mode Support**
+- `ThemeContext` provides theme state across app
+- `useTheme()` hook for accessing theme in components
+- All components support light/dark themes
 - Configured in `app.json`: `userInterfaceStyle: "automatic"`
 
 ## Development Workflow
@@ -283,7 +327,9 @@ If 3+ answers are ✅ → Install. Otherwise, find alternative or use Developmen
 **Core Types** (`src/types/ordenTrabajo.ts`):
 - `DetalleExtintor`: Individual fire extinguisher details
   - `id`, `extintorNro`, `capacidadUnidad`, `capacidadValor`, `marca`, `tipo`
+- `EstadoOrden`: `'completada' | 'anulada'` (orden status)
 - `OrdenTrabajoFormData`: Complete form data structure
+  - **Metadata**: `id`, `estado`, `fechaCreacion`, `fechaModificacion`
   - Header fields: `fechaEntrega`, `cliente`, `agencia`, `direccion`
   - Final fields: `telefono`, `observaciones`, `prestamoExtintores`, `cantidadPrestamo`
   - Dynamic list: `detalles: DetalleExtintor[]`
@@ -303,16 +349,18 @@ All dropdown options defined in `src/constants/ordenTrabajoConstants.ts`:
 
 **Zod Schemas** (`src/services/validationService.ts`):
 - `HeaderSchema`: Validates fechaEntrega, cliente, conditional agencia/direccion
-- `DetalleExtintorSchema`: Validates each extintor (all fields required except agencia/direccion)
+- `DetalleExtintorSchema`: Validates each extintor (all fields required, extintorNro: 1-10 digits)
 - `DetallesSchema`: Validates array of extintores (min 1 item)
+- `FinalSchema`: Validates telefono (7-15 digits), observaciones (max 500 chars), prestamo
+- `OrdenTrabajoSchemaComplete`: Complete form validation (Header + Detalles + Final)
 
 **Usage Pattern:**
 ```typescript
-import { validateData, HeaderSchema } from './services/validationService'
+import { validateData, OrdenTrabajoSchemaComplete } from './services/validationService'
 
-const result = validateData(HeaderSchema, formData)
+const result = validateData(OrdenTrabajoSchemaComplete, formData)
 if (result.valid) {
-  // Proceed
+  // Submit form
 } else {
   // Display result.errors
 }
@@ -341,10 +389,23 @@ if (validate()) {
 
 ## Testing Approach
 
-- `App.tsx` contains test suite for all phases (Phases 1-5)
-- Tests verify: imports, types, constants, validation, AsyncStorage, components
-- Run tests by launching Expo and checking console output
-- Expected output: "🎉 TODOS LOS TESTS PASARON!" in console
+**Development Testing:**
+- `app/test.tsx` screen for testing components and services during development
+- Test CRUD operations, QR scanner, form components, etc.
+- Run tests by navigating to `/test` route in app
+
+**Manual Testing Workflow:**
+1. Implement feature incrementally
+2. Test in Expo Go on physical device (Android priority)
+3. Verify TypeScript: `npx tsc --noEmit`
+4. Get user approval before commit
+5. Document changes and commit
+
+**Testing Screens:**
+- Lista de órdenes: Pull-to-refresh, search, navigation
+- Detalles: All data display, back navigation
+- Formulario: Validation, persistence, submit
+- QR Scanner: Permissions, scanning, auto-fill
 
 ## UI/UX Principles
 
@@ -356,23 +417,45 @@ if (validate()) {
 
 ## Project Status
 
-Phase tracking (see README.md for details):
-- ✅ FASE 1: Setup Inicial (dependencies, structure, types, constants, services)
-- ✅ FASE 2: Hooks Base (useStorage, useFormData, useFieldVisibility)
-- ✅ FASE 3: Componentes Base (FormInput, FormDropdown, FormDatePicker, ValidationIcon)
-- ✅ FASE 4: Header Form (cliente + fecha + conditional agencia)
-- ✅ FASE 5: Detalles Dinámicos (dynamic list, cascading dropdowns, validation)
-- 📋 FASE 5.5: QR Reader (optional - scan QR to auto-fill extintores)
-- ⏳ FASE 6: Final + Submit (ubicación, teléfono, observaciones, préstamo, API integration)
-- ⏳ FASE 7: Testing (end-to-end, offline, performance)
+**Current Phase: FASE 8 - Actions & Polish** 🔄
 
-Progress: 5 of 7 phases completed (71%)
+Phase tracking (see README.md and docs/ for details):
+- ✅ FASE 1: Setup Inicial (dependencies, structure, types, constants, services)
+- ✅ FASE 2: Hooks Base (useStorage, useFormData, useFieldVisibility, useQRReader, useHapticFeedback)
+- ✅ FASE 3: Componentes Base (FormInput, FormDropdown, FormDatePicker, ValidationIcon, FeedbackOverlay)
+- ✅ FASE 4: Header Form (cliente + fecha + conditional agencia/direccion)
+- ✅ FASE 5: Detalles Dinámicos (dynamic list, cascading dropdowns, validation, collapsible items)
+- ✅ FASE 5.5: QR Reader (scan QR to auto-fill extintores, haptic feedback)
+- ✅ FASE 6: Final + Submit (teléfono, observaciones, préstamo, submit with AsyncStorage)
+- ✅ FASE 7: Navegación (Expo Router + Stack Navigation)
+  - ✅ Subfase 7.0-7.1: Setup Expo Router, Stack Navigation
+  - ✅ Subfase 7.2: Lista de Órdenes + CRUD (ordenService, OrdenCard, SearchBar, FAB)
+  - ✅ Subfase 7.3: Detalles de Orden (dynamic route, full data display)
+  - ✅ Subfase 7.4: Formulario 2 Pasos (paso1: Cliente, paso2: Extintores + Final)
+- 🔄 FASE 8: Acciones y Polish (In Progress)
+  - ✅ Subfase 8.1: Editar Orden (edit mode in formulario)
+  - ⏳ Subfase 8.2: About + Configuración (secondary screens)
+  - ⏳ Subfase 8.3: Compartir Orden (share/export functionality - optional)
+  - ⏳ Subfase 8.4: Testing Final + Limpieza (exhaustive testing, cleanup)
+
+**Progress: 87.5%** (7 of 8 phases completed, phase 8 in progress)
+
+**Next Steps:**
+1. Complete Subfase 8.2: About + Configuración screens
+2. Subfase 8.4: Final testing and cleanup
+3. (Optional) Subfase 8.3: Share functionality
+4. Production ready! 🚀
 
 ## Important Notes
 
-- TypeScript strict mode is ENABLED (`tsconfig.json`)
-- New Architecture is NOT enabled (Expo Go limitation)
-- Spanish language used in UI, validation messages, and comments
-- All documentation in `docs/` organized by phase (00-ANALISIS, 01-FASE1-SETUP, etc.)
+- **TypeScript strict mode** is ENABLED (`tsconfig.json`)
+- **New Architecture is NOT enabled** (Expo Go limitation)
+- **Stack Navigation over Drawer**: Drawer incompatible with Expo Go due to `react-native-reanimated` issues
+- **Expo Go compatible**: All libraries work with QR scan, no Development Build required
+- **Spanish language** used in UI, validation messages, and comments
+- **All documentation** in `docs/` organized by phase (00-ANALISIS, 01-FASE1-SETUP, ..., 08-FASE8-ACCIONES)
+- **Primary platform**: Android (90% of users), iOS tested occasionally
 - See `copilot-instructions.md` for detailed GitHub Copilot context
 - See `README.md` for complete project overview and setup instructions
+- See `docs/07-FASE7-NAVEGACION/` for navigation architecture documentation
+- See `docs/08-FASE8-ACCIONES/PLAN_FASE8.md` for current phase plan

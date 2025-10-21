@@ -71,6 +71,18 @@ export default function RootLayout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="orden"
+            options={{
+              headerShown: false, // Usa su propio Stack layout
+            }}
+          />
+          <Stack.Screen
+            name="nueva-orden"
+            options={{
+              headerShown: false, // Usa su propio Stack layout
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </SafeAreaProvider>

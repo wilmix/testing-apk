@@ -4,9 +4,9 @@
  * FASE 7.3 - Muestra información completa de una orden
  */
 
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState, useEffect } from 'react'
 import { useTheme } from '../../src/contexts/ThemeContext'
 import { ordenService } from '../../src/services/ordenService'
@@ -14,6 +14,7 @@ import type { OrdenTrabajoFormData } from '../../src/types/ordenTrabajo'
 
 export default function OrdenDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const router = useRouter()
   const { theme, isDark } = useTheme()
 
   const [orden, setOrden] = useState<OrdenTrabajoFormData | null>(null)
@@ -88,6 +89,37 @@ export default function OrdenDetailsScreen() {
   // Estado color y emoji
   const estadoColor = orden.estado === 'completada' ? '#4CAF50' : '#F44336'
   const estadoEmoji = orden.estado === 'completada' ? '🟢' : '🔴'
+
+  // Handler para editar orden
+  const handleEditar = () => {
+    router.push(`/nueva-orden/paso1?id=${id}&mode=edit`)
+  }
+
+  // Handler para anular orden
+  const handleAnular = () => {
+    Alert.alert(
+      '⚠️ Anular Orden',
+      `¿Estás seguro de anular la orden #${id}?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Anular',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await ordenService.anularOrden(id)
+              Alert.alert('✅ Orden Anulada', 'La orden fue anulada exitosamente', [
+                { text: 'OK', onPress: () => router.back() }
+              ])
+            } catch (error) {
+              console.error('Error anulando orden:', error)
+              Alert.alert('Error', 'No se pudo anular la orden')
+            }
+          }
+        }
+      ]
+    )
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={['bottom']}>
@@ -248,6 +280,25 @@ export default function OrdenDetailsScreen() {
           )}
         </View>
 
+        {/* Acciones (solo si orden activa) */}
+        {orden.estado !== 'anulada' && (
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity
+              style={[styles.actionButton, styles.editButton, { backgroundColor: '#007AFF' }]}
+              onPress={handleEditar}
+            >
+              <Text style={styles.actionButtonText}>✏️ Editar Orden</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.deleteButton, { backgroundColor: '#F44336' }]}
+              onPress={handleAnular}
+            >
+              <Text style={styles.actionButtonText}>🗑️ Anular Orden</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
       </ScrollView>
     </SafeAreaView>
   )
@@ -390,5 +441,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginTop: 4,
+  },
+
+  // Acciones
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editButton: {},
+  deleteButton: {},
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 })

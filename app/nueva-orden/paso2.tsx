@@ -2,11 +2,12 @@
  * app/nueva-orden/paso2.tsx
  * Paso 2 del formulario: Detalles + Información Final + Submit
  * FASE 7.4 - Formulario 2 Pasos
+ * FASE 8.1 - Soporta modo edición
  */
 
 import { View, StyleSheet, ScrollView, Text, TouchableOpacity, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router'
 import { useState, useEffect } from 'react'
 import { useTheme } from '../../src/contexts/ThemeContext'
 import { DetallesForm } from '../../src/components/OrdenTrabajo/DetallesForm'
@@ -16,22 +17,38 @@ import { ordenService } from '../../src/services/ordenService'
 import type { OrdenTrabajoFormData } from '../../src/types/ordenTrabajo'
 
 const TEMP_STORAGE_KEY = 'temp_nueva_orden'
+const TEMP_EDIT_KEY = 'temp_edit_orden'
 
 export default function NuevaOrdenPaso2Screen() {
   const router = useRouter()
+  const navigation = useNavigation()
   const { theme, isDark } = useTheme()
+  const params = useLocalSearchParams<{ id?: string; mode?: string }>()
+
+  // Detectar si estamos en modo edición
+  const isEditMode = params.mode === 'edit' && params.id
+  const editId = params.id
 
   const [formData, setFormData] = useState<OrdenTrabajoFormData | null>(null)
   const [currentStep, setCurrentStep] = useState<'detalles' | 'final'>('detalles')
 
+  // Actualizar título según modo
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEditMode ? `Editar Orden #${editId} - Paso 2` : 'Nueva Orden - Paso 2'
+    })
+  }, [isEditMode, editId])
+
   // Cargar datos del paso 1
   useEffect(() => {
     loadTempData()
-  }, [])
+  }, [isEditMode, editId])
 
   const loadTempData = async () => {
     try {
-      const tempData = await storageUtils.getJSON<OrdenTrabajoFormData>(TEMP_STORAGE_KEY, undefined)
+      const key = isEditMode ? TEMP_EDIT_KEY : TEMP_STORAGE_KEY
+      const tempData = await storageUtils.getJSON<OrdenTrabajoFormData>(key, undefined)
+
       if (tempData) {
         // Convertir fechas de string a Date
         const dataWithDates = {
@@ -46,7 +63,16 @@ export default function NuevaOrdenPaso2Screen() {
         Alert.alert(
           'Error',
           'No se encontraron datos del paso anterior',
-          [{ text: 'OK', onPress: () => router.replace('/nueva-orden/paso1') }]
+          [{
+            text: 'OK',
+            onPress: () => {
+              if (isEditMode && editId) {
+                router.replace(`/nueva-orden/paso1?id=${editId}&mode=edit`)
+              } else {
+                router.replace('/nueva-orden/paso1')
+              }
+            }
+          }]
         )
       }
     } catch (error) {
@@ -58,7 +84,8 @@ export default function NuevaOrdenPaso2Screen() {
   // Guardar datos temporales
   const saveTempData = async (data: OrdenTrabajoFormData) => {
     try {
-      await storageUtils.setJSON(TEMP_STORAGE_KEY, data)
+      const key = isEditMode ? TEMP_EDIT_KEY : TEMP_STORAGE_KEY
+      await storageUtils.setJSON(key, data)
     } catch (error) {
       console.error('Error guardando datos temporales:', error)
     }
@@ -74,39 +101,70 @@ export default function NuevaOrdenPaso2Screen() {
     setCurrentStep('final')
   }
 
-  // FinalForm submit → crear orden y navegar a lista
+  // FinalForm submit → crear/actualizar orden y navegar
   const handleSubmit = async (data: OrdenTrabajoFormData) => {
     try {
-      // Crear orden en AsyncStorage
-      const newId = await ordenService.createOrden(data)
+      if (isEditMode && editId) {
+        // MODO EDICIÓN: Actualizar orden existente
+        await ordenService.updateOrden(editId, data)
 
-      // Limpiar datos temporales
-      await storageUtils.remove(TEMP_STORAGE_KEY)
+        // Limpiar datos temporales de edición
+        await storageUtils.remove(TEMP_EDIT_KEY)
 
-      // Mostrar éxito
-      Alert.alert(
-        '✅ Orden Creada',
-        `Orden #${newId} creada exitosamente`,
-        [
-          {
-            text: 'Ver Orden',
-            onPress: () => {
-              router.replace('/')
-              setTimeout(() => {
-                router.push(`/orden/${newId}`)
-              }, 100)
+        // Mostrar éxito
+        Alert.alert(
+          '✅ Orden Actualizada',
+          `Orden #${editId} actualizada exitosamente`,
+          [
+            {
+              text: 'Ver Orden',
+              onPress: () => {
+                router.replace('/')
+                setTimeout(() => {
+                  router.push(`/orden/${editId}`)
+                }, 100)
+              }
+            },
+            {
+              text: 'Ver Lista',
+              onPress: () => router.replace('/'),
+              style: 'cancel'
             }
-          },
-          {
-            text: 'Ver Lista',
-            onPress: () => router.replace('/'),
-            style: 'cancel'
-          }
-        ]
-      )
+          ]
+        )
+      } else {
+        // MODO CREACIÓN: Crear nueva orden
+        const newId = await ordenService.createOrden(data)
+
+        // Limpiar datos temporales
+        await storageUtils.remove(TEMP_STORAGE_KEY)
+
+        // Mostrar éxito
+        Alert.alert(
+          '✅ Orden Creada',
+          `Orden #${newId} creada exitosamente`,
+          [
+            {
+              text: 'Ver Orden',
+              onPress: () => {
+                router.replace('/')
+                setTimeout(() => {
+                  router.push(`/orden/${newId}`)
+                }, 100)
+              }
+            },
+            {
+              text: 'Ver Lista',
+              onPress: () => router.replace('/'),
+              style: 'cancel'
+            }
+          ]
+        )
+      }
     } catch (error) {
-      console.error('Error creando orden:', error)
-      Alert.alert('Error', 'No se pudo crear la orden. Intenta de nuevo.')
+      console.error('Error guardando orden:', error)
+      const errorMsg = isEditMode ? 'actualizar' : 'crear'
+      Alert.alert('Error', `No se pudo ${errorMsg} la orden. Intenta de nuevo.`)
     }
   }
 

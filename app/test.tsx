@@ -13,6 +13,7 @@ import { ordenService } from '../src/services/ordenService'
 import type { OrdenTrabajoFormData } from '../src/types/ordenTrabajo'
 import { OrdenCard } from '../src/components/OrdenTrabajo/OrdenCard'
 import { SearchBar } from '../src/components/OrdenTrabajo/SearchBar'
+import { FAB } from '../src/components/Navigation/FAB'
 
 export default function TestScreen() {
   const router = useRouter()
@@ -408,6 +409,17 @@ export default function TestScreen() {
           <Text style={styles.actionButtonText}>🗑️ Limpiar Todas</Text>
         </TouchableOpacity>
       </View>
+
+      {/* FAB - Solo visible en modo Cards */}
+      {showCards && (
+        <FAB
+          onPress={() => {
+            addLog('➕ FAB presionado - Navegaría a /nueva-orden/paso1')
+            Alert.alert('FAB Test', 'En la app real navegaría a crear nueva orden')
+          }}
+          isDark={isDark}
+        />
+      )}
     </SafeAreaView>
   )
 }

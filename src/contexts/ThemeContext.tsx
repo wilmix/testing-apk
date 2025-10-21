@@ -1,23 +1,28 @@
 /**
  * ThemeContext - Sistema de temas centralizado para dark/light mode
  *
- * Proporciona acceso global al tema actual y detecta automáticamente
- * el color scheme del sistema usando useColorScheme()
+ * Proporciona acceso global al tema actual con 3 modos:
+ * - 'auto': Detecta automáticamente usando el sistema
+ * - 'light': Fuerza modo claro
+ * - 'dark': Fuerza modo oscuro
+ *
+ * Las preferencias se guardan en AsyncStorage y persisten entre sesiones.
  *
  * Uso:
  * ```typescript
  * import { useTheme } from '@/contexts/ThemeContext'
  *
  * const MyComponent = () => {
- *   const { theme, isDark } = useTheme()
+ *   const { theme, isDark, themeMode, setThemeMode } = useTheme()
  *
  *   return <View style={{ backgroundColor: theme.background }}>...</View>
  * }
  * ```
  */
 
-import React, { createContext, useContext, ReactNode } from 'react'
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react'
 import { useColorScheme } from 'react-native'
+import { storageUtils } from '../services/storageService'
 
 /**
  * Definición de colores para Light Theme
@@ -143,6 +148,11 @@ const darkTheme = {
 } as const
 
 /**
+ * Modo del tema
+ */
+export type ThemeMode = 'auto' | 'light' | 'dark'
+
+/**
  * Tipo del tema (exportado para TypeScript)
  */
 export type Theme = {
@@ -208,12 +218,19 @@ export type Theme = {
 interface ThemeContextType {
   theme: Theme
   isDark: boolean
+  themeMode: ThemeMode
+  setThemeMode: (mode: ThemeMode) => Promise<void>
 }
 
 /**
  * Context para el tema
  */
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
+/**
+ * Storage key para la preferencia del tema
+ */
+const THEME_STORAGE_KEY = 'app:theme_preference'
 
 /**
  * Props del ThemeProvider
@@ -225,8 +242,8 @@ interface ThemeProviderProps {
 /**
  * ThemeProvider - Componente que envuelve la app y proporciona el tema
  *
- * Detecta automáticamente el color scheme del sistema usando useColorScheme()
- * y proporciona el tema correspondiente a todos los componentes hijos
+ * Gestiona la preferencia del tema del usuario (auto/light/dark) con persistencia
+ * en AsyncStorage. En modo 'auto', detecta automáticamente el color scheme del sistema.
  *
  * @example
  * ```typescript
@@ -240,17 +257,60 @@ interface ThemeProviderProps {
  * ```
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // Estado del modo de tema (default: 'auto')
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('auto')
+  const [isLoading, setIsLoading] = useState(true)
+
   // Detectar color scheme del sistema (null | 'light' | 'dark')
-  const colorScheme = useColorScheme()
+  const systemColorScheme = useColorScheme()
 
-  // Determinar si es dark mode (default: light si es null)
-  const isDark = colorScheme === 'dark'
+  // Cargar preferencia guardada al montar
+  useEffect(() => {
+    async function loadThemePreference() {
+      try {
+        const savedMode = await storageUtils.getJSON<ThemeMode>(THEME_STORAGE_KEY)
+        if (savedMode && ['auto', 'light', 'dark'].includes(savedMode)) {
+          setThemeModeState(savedMode)
+        }
+      } catch (error) {
+        console.log('Error loading theme preference:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadThemePreference()
+  }, [])
 
-  // Seleccionar tema según el color scheme
+  // Función para cambiar el modo del tema y guardarlo
+  const setThemeMode = async (mode: ThemeMode) => {
+    try {
+      await storageUtils.setJSON(THEME_STORAGE_KEY, mode)
+      setThemeModeState(mode)
+    } catch (error) {
+      console.error('Error saving theme preference:', error)
+    }
+  }
+
+  // Determinar si es dark mode según la preferencia
+  let isDark: boolean
+  if (themeMode === 'auto') {
+    // Modo automático: usar el sistema (default light si null)
+    isDark = systemColorScheme === 'dark'
+  } else {
+    // Modo manual: usar la preferencia del usuario
+    isDark = themeMode === 'dark'
+  }
+
+  // Seleccionar tema según isDark
   const theme = isDark ? darkTheme : lightTheme
 
+  // Mostrar un placeholder mientras se carga la preferencia
+  if (isLoading) {
+    return null // o un <LoadingScreen /> si prefieres
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, isDark }}>
+    <ThemeContext.Provider value={{ theme, isDark, themeMode, setThemeMode }}>
       {children}
     </ThemeContext.Provider>
   )
@@ -259,22 +319,25 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 /**
  * Hook useTheme - Acceso al tema actual
  *
- * Proporciona acceso al tema y al estado isDark desde cualquier componente
+ * Proporciona acceso al tema, estado isDark, modo actual y función para cambiar el modo
  *
  * @throws Error si se usa fuera de ThemeProvider
  *
- * @returns {ThemeContextType} { theme, isDark }
+ * @returns {ThemeContextType} { theme, isDark, themeMode, setThemeMode }
  *
  * @example
  * ```typescript
  * const MyComponent = () => {
- *   const { theme, isDark } = useTheme()
+ *   const { theme, isDark, themeMode, setThemeMode } = useTheme()
  *
  *   return (
  *     <View style={{ backgroundColor: theme.background }}>
  *       <Text style={{ color: theme.text }}>
- *         Current mode: {isDark ? 'Dark' : 'Light'}
+ *         Current mode: {isDark ? 'Dark' : 'Light'} ({themeMode})
  *       </Text>
+ *       <Button onPress={() => setThemeMode('dark')}>
+ *         Switch to Dark
+ *       </Button>
  *     </View>
  *   )
  * }

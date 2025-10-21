@@ -1,8 +1,8 @@
-import { Stack } from 'expo-router'
+import { Stack, useRouter } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { ThemeProvider } from '../src/contexts/ThemeContext'
 import { useEffect, useState } from 'react'
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native'
 import { migrationService } from '../src/services/migrationService'
 
 /**
@@ -13,6 +13,32 @@ function LoadingScreen() {
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color="#007AFF" />
       <Text style={styles.loadingText}>Preparando aplicación...</Text>
+    </View>
+  )
+}
+
+/**
+ * Botones del header para navegación
+ */
+function HeaderButtons() {
+  const router = useRouter()
+
+  return (
+    <View style={styles.headerButtons}>
+      <TouchableOpacity
+        onPress={() => router.push('/about')}
+        style={styles.headerButton}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.headerButtonText}>ℹ️</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push('/configuracion')}
+        style={styles.headerButton}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.headerButtonText}>⚙️</Text>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -46,6 +72,7 @@ export default function RootLayout() {
               title: '📋 Mis Órdenes',
               headerStyle: { backgroundColor: '#007AFF' },
               headerTintColor: '#fff',
+              headerRight: () => <HeaderButtons />,
             }}
           />
           <Stack.Screen
@@ -100,5 +127,18 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#666',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  headerButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginLeft: 8,
+  },
+  headerButtonText: {
+    fontSize: 22,
   },
 })

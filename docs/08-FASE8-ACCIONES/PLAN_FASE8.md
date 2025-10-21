@@ -1,7 +1,7 @@
 # 🚀 FASE 8: ACCIONES Y POLISH
 
 **Fecha Inicio**: 2025-10-21
-**Status**: 🚧 EN PROGRESO (Subfase 8.1 ✅)
+**Status**: 🚧 EN PROGRESO (Subfases 8.1 ✅, 8.2 ✅)
 **Tiempo estimado**: 6-8 horas
 **Prioridad**: 🟡 MEDIA
 
@@ -43,27 +43,43 @@ Completar funcionalidades pendientes del plan original y pulir la aplicación.
 
 ---
 
-### Subfase 8.2: Pantallas About + Config (1.5-2h)
+### Subfase 8.2: Pantallas About + Config (1.5-2h) ✅ COMPLETADO
 
 **Objetivo**: Completar pantallas secundarias del Drawer.
 
 **Tasks About**:
-- [ ] Crear `app/about.tsx`
-- [ ] Logo, título, versión
-- [ ] Info desarrollador
-- [ ] Copyright
+- [x] Crear `app/about.tsx`
+- [x] Logo, título, versión
+- [x] Info desarrollador con link a sitio web
+- [x] Copyright
 
 **Tasks Configuración**:
-- [ ] Crear `app/configuracion.tsx`
-- [ ] Toggle Dark Mode (Auto/Light/Dark)
-- [ ] Guardar preferencia en AsyncStorage
-- [ ] Aplicar preferencia en ThemeContext
-- [ ] Botón "Limpiar Caché" (opcional)
+- [x] Crear `app/configuracion.tsx`
+- [x] Toggle Dark Mode (Auto/Light/Dark)
+- [x] Guardar preferencia en AsyncStorage
+- [x] Aplicar preferencia en ThemeContext
+- [x] Botón "Limpiar Caché" (placeholder)
 
-**Archivos**:
-- `app/about.tsx` (crear)
-- `app/configuracion.tsx` (crear)
-- `src/contexts/ThemeContext.tsx` (modificar para preferencias)
+**Archivos modificados**:
+- `app/about.tsx` - Pantalla completa con logo, versión, desarrollador, tecnologías y copyright
+- `app/configuracion.tsx` - Toggle de tema con 3 modos (Auto/Light/Dark) + persistencia
+- `src/contexts/ThemeContext.tsx` - Soporte para preferencias guardadas en AsyncStorage
+- `app/_layout.tsx` - Botones de navegación (ℹ️ About, ⚙️ Config) en header principal
+
+**Implementación**:
+- **ThemeContext** ahora soporta 3 modos: `'auto'`, `'light'`, `'dark'`
+- Preferencias se guardan en AsyncStorage con key `app:theme_preference`
+- Cambios de tema son instantáneos y persisten entre sesiones
+- Botones de navegación en header principal (ℹ️ y ⚙️)
+- About incluye link clickeable a sitio web del desarrollador (willysalas.com)
+- Dark mode funciona en todas las pantallas de la app
+
+**Testing**:
+- ✅ Navegación a About y Configuración desde header
+- ✅ Cambio de tema (Auto/Light/Dark) funciona correctamente
+- ✅ Persistencia del tema verificada (sobrevive cierre de app)
+- ✅ Dark mode funciona en todas las pantallas
+- ✅ TypeScript sin errores
 
 ---
 
@@ -144,10 +160,10 @@ GENERAL
 
 **CRÍTICO (hacer primero)**:
 1. ✅ Subfase 8.1: Editar Orden (core feature)
-2. ✅ Subfase 8.4: Testing Final (calidad)
+2. ⏳ Subfase 8.4: Testing Final (calidad) - PENDIENTE
 
 **IMPORTANTE (hacer después)**:
-3. ⚠️ Subfase 8.2: About + Config (UX completa)
+3. ✅ Subfase 8.2: About + Config (UX completa)
 
 **OPCIONAL (si hay tiempo)**:
 4. 💡 Subfase 8.3: Compartir (nice to have)
@@ -180,10 +196,10 @@ GENERAL
 - Migración de datos
 
 **⏳ PENDIENTE (FASE 8)**:
-- Editar orden existente
-- About screen
-- Configuración con preferencias
-- Compartir orden
+- ✅ ~~Editar orden existente~~
+- ✅ ~~About screen~~
+- ✅ ~~Configuración con preferencias~~
+- Compartir orden (opcional)
 - Testing exhaustivo
 - Limpieza código
 

@@ -1,4 +1,4 @@
-# 📱 Orden de Trabajo Mobile - React Native + Expo
+# 📱 REX/Mobile - React Native + Expo
 
 App mobile **offline-first** para field workers (técnicos en campo) de recarga de extintores.
 

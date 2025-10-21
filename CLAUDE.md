@@ -174,11 +174,86 @@ src/
 ## Development Workflow
 
 ### Standard Flow (For Each Feature/Phase)
-1. **Implement**: Write code, check types (`npx tsc --noEmit`)
-2. **Test in Expo Go**: `npx expo start`, scan QR on device
-3. **Verify on Phone**: Test functionality, check persistence
-4. **Git Commit**: Only if tests pass
-5. **Next Phase**: Move to next feature
+
+**CRITICAL: All development and testing MUST be done with Expo Go**
+
+This is the mandatory workflow cycle - NO exceptions:
+
+1. **Implement**:
+   - Write code incrementally (one component/feature at a time)
+   - Check TypeScript types (`npx tsc --noEmit`)
+   - NO large commits - small, testable increments
+
+2. **Test in Expo Go**:
+   - ALWAYS run `npx expo start`
+   - Scan QR on physical Android device
+   - Test the specific feature implemented
+   - Verify on actual device, NOT emulator
+
+3. **User Approval**:
+   - Show working feature to user
+   - User MUST test and approve functionality
+   - Get explicit "ok funciona bien" confirmation
+   - If issues found, go back to step 1
+
+4. **Documentation**:
+   - Update relevant documentation in `docs/`
+   - Document what was implemented
+   - Include testing results
+   - Add screenshots/logs if helpful
+
+5. **Git Commit**:
+   - ONLY commit after user approval
+   - User provides commit message or approves provided message
+   - Use conventional commit format with emoji
+   - Keep commits focused on single feature
+
+6. **Next Feature**:
+   - Move to next component/feature in the phase
+   - Repeat cycle from step 1
+
+### Key Principles
+
+- ✅ **Small iterations**: One component at a time
+- ✅ **Test everything**: Every change tested in Expo Go
+- ✅ **User approval**: No commit without "ok"
+- ✅ **Documentation first**: Update docs before commit
+- ✅ **Incremental progress**: Build confidence with each step
+
+### Example Workflow (Subfase 7.2)
+
+```
+Step 1: ordenService.ts
+  → Implement CRUD functions
+  → Test in /test screen
+  → User approval ✅
+  → Update docs
+  → Commit
+
+Step 2: OrdenCard.tsx
+  → Create card component
+  → Test visual rendering in /test
+  → User approval ✅
+  → Update docs
+  → Commit
+
+Step 3: SearchBar.tsx
+  → Create search component
+  → Test search functionality in /test
+  → User approval ✅
+  → Update docs
+  → Commit
+
+Step 4: Continue...
+```
+
+### Never Skip Testing
+
+- ❌ NO "it should work" assumptions
+- ❌ NO commits without device testing
+- ❌ NO batch testing of multiple features
+- ✅ ALWAYS test on real Android device
+- ✅ ALWAYS get user confirmation
 
 ### Library Compatibility (IMPORTANT)
 

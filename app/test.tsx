@@ -12,6 +12,7 @@ import { useTheme } from '../src/contexts/ThemeContext'
 import { ordenService } from '../src/services/ordenService'
 import type { OrdenTrabajoFormData } from '../src/types/ordenTrabajo'
 import { OrdenCard } from '../src/components/OrdenTrabajo/OrdenCard'
+import { SearchBar } from '../src/components/OrdenTrabajo/SearchBar'
 
 export default function TestScreen() {
   const router = useRouter()
@@ -21,6 +22,8 @@ export default function TestScreen() {
   const [ordenCount, setOrdenCount] = useState<number>(0)
   const [showCards, setShowCards] = useState<boolean>(false)
   const [ordenes, setOrdenes] = useState<OrdenTrabajoFormData[]>([])
+  const [allOrdenes, setAllOrdenes] = useState<OrdenTrabajoFormData[]>([])
+  const [isSearching, setIsSearching] = useState<boolean>(false)
 
   const addLog = (message: string) => {
     console.log(message)
@@ -229,12 +232,52 @@ export default function TestScreen() {
     try {
       const ordenesData = await ordenService.getOrdenes()
       setOrdenes(ordenesData)
+      setAllOrdenes(ordenesData) // Guardar todas para búsqueda
       setOrdenCount(ordenesData.length)
       setShowCards(true)
+      setIsSearching(false)
       setLogs([])
     } catch (error) {
       addError(`Error al cargar cards: ${error}`)
     }
+  }
+
+  const handleSearch = async (query: string, filter: 'cliente' | 'numero') => {
+    try {
+      setLogs([])
+      addLog(`🔍 BUSCANDO: "${query}" en campo "${filter}"`)
+      addLog('')
+
+      let resultados: OrdenTrabajoFormData[]
+
+      if (filter === 'cliente') {
+        resultados = await ordenService.searchByCliente(query)
+        addLog(`✅ Búsqueda por cliente: ${resultados.length} resultado(s)`)
+      } else {
+        resultados = await ordenService.searchByNumero(query)
+        addLog(`✅ Búsqueda por número: ${resultados.length} resultado(s)`)
+      }
+
+      if (resultados.length > 0) {
+        resultados.forEach((orden, i) => {
+          addLog(`  ${i + 1}. Orden #${orden.id} - ${orden.cliente}`)
+        })
+      } else {
+        addLog('ℹ️  No se encontraron resultados')
+      }
+
+      setOrdenes(resultados)
+      setIsSearching(true)
+    } catch (error) {
+      addError(`Error en búsqueda: ${error}`)
+    }
+  }
+
+  const handleClearSearch = () => {
+    setOrdenes(allOrdenes)
+    setIsSearching(false)
+    setLogs([])
+    addLog('✅ Búsqueda limpiada - Mostrando todas las órdenes')
   }
 
   return (
@@ -262,6 +305,15 @@ export default function TestScreen() {
         )}
       </View>
 
+      {/* SearchBar - Solo visible en modo Cards */}
+      {showCards && (
+        <SearchBar
+          onSearch={handleSearch}
+          onClear={handleClearSearch}
+          isDark={isDark}
+        />
+      )}
+
       {/* Logs o Cards */}
       <ScrollView style={styles.logsContainer} contentContainerStyle={styles.logsContent}>
         {showCards ? (
@@ -270,10 +322,10 @@ export default function TestScreen() {
             {ordenes.length === 0 ? (
               <View style={styles.emptyState}>
                 <Text style={[styles.emptyText, { color: isDark ? '#888' : '#666' }]}>
-                  No hay órdenes para mostrar
+                  {isSearching ? '🔍 No se encontraron resultados' : 'No hay órdenes para mostrar'}
                 </Text>
                 <Text style={[styles.emptyHint, { color: isDark ? '#666' : '#999' }]}>
-                  Presiona "Test CRUD" para crear una orden
+                  {isSearching ? 'Intenta con otros términos de búsqueda' : 'Presiona "Test CRUD" para crear una orden'}
                 </Text>
               </View>
             ) : (

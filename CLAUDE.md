@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Orden de Trabajo Mobile** - An offline-first React Native + Expo mobile app for field workers (fire extinguisher recharge technicians). The app transforms a web-based form into an optimized mobile experience with 70-80% UX improvement.
+**REX/Mobile** - An offline-first React Native + Expo mobile app for field workers (fire extinguisher recharge technicians). The app transforms a web-based form into an optimized mobile experience with 70-80% UX improvement.
 
 ## Development Philosophy: KISS, DRY, SOLID
 

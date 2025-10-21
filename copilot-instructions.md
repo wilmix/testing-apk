@@ -2,6 +2,9 @@
 
 Este documento proporciona instrucciones detalladas y mejores prácticas para trabajar en proyectos de React Native con Expo. Está diseñado para agentes de IA (como GitHub Copilot) y desarrolladores, basado en consultas previas, principios KISS (Keep It Simple, Stupid), DRY (Don't Repeat Yourself) y SOLID, y recomendaciones actuales de Expo SDK 54 y React Native 0.81.4.
 
+## Project Name
+**REX/Mobile** - Recarga de Extintores Mobile
+
 ## 🎯 Development Philosophy
 
 ### KISS, DRY, SOLID - Core Principles
@@ -46,22 +49,94 @@ Este documento proporciona instrucciones detalladas y mejores prácticas para tr
 
 ## Overview
 - **Framework**: React Native con Expo para desarrollo cross-platform
+- **Navigation**: Expo Router + Stack Navigation (file-based routing)
 - **Versiones**: Expo ~54.0.13, React Native 0.81.4, React 19.1.0, TypeScript ~5.9.2
 - **Target Platform**: **Android** (90% users), iOS secondary
-- **Enfoque**: Apps móviles para trabajo en campo (field workers)
+- **Enfoque**: Apps móviles offline-first para trabajo en campo (técnicos de recarga de extintores)
 - **Principios**: KISS, DRY, SOLID
+- **Arquitectura**: Stack Navigation (no Drawer - incompatible con Expo Go)
 
 ## 🖥️ Environment Setup
-- **Sistema Operativo**: Windows (no Linux/Mac)
+- **Sistema Operativo**: Windows 10/11 (no Linux/Mac)
 - **IDE**: Visual Studio Code (VSCode)
 - **Terminal**: PowerShell (pwsh.exe) - NO bash
 - **Node.js**: v18+ instalado
-- **Proyecto**: c:\Users\willy\projects\testing-apk
-- **Testing**: Android emulator + dispositivos físicos Android
+- **Proyecto**: c:\dev\react-native\testing-app (actualizado desde c:\Users\willy\projects\testing-apk)
+- **Testing**: Expo Go en dispositivos físicos Android (prioridad), iOS ocasional
+- **Branch Actual**: feat/navegacion-gmail
+
+## 📦 Tech Stack Completo
+
+| Component | Library | Version | Notes |
+|-----------|---------|---------|-------|
+| Framework | React Native + Expo | 0.81.4 / ~54.0.13 | Cross-platform |
+| **Navigation** | **Expo Router + Stack** | **~6.0.13** | **File-based routing** |
+| Language | TypeScript | ~5.9.2 | Strict mode enabled |
+| Storage | AsyncStorage | 2.2.0 | Offline-first, Expo Go compatible |
+| Dropdowns | react-native-element-dropdown | 2.12.4 | Touch-optimized with search |
+| Validation | Zod | 3.25.76 | Type-safe, Spanish messages |
+| Date Picker | @react-native-community/datetimepicker | 8.4.4 | Native iOS/Android |
+| QR Scanner | expo-camera | ~17.0.8 | QR scanning, permissions |
+| Haptics | expo-haptics | ~15.0.7 | Vibration feedback |
+| Safe Area | react-native-safe-area-context | ~5.6.0 | Cross-platform |
+| Theming | React Context | Built-in | Dark/Light mode |
+
+## 🏗️ Arquitectura de Navegación
+
+### Stack Navigation (NO Drawer)
+
+**Por qué Stack en vez de Drawer:**
+- ✅ Compatible con Expo Go (no issues con react-native-reanimated)
+- ✅ Headers nativos funcionan out-of-the-box
+- ✅ Implementación más simple
+- ✅ Mejor UX para workflows secuenciales (lista → detalles → editar)
+
+**Estructura:**
+```
+app/                              # Expo Router file-based routing
+├── _layout.tsx                   # Root Stack
+├── index.tsx                     # Lista de Órdenes (Home)
+├── about.tsx                     # About screen
+├── configuracion.tsx             # Configuración screen
+├── test.tsx                      # Testing screen (dev only)
+├── orden/
+│   ├── _layout.tsx               # Stack para detalles
+│   └── [id].tsx                  # Detalles (dynamic route)
+└── nueva-orden/
+    ├── _layout.tsx               # Stack para formulario
+    ├── paso1.tsx                 # Cliente + Fecha + Ubicación
+    └── paso2.tsx                 # Extintores + Info Final
+```
+
+## 📊 Estado del Proyecto
+
+**FASE Actual: FASE 8 - Acciones y Polish** 🔄
+
+**Progreso: 87.5%** (7 de 8 fases completadas)
+
+Fases completadas:
+- ✅ FASE 1-6: Setup → Forms → QR Scanner
+- ✅ FASE 7: Navegación (Expo Router + Stack Navigation)
+  - ✅ 7.0-7.1: Setup Expo Router, Stack Navigation
+  - ✅ 7.2: Lista + CRUD (ordenService, OrdenCard, SearchBar, FAB)
+  - ✅ 7.3: Detalles de Orden (dynamic route)
+  - ✅ 7.4: Formulario 2 Pasos
+- 🔄 FASE 8: Acciones y Polish (En Progreso)
+  - ✅ 8.1: Editar Orden
+  - ⏳ 8.2: About + Configuración
+  - ⏳ 8.3: Compartir (opcional)
+  - ⏳ 8.4: Testing Final
+
+**Next Steps:**
+1. Completar Subfase 8.2: About + Configuración
+2. Subfase 8.4: Testing Final + Limpieza
+3. (Opcional) Subfase 8.3: Compartir/Exportar
 
 ## Troubleshooting
 - **Hot Reload**: Si no actualiza, `npx expo start --clear`.
 - **Librerías**: Confirma versiones compatibles con Expo 54.
+- **Navigation**: Usa Stack (no Drawer) - Drawer incompatible con Expo Go.
+- **Dynamic Routes**: Usa `[id].tsx` para rutas dinámicas con Expo Router.
 
 ---
 
@@ -227,7 +302,14 @@ Si NO a alguna → Buscar alternativa o usar Development Build
 # Git
 git status
 git add -A
-git commit -m "mensaje"
+git commit -m "✨ feat: mensaje"
+
+# Emojis comunes:
+# ✨ feat: new feature
+# 🐛 fix: bug fix
+# ♻️ refactor: refactoring
+# 📝 docs: documentation
+# 🔧 config: configuration
 
 # NPM
 npm install
@@ -235,8 +317,80 @@ npm list
 npx tsc --noEmit
 
 # Expo
-npx expo start --clear
+npx expo start                # Iniciar servidor
+npx expo start --clear        # Limpiar cache y iniciar
 ```
+
+## 🚀 Navigation Patterns (Expo Router)
+
+### File-based Routing
+
+```typescript
+// Navegar a pantalla
+import { useRouter } from 'expo-router'
+const router = useRouter()
+
+router.push('/orden/001')           // Navigate to orden details
+router.push('/nueva-orden/paso1')   // Navigate to new orden form
+router.replace('/')                 // Replace current screen
+router.back()                       // Go back
+```
+
+### Dynamic Routes
+
+```typescript
+// Archivo: app/orden/[id].tsx
+import { useLocalSearchParams } from 'expo-router'
+
+export default function OrdenDetailsScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>()
+  // id = "001", "002", etc.
+}
+```
+
+### Stack Headers
+
+```typescript
+// En _layout.tsx
+<Stack.Screen
+  name="index"
+  options={{
+    title: '📋 Mis Órdenes',
+    headerStyle: { backgroundColor: '#007AFF' },
+    headerTintColor: '#fff',
+  }}
+/>
+```
+
+## 🗄️ CRUD Operations (ordenService)
+
+```typescript
+import { ordenService } from '@/services/ordenService'
+
+// Create
+const newId = await ordenService.createOrden(data)
+
+// Read
+const ordenes = await ordenService.getOrdenes()
+const orden = await ordenService.getOrdenById('001')
+
+// Update
+await ordenService.updateOrden('001', updatedData)
+
+// Delete
+await ordenService.deleteOrden('001')
+
+// Search
+const results = await ordenService.searchByCliente('BANCO')
+const results = await ordenService.searchByNumero('001')
+```
+
+**Storage Structure:**
+- `ordenes:list` - Array of orden IDs
+- `ordenes:data:{id}` - Individual orden data
+- `ordenes:lastId` - Auto-increment counter
+- `temp_nueva_orden` - Temporary storage for new orden
+- `temp_edit_orden` - Temporary storage for editing
 
 ---
 
@@ -332,13 +486,96 @@ expect(detalles.length).toBeGreaterThan(0)
 
 ---
 
+## 🎨 Component Patterns
+
+### Form Components (2-Step Pattern)
+
+```typescript
+// Paso 1: Cliente + Fecha + Ubicación
+// File: app/nueva-orden/paso1.tsx
+<HeaderForm
+  data={formData}
+  onDataChange={setFormData}
+  isDark={isDark}
+/>
+
+// Paso 2: Extintores + Info Final
+// File: app/nueva-orden/paso2.tsx
+{currentStep === 'detalles' ? (
+  <DetallesForm />
+) : (
+  <FinalForm />
+)}
+```
+
+### List Components
+
+```typescript
+// File: app/index.tsx
+<FlatList
+  data={ordenes}
+  renderItem={({ item }) => (
+    <OrdenCard
+      orden={item}
+      onPress={() => router.push(`/orden/${item.id}`)}
+      isDark={isDark}
+    />
+  )}
+  refreshControl={<RefreshControl />}
+/>
+```
+
+### Search Component
+
+```typescript
+// File: src/components/OrdenTrabajo/SearchBar.tsx
+<SearchBar
+  onSearch={(query, filter) => handleSearch(query, filter)}
+  onClear={handleClearSearch}
+  isDark={isDark}
+/>
+```
+
+### FAB (Floating Action Button)
+
+```typescript
+// File: src/components/Navigation/FAB.tsx
+<FAB
+  onPress={() => router.push('/nueva-orden/paso1')}
+  isDark={isDark}
+/>
+```
+
+## 📚 Documentation References
+
+- **Main Docs**: `CLAUDE.md` - Guía completa para AI assistants
+- **README**: `README.md` - Setup y overview del proyecto
+- **Phase Docs**: `docs/` - Documentación organizada por fase
+  - `docs/07-FASE7-NAVEGACION/` - Navegación architecture
+  - `docs/08-FASE8-ACCIONES/PLAN_FASE8.md` - Plan actual
+
+## ⚠️ Important Notes
+
+- **TypeScript strict mode** está habilitado
+- **New Architecture NO** habilitado (Expo Go limitation)
+- **Stack Navigation** sobre Drawer (compatibilidad Expo Go)
+- **AsyncStorage** sobre MMKV (compatibilidad Expo Go)
+- **Lenguaje**: Español en UI, validaciones, y comentarios
+- **Platform**: Android primero, iOS secundario
+- **Testing**: Siempre en Expo Go con dispositivo físico Android
+
 ## Instrucciones para GitHub Copilot
 
 - **Contexto**: Windows 10/11, PowerShell, VSCode
-- **Ruta**: c:\Users\willy\projects\testing-apk
-- **Usa**: Rutas Windows (c:\Users\...), PowerShell cmdlets
+- **Ruta Actual**: c:\dev\react-native\testing-app
+- **Ruta Antigua**: c:\Users\willy\projects\testing-apk (deprecada)
+- **Usa**: Rutas Windows (c:\dev\...), PowerShell cmdlets
 - **Evita**: Comandos bash (ls, mv, rm), rutas Unix
+- **Navigation**: Expo Router + Stack (NO Drawer)
+- **Storage**: AsyncStorage (NO MMKV)
 
 ---
 
 **Flujo resumen: Implementar → Testear en Expo Go → Verificar en teléfono → Commit → Siguiente fase**
+
+**Stack completo: React Native + Expo Router + Stack Navigation + AsyncStorage + Zod + TypeScript**

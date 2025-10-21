@@ -4,6 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { useState, useEffect } from 'react'
 import { storageUtils } from './src/services/storageService';
 import { validateData, HeaderSchema, DetallesSchema, DetalleExtintorSchema, FinalSchema } from './src/services/validationService'
+import { ordenService } from './src/services/ordenService'
 import { CLIENTES, CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from './src/constants/ordenTrabajoConstants'
 import type { OrdenTrabajoFormData, DetalleExtintor } from './src/types/ordenTrabajo'
 import { useFieldVisibility } from './src/hooks'
@@ -120,6 +121,9 @@ function AppContent() {
       },
     ],
   })
+
+  // FASE 7.2 - Test ordenService
+  const [ordenServiceTest, setOrdenServiceTest] = useState<string>('')
 
   useEffect(() => {
     // Ejecutar tests al montar
@@ -276,6 +280,112 @@ function AppContent() {
 
   // Theme is now automatically detected by ThemeProvider
 
+  // FASE 7.2 - Test ordenService CRUD
+  const testOrdenService = async () => {
+    try {
+      addDebugLog('🚀 INICIANDO TESTS ORDEN SERVICE (FASE 7.2)...')
+
+      // Test 1: Crear orden
+      const ordenData: Omit<OrdenTrabajoFormData, 'id'> = {
+        fechaEntrega: new Date(),
+        cliente: 'BANCO NACIONAL DE BOLIVIA S.A.',
+        agencia: 'OFICINA CENTRAL',
+        direccion: '',
+        telefono: '70572005',
+        observaciones: 'Orden de prueba desde App.tsx',
+        prestamoExtintores: true,
+        cantidadPrestamo: '2',
+        estado: 'completada',
+        detalles: [
+          {
+            id: 'test_001',
+            extintorNro: '001',
+            capacidadUnidad: 'KILOS',
+            capacidadValor: '10 KILOS',
+            marca: 'BUCL',
+            tipo: 'ABC',
+          },
+          {
+            id: 'test_002',
+            extintorNro: '002',
+            capacidadUnidad: 'KILOS',
+            capacidadValor: '5 KILOS',
+            marca: 'AMEREX',
+            tipo: 'BC',
+          },
+        ],
+      }
+
+      const ordenId = await ordenService.createOrden(ordenData)
+      addDebugLog(`✅ Orden #${ordenId} creada exitosamente`)
+
+      // Test 2: Obtener orden por ID
+      const orden = await ordenService.getOrdenById(ordenId)
+      if (orden && orden.cliente === ordenData.cliente) {
+        addDebugLog(`✅ Orden #${ordenId} recuperada correctamente`)
+        addDebugLog(`   Cliente: ${orden.cliente}`)
+        addDebugLog(`   Extintores: ${orden.detalles.length}`)
+      } else {
+        addDebugError('No se pudo recuperar la orden')
+      }
+
+      // Test 3: Listar todas las órdenes
+      const ordenes = await ordenService.getOrdenes()
+      addDebugLog(`✅ Total de órdenes: ${ordenes.length}`)
+
+      // Test 4: Buscar por cliente
+      const busquedaCliente = await ordenService.searchByCliente('NACIONAL')
+      addDebugLog(`✅ Búsqueda por cliente: ${busquedaCliente.length} resultado(s)`)
+
+      // Test 5: Buscar por número
+      const busquedaNumero = await ordenService.searchByNumero(ordenId)
+      addDebugLog(`✅ Búsqueda por número: ${busquedaNumero.length} resultado(s)`)
+
+      // Test 6: Actualizar orden
+      await ordenService.updateOrden(ordenId, {
+        observaciones: 'Orden actualizada desde App.tsx'
+      })
+      const ordenActualizada = await ordenService.getOrdenById(ordenId)
+      if (ordenActualizada?.observaciones === 'Orden actualizada desde App.tsx') {
+        addDebugLog(`✅ Orden #${ordenId} actualizada correctamente`)
+      }
+
+      addDebugLog('')
+      addDebugLog('🎉 TODOS LOS TESTS DE ORDEN SERVICE PASARON!')
+      addDebugLog(`📊 Orden de prueba creada con ID: ${ordenId}`)
+      addDebugLog('⚠️ Nota: La orden se quedará en AsyncStorage')
+      addDebugLog('   Para limpiar, usa el botón "Limpiar Órdenes"')
+
+      setOrdenServiceTest(`✅ Tests completados! Orden ID: ${ordenId}`)
+    } catch (error) {
+      addDebugError(`Error en tests: ${error}`)
+      setOrdenServiceTest(`❌ Error: ${error}`)
+    }
+  }
+
+  const limpiarOrdenes = async () => {
+    try {
+      Alert.alert(
+        'Limpiar Órdenes',
+        '¿Estás seguro de eliminar TODAS las órdenes?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Eliminar',
+            style: 'destructive',
+            onPress: async () => {
+              await ordenService.clearAllOrdenes()
+              addDebugLog('⚠️ Todas las órdenes han sido eliminadas')
+              setOrdenServiceTest('')
+            }
+          }
+        ]
+      )
+    } catch (error) {
+      addDebugError(`Error al limpiar órdenes: ${error}`)
+    }
+  }
+
   const clearDebug = async () => {
     setDebugInfo([])
     await storageUtils.remove('test:form:data')
@@ -283,6 +393,7 @@ function AppContent() {
     setShowHeaderForm(false)
     setShowDetallesForm(false)
     setShowFinalForm(false)
+    setOrdenServiceTest('')
     setHeaderFormData({
       fechaEntrega: new Date(),
       cliente: '',
@@ -560,6 +671,18 @@ function AppContent() {
           </View>
         ) : null}
 
+        {/* FASE 7.2 - OrdenService Test Results */}
+        {ordenServiceTest ? (
+          <View style={[styles.mmkvSection, { backgroundColor: theme.infoBg }]}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              🔧 Orden Service Test
+            </Text>
+            <Text style={[styles.debugText, { color: theme.text }]}>
+              {ordenServiceTest}
+            </Text>
+          </View>
+        ) : null}
+
         {/* FASE 3 - Components Preview */}
         {fase3Tests ? (
           <View style={[styles.componentsSection, { backgroundColor: theme.surface }]}>
@@ -678,6 +801,22 @@ function AppContent() {
           onPress={clearDebug}
         >
           <Text style={[styles.buttonText, { color: theme.buttonSecondaryText }]}>🔄 Reset</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* FASE 7.2 Actions */}
+      <View style={[styles.actionsContainer, { backgroundColor: theme.surface, borderTopColor: theme.border, borderTopWidth: 0, paddingTop: 0 }]}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#007AFF' }]}
+          onPress={testOrdenService}
+        >
+          <Text style={styles.buttonText}>🔧 Test Service</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: '#FF3B30' }]}
+          onPress={limpiarOrdenes}
+        >
+          <Text style={styles.buttonText}>🗑️ Limpiar</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

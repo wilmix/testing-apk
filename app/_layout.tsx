@@ -64,6 +64,13 @@ export default function RootLayout() {
               headerTintColor: '#fff',
             }}
           />
+          <Stack.Screen
+            name="test"
+            options={{
+              title: '🧪 Test',
+              headerShown: false,
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </SafeAreaProvider>

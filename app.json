@@ -3,6 +3,7 @@
     "name": "testing-app",
     "slug": "testing-app",
     "version": "1.0.0",
+    "scheme": "ordenestrabajo",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -25,6 +26,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

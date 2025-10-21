@@ -10,7 +10,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native'
-import { FormInput } from '../index'
+import { FormInput } from '../FormFields/FormInput'
 import { validateData, FinalSchema, OrdenTrabajoSchemaComplete } from '../../services/validationService'
 import type { OrdenTrabajoFormData } from '../../types/ordenTrabajo'
 import { useTheme } from '../../contexts/ThemeContext'

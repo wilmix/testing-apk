@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { View, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native'
-import { FormDropdown, FormDatePicker, FormInput, DropdownItem } from '../index'
+import { FormDropdown } from '../FormFields/FormDropdown'
+import { FormDatePicker } from '../FormFields/FormDatePicker'
+import { FormInput } from '../FormFields/FormInput'
+import type { DropdownItem } from '../FormFields/FormDropdown'
 import { CLIENTES } from '../../constants/ordenTrabajoConstants'
 import { validateData, HeaderSchema } from '../../services/validationService'
 import type { OrdenTrabajoFormData } from '../../types/ordenTrabajo'
@@ -23,6 +26,7 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
     cliente: false,
     fechaEntrega: false,
     agencia: false,
+    direccion: false,
   })
 
   // Validation
@@ -45,10 +49,12 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
 
   const handleClienteChange = (item: DropdownItem) => {
     setTouched((prev) => ({ ...prev, cliente: true }))
+    const isBancoSolidario = item.value === 'BANCO SOLIDARIO S.A.'
     onDataChange({
       ...data,
       cliente: item.value as string,
-      agencia: '', // Reset agencia cuando cambia cliente
+      agencia: isBancoSolidario ? data.agencia : '', // Keep agencia if Banco Solidario, clear otherwise
+      direccion: !isBancoSolidario ? data.direccion : '', // Keep direccion if not Banco Solidario, clear otherwise
     })
   }
 
@@ -68,12 +74,21 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
     })
   }
 
+  const handleDireccionChange = (text: string) => {
+    setTouched((prev) => ({ ...prev, direccion: true }))
+    onDataChange({
+      ...data,
+      direccion: text,
+    })
+  }
+
   const handleContinue = () => {
     // Mark all as touched
     setTouched({
       cliente: true,
       fechaEntrega: true,
       agencia: true,
+      direccion: true,
     })
 
     // Validate and continue if valid
@@ -82,7 +97,8 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
     }
   }
 
-  const isFormValid = validation.valid && (!showAgencia || data.agencia.trim() !== '')
+  const isFormValid = validation.valid &&
+    (showAgencia ? data.agencia.trim() !== '' : data.direccion.trim() !== '')
 
   return (
     <ScrollView
@@ -136,10 +152,22 @@ export const HeaderForm: React.FC<HeaderFormProps> = ({
           />
         )}
 
+        {/* Dirección (Conditional - for other clients) */}
+        {!showAgencia && (
+          <FormInput
+            label="Dirección *"
+            value={data.direccion}
+            onChange={handleDireccionChange}
+            placeholder="Escriba la dirección del cliente..."
+            error={data.direccion.trim() === '' && touched.direccion ? 'Dirección requerida' : undefined}
+            touched={touched.direccion}
+          />
+        )}
+
         {/* Info Text */}
         <View style={[styles.infoBox, { backgroundColor: theme.infoBg, borderLeftColor: theme.info }]}>
           <Text style={[styles.infoText, { color: theme.text }]}>
-            ℹ️ {showAgencia ? 'Especifique la agencia de Banco Solidario' : 'Información básica del cliente'}
+            ℹ️ {showAgencia ? 'Especifique la agencia de Banco Solidario' : 'Especifique la dirección del cliente'}
           </Text>
         </View>
       </View>

@@ -15,7 +15,7 @@ export const DetalleExtintorSchema = z.object({
   extintorNro: z
     .string()
     .min(1, 'Número de extintor requerido')
-    .regex(/^\d{1,3}$/, 'Debe ser un número entre 1 y 999'),
+    .regex(/^\d{1,10}$/, 'Debe ser un número (máximo 10 dígitos)'),
   capacidadUnidad: z.string().min(1, 'Unidad de capacidad requerida'),
   capacidadValor: z.string().min(1, 'Capacidad requerida'),
   marca: z.string().min(1, 'Marca requerida'),

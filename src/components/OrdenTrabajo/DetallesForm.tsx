@@ -447,9 +447,26 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
         ) : (
           <>
             <Text style={[styles.validationTitle, { color: theme.error }]}>❌ Hay errores</Text>
-            <Text style={[styles.validationDetail, { color: theme.text }]}>
-              Completa todos los campos requeridos
-            </Text>
+            {data.detalles.length === 0 ? (
+              <Text style={[styles.validationDetail, { color: theme.text }]}>
+                Agrega al menos 1 extintor
+              </Text>
+            ) : (
+              <>
+                <Text style={[styles.validationDetail, { color: theme.text }]}>
+                  Revisa los campos marcados con ❌
+                </Text>
+                {Object.keys(validation.errors).length > 0 && (
+                  <View style={{ marginTop: 8 }}>
+                    {Object.entries(validation.errors).map(([key, error]) => (
+                      <Text key={key} style={[{ color: theme.error, fontSize: 12, marginTop: 4 }]}>
+                        • {error}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
           </>
         )}
       </View>

@@ -125,9 +125,9 @@ export default function OrdenesListScreen() {
         }
       />
 
-      {/* FAB para nueva orden - Temporalmente va a /test hasta crear formulario */}
+      {/* FAB para nueva orden */}
       <FAB
-        onPress={() => router.push('/test')}
+        onPress={() => router.push('/nueva-orden/paso1')}
         isDark={isDark}
       />
     </SafeAreaView>

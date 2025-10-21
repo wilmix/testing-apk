@@ -47,7 +47,7 @@ export const ordenService = {
         return new Date(b.fechaCreacion).getTime() - new Date(a.fechaCreacion).getTime()
       })
     } catch (error) {
-      console.error('❌ Error al obtener órdenes:', error)
+      console.error('Error al obtener órdenes:', error)
       return []
     }
   },
@@ -62,7 +62,7 @@ export const ordenService = {
       const orden = await storageUtils.getJSON<OrdenTrabajoFormData>(KEYS.DATA(id))
       return orden ? { ...orden, id } : null
     } catch (error) {
-      console.error(`❌ Error al obtener orden ${id}:`, error)
+      console.error(`Error al obtener orden ${id}:`, error)
       return null
     }
   },
@@ -89,10 +89,9 @@ export const ordenService = {
       const ids = await storageUtils.getJSON<string[]>(KEYS.LIST, []) || []
       await storageUtils.setJSON(KEYS.LIST, [...ids, id])
 
-      console.log(`✅ Orden #${id} creada exitosamente`)
       return id
     } catch (error) {
-      console.error('❌ Error al crear orden:', error)
+      console.error('Error al crear orden:', error)
       throw error
     }
   },
@@ -117,9 +116,8 @@ export const ordenService = {
       }
 
       await storageUtils.setJSON(KEYS.DATA(id), updatedOrden)
-      console.log(`✅ Orden #${id} actualizada exitosamente`)
     } catch (error) {
-      console.error(`❌ Error al actualizar orden ${id}:`, error)
+      console.error(`Error al actualizar orden ${id}:`, error)
       throw error
     }
   },
@@ -134,9 +132,8 @@ export const ordenService = {
         estado: 'anulada',
         fechaModificacion: new Date()
       })
-      console.log(`✅ Orden #${id} anulada exitosamente`)
     } catch (error) {
-      console.error(`❌ Error al anular orden ${id}:`, error)
+      console.error(`Error al anular orden ${id}:`, error)
       throw error
     }
   },
@@ -159,9 +156,8 @@ export const ordenService = {
         estado: 'completada',
         fechaModificacion: new Date()
       })
-      console.log(`✅ Orden #${id} completada exitosamente`)
     } catch (error) {
-      console.error(`❌ Error al completar orden ${id}:`, error)
+      console.error(`Error al completar orden ${id}:`, error)
       throw error
     }
   },
@@ -180,7 +176,7 @@ export const ordenService = {
         orden.cliente.toLowerCase().includes(searchTerm)
       )
     } catch (error) {
-      console.error('❌ Error al buscar por cliente:', error)
+      console.error('Error al buscar por cliente:', error)
       return []
     }
   },
@@ -199,7 +195,7 @@ export const ordenService = {
         orden.id?.includes(searchTerm)
       )
     } catch (error) {
-      console.error('❌ Error al buscar por número:', error)
+      console.error('Error al buscar por número:', error)
       return []
     }
   },
@@ -214,7 +210,7 @@ export const ordenService = {
       const ordenes = await ordenService.getOrdenes()
       return ordenes.filter(orden => orden.estado === estado)
     } catch (error) {
-      console.error('❌ Error al filtrar por estado:', error)
+      console.error('Error al filtrar por estado:', error)
       return []
     }
   },
@@ -228,7 +224,7 @@ export const ordenService = {
       const ids = await storageUtils.getJSON<string[]>(KEYS.LIST, []) || []
       return ids.length
     } catch (error) {
-      console.error('❌ Error al obtener conteo de órdenes:', error)
+      console.error('Error al obtener conteo de órdenes:', error)
       return 0
     }
   },
@@ -249,10 +245,8 @@ export const ordenService = {
       // Limpiar lista y contador
       await storageUtils.remove(KEYS.LIST)
       await storageUtils.remove(KEYS.LAST_ID)
-
-      console.log('⚠️ Todas las órdenes han sido eliminadas')
     } catch (error) {
-      console.error('❌ Error al limpiar órdenes:', error)
+      console.error('Error al limpiar órdenes:', error)
       throw error
     }
   },

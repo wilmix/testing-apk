@@ -284,7 +284,7 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
       {/* Info box */}
       <View style={[styles.infoBox, { backgroundColor: theme.infoBg, borderLeftColor: theme.info }]}>
         <Text style={[styles.infoText, { color: theme.text }]}>
-          ℹ️ Escanea QR o agrega manualmente. Mínimo 1 extintor. Cascada: selecciona Unidad primero, luego Capacidad
+          ℹ️ Escanea QR o agrega manualmente. Mínimo 1 extintor.
         </Text>
       </View>
 

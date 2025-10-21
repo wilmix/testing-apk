@@ -1,29 +1,36 @@
-# 📱 REX/Mobile - React Native + Expo
+# 🔥 REX/Mobile - React Native + Expo
 
-App mobile **offline-first** para field workers (técnicos en campo) de recarga de extintores.
+Aplicación móvil **offline-first** para técnicos de recarga de extintores. Optimizada para trabajo en campo con sincronización automática.
 
-> **📌 Nota para GitHub Copilot**: Lee `copilot-instructions.md` en la raíz del proyecto para contexto sobre el ambiente Windows/PowerShell/VSCode.
+> **📌 Nota para Claude Code**: Lee `CLAUDE.md` en la raíz del proyecto para contexto completo.
+
+---
 
 ## 🎯 Objetivo
 
-Transformar el formulario web `OrdenTrabajo.tsx` (MUI, ~20 campos) en una experiencia mobile optimizada con:
-- ⚡ **70-80% mejora en UX**
-- 🌐 **Funciona 100% sin internet**
-- ⏱️ **Tiempo: 5-10 min → 1-2 min**
-- ✓ **Validación real-time**
+Transformar el flujo de trabajo manual de órdenes de trabajo en una experiencia mobile optimizada:
+- ⚡ **70-80% mejora en UX** vs formulario web
+- 🌐 **100% funcional sin internet** (offline-first)
+- ⏱️ **Tiempo reducido**: 5-10 min → 1-2 min por orden
+- ✓ **Validación en tiempo real** con feedback visual
 
 ---
 
 ## 🏗️ Stack Tecnológico
 
-| Componente | Librería | Versión | Por qué |
-|-----------|----------|---------|--------|
-| **Storage** | `@react-native-async-storage/async-storage` | 2.2.0 | Incluido en Expo Go, offline-first |
-| **Dropdowns** | `react-native-element-dropdown` | 2.12.4 | Touch-optimized, search |
-| **Validación** | `zod` | 3.25.76 | Type-safe, mensajes ES |
-| **Date Picker** | `@react-native-community/datetimepicker` | 8.4.4 | Nativo iOS/Android |
-| **QR Scanner** | `expo-camera` | 8.4.4 | Escaneo QR, permisos, Expo Go |
-| **State** | React Hooks | Built-in | Simple, sin deps extra |
+| Componente | Librería | Versión | Notas |
+|-----------|----------|---------|-------|
+| **Framework** | React Native + Expo | 0.81.4 / ~54.0.13 | Cross-platform |
+| **Navegación** | **Expo Router + Stack** | **~6.0.13** | File-based routing |
+| **Lenguaje** | TypeScript | ~5.9.2 | Strict mode |
+| **Storage** | AsyncStorage | 2.2.0 | Offline-first, Expo Go compatible |
+| **Dropdowns** | react-native-element-dropdown | 2.12.4 | Touch-optimized + search |
+| **Validación** | Zod | 3.25.76 | Type-safe, mensajes ES |
+| **Date Picker** | @react-native-community/datetimepicker | 8.4.4 | Nativo iOS/Android |
+| **QR Scanner** | expo-camera | ~17.0.8 | Escaneo QR, permisos |
+| **Haptics** | expo-haptics | ~15.0.7 | Feedback táctil |
+| **Safe Area** | react-native-safe-area-context | ~5.6.0 | Android + iOS |
+| **Theming** | React Context | Built-in | Dark/Light mode |
 
 ---
 
@@ -32,27 +39,24 @@ Transformar el formulario web `OrdenTrabajo.tsx` (MUI, ~20 campos) en una experi
 ### Requisitos Previos
 - **Node.js** ≥ 18
 - **npm** o **yarn**
-- **Expo CLI**: `npm install -g expo-cli`
+- **Expo Go** app en tu dispositivo móvil ([Android](https://play.google.com/store/apps/details?id=host.exp.exponent) / [iOS](https://apps.apple.com/app/expo-go/id982107779))
 
 ### Setup Inicial
 
 ```bash
-# 1. Clonar/navegar al proyecto
-cd c:\Users\willy\projects\testing-apk
+# 1. Navegar al proyecto
+cd c:\dev\react-native\testing-app
 
-# 2. Instalar dependencias (ya están instaladas en FASE 1)
+# 2. Instalar dependencias
 npm install
 
-# 3. Verificar que todo está OK
-npx tsc --noEmit    # TypeScript
-npm list            # Dependencias
+# 3. Verificar TypeScript
+npx tsc --noEmit
 
-# 4. Iniciar el proyecto
+# 4. Iniciar servidor de desarrollo
 npx expo start
 
-# En Android: presiona 'a'
-# En iOS: presiona 'i'
-# En Web: presiona 'w'
+# 5. Escanear QR con Expo Go en tu dispositivo
 ```
 
 ---
@@ -62,26 +66,26 @@ npx expo start
 ### Desarrollo
 
 ```bash
-# Terminal 1: Iniciar servidor
+# Iniciar servidor
 npx expo start
 
-# Terminal 2: Ver logs
+# Limpiar caché si es necesario
 npx expo start --clear
 
-# En emulador/dispositivo:
-# - Presiona 'a' para Android
-# - Presiona 'i' para iOS
-# - Presiona 'w' para Web
+# En la terminal Expo:
+# Presiona 'a' para Android
+# Presiona 'i' para iOS
+# Presiona 'w' para Web (limitado)
 ```
 
-### Tests
+### Testing
 
 ```bash
-# Compilar TypeScript
+# Verificar TypeScript
 npx tsc --noEmit
 
-# Ver estructura
-tree src /L 3
+# Listar dependencias
+npm list
 ```
 
 ---
@@ -89,267 +93,223 @@ tree src /L 3
 ## 📁 Estructura del Proyecto
 
 ```
-c:\Users\willy\projects\testing-apk\
-├─ src/
-│  ├─ types/
-│  │  └─ ordenTrabajo.ts         # Interfaces TypeScript
-│  ├─ constants/
-│  │  └─ ordenTrabajoConstants.ts # CLIENTES, MARCAS, TIPOS, etc
-│  ├─ services/
-│  │  ├─ storageService.ts          # AsyncStorage utilities
-│  │  └─ validationService.ts    # Zod Schemas + validación
-│  ├─ hooks/                     # FASE 2 (próximamente)
-│  │  ├─ useStorage.ts
-│  │  ├─ useFormData.ts
-│  │  └─ useFieldVisibility.ts
-│  ├─ components/                # FASE 3 (próximamente)
-│  │  ├─ FormFields/
-│  │  ├─ Feedback/
-│  │  └─ OrdenTrabajo/
-│  └─ utils/                     # Funciones utilitarias
+testing-app/
+├── app/                              # 🆕 Expo Router (file-based routing)
+│   ├── _layout.tsx                   # Root Stack Navigation
+│   ├── index.tsx                     # Lista de Órdenes (Home)
+│   ├── about.tsx                     # Pantalla About
+│   ├── configuracion.tsx             # Configuración
+│   ├── test.tsx                      # Testing (dev only)
+│   ├── orden/
+│   │   ├── _layout.tsx               # Stack para detalles
+│   │   └── [id].tsx                  # Detalles de orden (dynamic route)
+│   └── nueva-orden/
+│       ├── _layout.tsx               # Stack para formulario
+│       ├── paso1.tsx                 # Cliente + Fecha + Ubicación
+│       └── paso2.tsx                 # Extintores + Info Final
 │
-├─ App.tsx                        # Componente raíz + tests
-├─ app.json                       # Configuración Expo
-├─ tsconfig.json                  # Configuración TypeScript
-├─ package.json                   # Dependencias
+├── src/
+│   ├── types/
+│   │   └── ordenTrabajo.ts           # Interfaces TypeScript
+│   ├── constants/
+│   │   ├── ordenTrabajoConstants.ts  # CLIENTES, MARCAS, TIPOS, etc.
+│   │   └── hapticConfig.ts           # Configuración de vibraciones
+│   ├── services/
+│   │   ├── storageService.ts         # AsyncStorage utilities
+│   │   ├── validationService.ts      # Zod schemas
+│   │   ├── ordenService.ts           # CRUD operations
+│   │   └── migrationService.ts       # Data migration
+│   ├── hooks/
+│   │   ├── useStorage.ts             # Generic AsyncStorage hook
+│   │   ├── useFormData.ts            # Form state + validation
+│   │   ├── useFieldVisibility.ts     # Conditional fields
+│   │   ├── useQRReader.ts            # QR scanner
+│   │   └── useHapticFeedback.ts      # Haptic feedback
+│   ├── contexts/
+│   │   └── ThemeContext.tsx          # Theme provider (dark/light + preferences)
+│   └── components/
+│       ├── FormFields/               # Reusable inputs
+│       ├── Feedback/                 # Visual feedback
+│       ├── Navigation/               # FAB button
+│       ├── QR/                       # QR Scanner
+│       └── OrdenTrabajo/             # Feature components
 │
-├─ docs/                          # Documentación
-│  ├─ ANALISIS_ORDEN_TRABAJO_MOBILE.md
-│  ├─ GUIA_TECNICA_IMPLEMENTACION.md
-│  ├─ RESUMEN_EJECUTIVO.md
-│  └─ ...
-│
-└─ PLAN_ACCION_FASES.md          # Plan de 7 fases
+├── docs/                             # Documentación completa
+├── CLAUDE.md                         # Instrucciones para Claude Code
+├── app.json                          # Configuración Expo
+├── tsconfig.json                     # TypeScript config
+└── package.json                      # Dependencias
 ```
 
 ---
 
-## 🎬 Plan de Fases
+## 🎬 Progreso del Proyecto
 
-### ✅ FASE 1: Setup Inicial (2-3h) - **COMPLETADA**
-- ✅ Instalar dependencias (AsyncStorage, Element Dropdown, Zod, DateTimePicker)
-- ✅ Crear estructura de carpetas
-- ✅ TypeScript Types
-- ✅ Constants
-- ✅ Schemas Zod
-- ✅ AsyncStorage Service
-- ✅ Tests en App.tsx (todos pasan en Expo Go)
+### ✅ Fases Completadas (7 de 8)
 
-### ✅ FASE 2: Hooks Base (3-4h) - **COMPLETADA**
-- ✅ `useStorage` - Guardar/cargar datos (AsyncStorage)
-- ✅ `useFormData` - Validación + persistencia
-- ✅ `useFieldVisibility` - Campos condicionales
-- ✅ Tests (4 tests pasan)
+| Fase | Descripción | Status | Tiempo |
+|------|-------------|--------|--------|
+| **FASE 1** | Setup Inicial | ✅ COMPLETADA | 2-3h |
+| **FASE 2** | Hooks Base | ✅ COMPLETADA | 3-4h |
+| **FASE 3** | Componentes Base | ✅ COMPLETADA | 2-3h |
+| **FASE 4** | Header Form | ✅ COMPLETADA | 4-5h |
+| **FASE 5** | Detalles Dinámicos | ✅ COMPLETADA | 5-6h |
+| **FASE 5.5** | QR Reader | ✅ COMPLETADA | 2h |
+| **FASE 6** | Final + Submit | ✅ COMPLETADA | 4-5h |
+| **FASE 7** | Navegación (Expo Router + Stack) | ✅ COMPLETADA | 6-8h |
+| **FASE 8** | Acciones y Polish | 🚧 EN PROGRESO | 6-8h |
 
-### ✅ FASE 3: Componentes Base (2-3h) - **COMPLETADA**
-- ✅ `FormInput`, `FormDropdown`, `FormDatePicker`
-- ✅ `ValidationIcon`
-- ✅ Estilos touch-friendly
-- ✅ Tests en App.tsx
-
-### ✅ FASE 4: Header Form (4-5h) - **COMPLETADA** ⭐ APPROVAL POINT 1
-- ✅ `HeaderForm` component (cliente, fecha, agencia condicional)
-- ✅ Validación con `HeaderSchema`
-- ✅ AsyncStorage persistence
-- ✅ Tests en App.tsx
-
-### ✅ FASE 5: Detalles Dinámicos (5-6h) - **COMPLETADA** ⭐ APPROVAL POINT 2
-- ✅ `DetallesForm` component (lista dinámica de extintores)
-- ✅ Add/Remove items
-- ✅ Cascading dropdowns (Unidad → Capacidad)
-- ✅ Validación per-item con `DetalleExtintorSchema`
-- ✅ Tests en App.tsx
-
-### ✅ FASE 5.5: QR Reader (1-2h) - **COMPLETADA** (OPCIONAL)
-- ✅ `QRScanner` component con expo-camera
-- ✅ `useQRReader` hook con validación
-- ✅ Auto-fill de extintores desde QR JSON
-- ✅ Feedback háptico y visual
-- ✅ Tests en App.tsx
-
-### ✅ FASE 6: Final + Submit (4-5h) - **COMPLETADA** ⭐ APPROVAL POINT 3
-- ✅ `FinalForm` component (teléfono, observaciones, préstamo)
-- ✅ Campo Teléfono con validación numérica (7-15 dígitos)
-- ✅ Campo Observaciones con contador (0-500 caracteres)
-- ✅ Checkbox Préstamo con reveal condicional de cantidad
-- ✅ Validación con `FinalSchema` y `OrdenTrabajoSchemaComplete`
-- ✅ Botón Submit con validación completa del formulario
-- ✅ Estados de Loading durante submit
-- ✅ Feedback visual con Alert nativo
-- ✅ Reset automático después de submit exitoso
-- ✅ Persistencia en AsyncStorage (historial)
-- ✅ Tests en App.tsx
-- ✅ Guardado AsyncStorage
-
-### ✅ FASE 5: Detalles Dinámicos (5-6h) - **COMPLETADA** ⭐ APPROVAL POINT 2
-- ✅ Items add/remove dinámicos
-- ✅ Cascada Unidad → Capacidad (funcional)
-- ✅ Validación completa per extintor
-- ✅ Collapsible items con estado
-- ✅ Dark theme completo
-
-### ✅ FASE 5.5: QR Reader (2h) - **COMPLETADA**
-- ✅ `useQRReader` hook con validación JSON
-- ✅ `QRScanner` component con permisos de cámara
-- ✅ Escaneo individual de extintores (un QR = un extintor)
-- ✅ Validación contra constantes (MARCAS, TIPOS, etc.)
-- ✅ Integración en DetallesForm con botón "📷 QR"
-- ✅ Theming con `useTheme()`
-- ✅ Ahorro: 67% de tiempo vs entrada manual
-- [Documentación: `docs/05_5-FASE5_5-QR_READER/IMPLEMENTACION.md`]
-
-**JSON Format:**
-```json
-{
-  "version": "1.0",
-  "tipo": "extintor_batch",
-  "detalles": [
-    {"extintorNro":"001","capacidadUnidad":"KILOS","capacidadValor":"6 KILOS","marca":"KIDDE BRASIL","tipo":"ABC"}
-  ]
-}
-```
-
-**UX Improvement:** 4min (manual 8 ext) → 45seg (QR + ajustes)
-
-### ✏️ FASE 6: Final + Submit (4-5h) - **APPROVAL POINT 3**
-- Ubicación condicional
-- Teléfono (requerido, numérico)
-- Observaciones (max 500 chars)
-- Préstamo checkbox + reveal cantidad
-- Submit button + API integration
-
-### ⏳ FASE 7: Testing & Optimización (3-4h) - **PRÓXIMA** ⭐ APPROVAL POINT 4
-- End-to-end testing: Header → Detalles → Final → Submit
-- Offline functionality testing
-- Performance optimization
-- Responsive design (múltiples pantallas)
-- UX polish y mejoras finales
-- Documentación final completa
-
-**Total Estimado**: 25-32 horas = 4-5 días
+**Progreso Total**: ~87.5% (7 de 8 fases completadas)
 
 ---
 
-## 📊 Status Actual
+## 🌟 Características Principales
 
-```
-✅ FASE 1: Setup Inicial                      COMPLETADA
-✅ FASE 2: Hooks Base                         COMPLETADA
-✅ FASE 3: Componentes Base (4)               COMPLETADA
-✅ FASE 4: Header Form (APPROVAL POINT 1)     COMPLETADA ⭐
-✅ FASE 5: Detalles Dinámicos (APPROVAL 2)    COMPLETADA ⭐
-✅ FASE 5.5: QR Reader (OPCIONAL)             COMPLETADA 📱
-✅ FASE 6: Final + Submit (APPROVAL POINT 3)  COMPLETADA ⭐
-🚀 FASE 7: Testing (APPROVAL POINT 4)         PRÓXIMA
-```
+### 📱 Navegación con Expo Router
+- **File-based routing**: Rutas definidas por estructura de carpetas
+- **Stack Navigation**: Headers nativos, back navigation fluido
+- **Dynamic routes**: `/orden/[id]` para detalles de órdenes
+- **Nested stacks**: Grupos independientes para mejor organización
 
-**Progreso:** 6 de 7 fases completadas (86%)
+### 🔥 CRUD Completo de Órdenes
+- **Crear**: Formulario en 2 pasos (Cliente → Extintores)
+- **Ver**: Pantalla de detalles con toda la información
+- **Editar**: Modo edición con pre-carga de datos existentes
+- **Anular**: Soft delete con confirmación
 
----
+### 🔍 Búsqueda y Filtros
+- Búsqueda por **cliente** (nombre parcial)
+- Búsqueda por **número de orden**
+- Pull-to-refresh para recargar lista
+- Ordenamiento por fecha de creación
 
-## 🧪 Tests FASE 1
+### 📷 Escaneo QR
+- Escaneo individual de extintores
+- Auto-fill de datos desde JSON
+- Validación contra constantes
+- **Ahorro**: 67% de tiempo vs entrada manual
 
-Para verificar que todo funciona:
+### 🎨 Dark Mode Completo
+- 3 modos: **Automático**, **Claro**, **Oscuro**
+- Persistencia en AsyncStorage
+- Cambios instantáneos
+- Soporte en todas las pantallas
 
-```bash
-# 1. Compilar TypeScript
-npx tsc --noEmit
+### 💾 Offline-First
+- 100% funcional sin internet
+- Persistencia automática en AsyncStorage
+- ID-based storage con índice de órdenes
+- Migración automática de datos
 
-# 2. Verificar dependencias
-npm list @react-native-async-storage/async-storage react-native-element-dropdown zod @react-native-community/datetimepicker
-
-# 3. Ver App.tsx tests
-npx expo start
-# Presiona 'w' para web
-# Mira la consola con los tests
-```
-
-**Outputs esperados en App.tsx:**
-```
-✅ Imports exitosos (AsyncStorage, Types, Constants, Schemas)
-✅ CLIENTES: 11 clientes
-✅ MARCAS: 11 marcas
-✅ TIPOS: 6 tipos
-✅ CAPACIDAD_UNIDADES: 3 unidades
-✅ Datos de prueba creados
-✅ Header validation: VALID
-✅ Detalles validation: VALID
-✅ Datos guardados en AsyncStorage
-✅ Datos cargados correctamente de AsyncStorage
-✅ Verificar clave: EXISTS
-✅ Total de claves en AsyncStorage: 1
-🎉 TODOS LOS TESTS PASARON!
-```
-
----
-
-## 💡 Características Clave
-
-### Offline-First ✅
-- Todos los datos guardados en AsyncStorage automáticamente
-- Funciona 100% sin internet
-- Indicador visual de estado
-- Sincronización automática al recuperar conexión
-
-### Validación Real-Time ✅
-- Feedback inmediato (🟢 válido, 🔴 error, 🟡 warning)
+### ✅ Validación Real-Time
+- Feedback visual (🟢 válido, 🔴 error)
 - Mensajes en español con Zod
-- Validación por campo
-- Validación completa antes de submit
+- Validación por campo (on blur)
+- Validación completa pre-submit
 
-### Progressive Disclosure ✅
-- Header mínimo (cliente + fecha)
-- Ubicación condicional (según cliente)
-- Detalles dinámicos (add/remove items)
-- Observaciones y préstamo finales
-- Reduce cognitive load
-
-### Touch-Friendly ✅
-- Botones ≥48x48px
-- Inputs ≥44px altura
-- Espaciado ≥16px
-- Single column layout
-- No requiere precisión
+### 📳 Feedback Háptico
+- Configuración centralizada
+- Feedback por tipo de acción (success, error, warning)
+- Soporte Android + iOS
 
 ---
 
-## � Documentación
+## 🧪 Testing
 
-Toda la documentación está organizada en `docs/`:
+### Checklist Completo
 
-### Análisis & Decisiones (`docs/00-ANALISIS/`)
-- `RESUMEN_EJECUTIVO.md` ← **Comienza aquí** si eres nuevo
-- `ANALISIS_ORDEN_TRABAJO_MOBILE.md` - Estrategia técnica completa
-- `MATRIZ_DECISIONES_JUSTIFICACION.md` - Por qué cada librería
-- `GUIA_TECNICA_IMPLEMENTACION.md` - Guía de implementación
+```
+NAVEGACIÓN
+✅ Stack navigation funciona
+✅ Todas las pantallas accesibles
+✅ Back button funciona
+✅ Headers configurados correctamente
 
-### Fases de Desarrollo
-- `docs/01-FASE1-SETUP/` - Setup inicial ✅ COMPLETADA
-- `docs/02-FASE2-HOOKS/` - Hooks base ⏳
-- `docs/03-FASE3-COMPONENTES/` - Componentes ⏳
-- `docs/04-FASE4-HEADER/` - Header form 🔴 APPROVAL 1
-- `docs/05-FASE5-DETALLES/` - Detalles dinámicos 🔴 APPROVAL 2
-- `docs/06-FASE6-FINAL/` - Final + submit 🔴 APPROVAL 3
-- `docs/07-FASE7-TESTING/` - Testing 🟢 PRODUCTION
+CRUD ÓRDENES
+✅ Crear orden nueva
+✅ Ver detalles completos
+✅ Editar orden existente
+✅ Anular orden con confirmación
 
-### Referencias
-- `docs/REFERENCIAS/` - Librerías, patrones, links
-- `docs/INDICE.md` - **Índice completo** (mapa del proyecto)
+BÚSQUEDA
+✅ Búsqueda por cliente
+✅ Búsqueda por número
+✅ Limpiar búsqueda
+✅ Pull-to-refresh
+
+VALIDACIONES
+✅ Paso 1 valida (cliente, fecha, ubicación)
+✅ Paso 2 valida (extintores, teléfono, observaciones)
+✅ Mensajes de error claros
+✅ Previene submit con datos inválidos
+
+DARK MODE
+✅ Funciona en todas las pantallas
+✅ Preferencia se guarda
+✅ Cambios instantáneos
+✅ Modo automático detecta sistema
+
+QR SCANNER
+✅ Permisos de cámara
+✅ Escaneo y validación JSON
+✅ Auto-fill de extintores
+✅ Feedback visual y háptico
+
+GENERAL
+✅ Sin crashes
+✅ AsyncStorage persiste
+✅ TypeScript sin errores
+✅ Navegación fluida
+```
 
 ---
 
-## 🔗 Links Útiles
+## 💡 Arquitectura
 
-### Documentación Oficial
-- [Expo Docs](https://docs.expo.dev)
-- [React Native Docs](https://reactnative.dev)
-- [AsyncStorage Docs](https://react-native-async-storage.github.io/async-storage/)
-- [Element Dropdown Docs](https://github.com/hoaphantn7604/react-native-element-dropdown)
-- [Zod Docs](https://zod.dev)
+### Patterns Clave
 
-### Recursos Locales
-- `copilot-instructions.md` - Instrucciones para GitHub Copilot
-- Documentación en `/docs/` folder
+1. **File-based Routing** (Expo Router)
+   - Rutas definidas por carpetas en `app/`
+   - Stack Navigation automático
+   - Parametrized routes con `[id].tsx`
+
+2. **CRUD Operations** (ordenService)
+   - Centralizado en `src/services/ordenService.ts`
+   - ID-based storage: `ordenes:data:{id}`
+   - Index list: `ordenes:list`
+   - Auto-incrementing IDs
+
+3. **Form Management** (useFormData hook)
+   - Estado + validación + persistencia
+   - Debounced auto-save (500ms)
+   - Validación on blur (touched fields)
+
+4. **Theme System** (ThemeContext)
+   - 3 modos: auto/light/dark
+   - Persistencia en AsyncStorage
+   - Hook `useTheme()` para acceso global
+
+5. **Progressive Disclosure**
+   - Paso 1: Cliente + Fecha + Ubicación
+   - Paso 2: Extintores + Teléfono + Observaciones
+   - Campos condicionales (agencia, dirección)
+
+---
+
+## 📖 Documentación
+
+Documentación completa en `/docs/`:
+
+- **`00-ANALISIS/`** - Análisis inicial, decisiones técnicas
+- **`01-FASE1-SETUP/`** - Setup del proyecto
+- **`02-FASE2-HOOKS/`** - Hooks base
+- **`03-FASE3-COMPONENTES/`** - Componentes reutilizables
+- **`04-FASE4-HEADER/`** - Header form
+- **`05-FASE5-DETALLES/`** - Detalles dinámicos
+- **`05_5-FASE5_5-QR_READER/`** - QR Scanner
+- **`06-FASE6-FINAL/`** - Final form + submit
+- **`07-FASE7-NAVEGACION/`** - Expo Router + Stack Navigation
+- **`08-FASE8-ACCIONES/`** - Acciones y Polish (actual)
 
 ---
 
@@ -357,140 +317,98 @@ Toda la documentación está organizada en `docs/`:
 
 ### "Module not found"
 ```bash
-# Limpiar caché y reinstalar
+rm -rf node_modules
+npm install
 npx expo start --clear
-npm ci
 ```
 
-### "TypeScript compilation error"
+### "TypeScript errors"
 ```bash
-# Verificar tipos
 npx tsc --noEmit
-
-# Ver errores específicos
-npx tsc
 ```
 
-### "AsyncStorage not working"
-```bash
-# Verificar que está instalada
-npm list @react-native-async-storage/async-storage
-
-# Reinstalar si es necesario
-npx expo install @react-native-async-storage/async-storage
+### "Permission denied" (Windows)
+```powershell
+# Ejecutar PowerShell como Administrador
+Remove-Item -Recurse -Force .\node_modules
+npm install
 ```
 
-### "Emulador no se conecta"
+### "Expo Go not connecting"
 ```bash
-# Reiniciar metro bundler
 npx expo start --clear
-
-# En nuevo terminal
-npx expo start
+# Asegúrate de estar en la misma red WiFi
 ```
 
 ---
 
 ## 👥 Equipo
 
-- **Desarrollador**: GitHub Copilot
-- **Propietario**: wilmix
-- **Repo**: testing-apk
+- **Desarrollador**: Willy Salas Quiroga
+- **Asistente**: Claude Code (Anthropic)
+- **Versión**: 0.0.1
+- **Plataforma Principal**: Android (90% de usuarios)
 
 ---
 
-## 📝 Notas Importantes
+## 📝 Configuración
 
-### Versiones Utilizadas (Expo SDK 54)
+### Expo SDK 54
 - React Native: 0.81.4
 - React: 19.1.0
 - TypeScript: ~5.9.2
 - Expo: ~54.0.13
 
-### Configuración
-- `newArchEnabled: true` en app.json
-- `userInterfaceStyle: "automatic"` para soporte light/dark theme
+### Settings
+- `userInterfaceStyle: "automatic"` - Dark mode automático
 - TypeScript strict mode habilitado
+- Expo Go compatible (todas las librerías)
 
-### Principios de Diseño
-- **KISS**: Soluciones simples
-- **DRY**: Reutilización de código
-- **SOLID**: Responsabilidades claras
+### Principios
+- **KISS**: Keep It Simple, Stupid
+- **DRY**: Don't Repeat Yourself
+- **SOLID**: Clean architecture
 - **Mobile-First**: Optimizado para mobile
-- **Accessibility**: Touch-friendly (48px+)
+- **Offline-First**: Sin dependencia de red
 
 ---
 
-## 🚀 Comenzar
+## 🚀 Quick Start
 
 ```bash
-# 1. Clonar/navegar
-cd c:\Users\willy\projects\testing-apk
-
-# 2. Instalar dependencias (ya instaladas)
+# 1. Instalar dependencias
 npm install
 
-# 3. Iniciar
+# 2. Iniciar Expo
 npx expo start
 
-# 4. Abrir en emulador o dispositivo
-# Presiona 'a' (Android), 'i' (iOS) o 'w' (Web)
+# 3. Escanear QR con Expo Go
+# (Android/iOS)
 
-# 5. Ver tests en App.tsx
-# La consola mostrará los tests de FASE 1
+# 4. ¡Empieza a crear órdenes!
 ```
 
 ---
 
-## 📅 Timeline Estimado
+## 📞 Links Útiles
 
-```
-HOY (18 Oct):      ✅ FASE 1 Completada
-DÍA 2:             🔄 FASE 2-3 (Setup Hooks + Componentes)
-DÍA 3-4:           📝 FASE 4-5 (Header + Detalles)
-DÍA 5:             ✏️ FASE 6 (Final + Submit)
-DÍA 6-7:           🧪 FASE 7 (Testing)
-
-TOTAL: ~4-5 días de desarrollo
-```
+- [Expo Docs](https://docs.expo.dev)
+- [Expo Router Docs](https://docs.expo.dev/router/introduction/)
+- [React Native Docs](https://reactnative.dev)
+- [Zod Docs](https://zod.dev)
 
 ---
 
-## ✅ Checklist para Comenzar FASE 2
+## 📅 Próximos Pasos
 
-```
-PRE-REQUISITOS COMPLETADOS:
-✅ Node.js ≥ 18 instalado
-✅ npm funcionando
-✅ Proyecto React Native + Expo creado
-✅ FASE 1 completada
-
-ARCHIVOS CREADOS:
-✅ src/types/ordenTrabajo.ts
-✅ src/constants/ordenTrabajoConstants.ts
-✅ src/services/storageUtils.ts (AsyncStorage)
-✅ src/services/validationService.ts
-✅ App.tsx (actualizado con tests)
-
-VERIFICACIONES:
-✅ npm list (dependencias OK)
-✅ npx tsc --noEmit (TypeScript OK)
-✅ Git commit realizado
-
-STATUS: ✅ LISTO PARA FASE 2
-```
+**FASE 8 (En Progreso)**:
+- ✅ Subfase 8.1: Editar Orden
+- ✅ Subfase 8.2: About + Configuración
+- ⏳ Subfase 8.3: Compartir Orden (opcional)
+- ⏳ Subfase 8.4: Testing Final + Limpieza
 
 ---
 
-## 📞 Soporte
+**¡REX/Mobile está casi listo para producción! 🔥**
 
-Para más información:
-- Lee `PLAN_ACCION_FASES.md` para detalles completos
-- Lee `docs/GUIA_TECNICA_IMPLEMENTACION.md` para código
-- Revisa `copilot-instructions.md` para contexto del proyecto
-
----
-
-**¡FASE 1 Completada! 🎉 Próximo: FASE 2 - Hooks Base**
-
-Para comenzar FASE 2, responde: `Listo para FASE 2`
+Para más información, lee `CLAUDE.md` o la documentación en `/docs/`.

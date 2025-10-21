@@ -62,8 +62,6 @@ export default function NuevaOrdenPaso1Screen() {
 
       if (isEditMode && editId) {
         // MODO EDICIÓN: Cargar orden existente
-        console.log(`📝 Modo edición: cargando orden #${editId}`)
-
         // Primero intentar cargar datos temporales de edición
         const tempEditData = await storageUtils.getJSON<OrdenTrabajoFormData>(TEMP_EDIT_KEY, undefined)
         if (tempEditData && tempEditData.id === editId) {

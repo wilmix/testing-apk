@@ -24,12 +24,13 @@ import {
 } from 'react-native'
 import type { OrdenTrabajoFormData, DetalleExtintor } from '../../types/ordenTrabajo'
 import { CAPACIDAD_UNIDADES, CAPACIDAD_VALORES, MARCAS, TIPOS } from '../../constants/ordenTrabajoConstants'
-import { validateData, DetallesSchema } from '../../services/validationService'
+import { validateData, DetallesSchema, DetalleExtintorSchema } from '../../services/validationService'
 import { FormInput } from '../FormFields/FormInput'
 import { FormDropdown } from '../FormFields/FormDropdown'
 import { ValidationIcon } from '../Feedback/ValidationIcon'
 import { useTheme } from '../../contexts/ThemeContext'
 import { QRScanner } from '../QR/QRScanner'
+import { useHapticFeedback, HapticType } from '../../hooks/useHapticFeedback'
 
 /**
  * Generar ID único simple
@@ -50,6 +51,7 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
   onContinue,
 }) => {
   const { theme } = useTheme()
+  const haptic = useHapticFeedback()
   // Estado para rastrear qué campos han sido tocados
   const [touchedDetalles, setTouchedDetalles] = useState<Record<string, Record<string, boolean>>>({})
   const [expandedDetalleId, setExpandedDetalleId] = useState<string | null>(
@@ -177,15 +179,34 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
   }, [data, onDataChange])
 
   /**
-   * Remover extintor
+   * Remover extintor (siempre visible, incluye confirmación si es el último)
    */
   const handleRemoveDetalle = useCallback(
-    (detalleId: string) => {
+    async (detalleId: string) => {
+      // Si es el último extintor, resetear el actual en lugar de removerlo
       if (data.detalles.length === 1) {
-        // No permitir remover el último extintor
+        // Resetear campos del único extintor
+        const resetDetalle: DetalleExtintor = {
+          ...data.detalles[0],
+          extintorNro: '',
+          capacidadUnidad: '',
+          capacidadValor: '',
+          marca: '',
+          tipo: '',
+        }
+
+        const updatedData = { ...data, detalles: [resetDetalle] }
+        onDataChange(updatedData)
+
+        // Limpiar touched
+        setTouchedDetalles({ [resetDetalle.id]: {} })
+        setExpandedDetalleId(resetDetalle.id)
+
+        await haptic.trigger(HapticType.LIGHT)
         return
       }
 
+      // Si hay más de uno, remover normalmente
       const updatedDetalles = data.detalles.filter((d) => d.id !== detalleId)
       const updatedData = { ...data, detalles: updatedDetalles }
 
@@ -199,8 +220,10 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
       if (expandedDetalleId === detalleId) {
         setExpandedDetalleId(updatedDetalles.length > 0 ? updatedDetalles[0].id : null)
       }
+
+      await haptic.trigger('light')
     },
-    [data, onDataChange, expandedDetalleId]
+    [data, onDataChange, expandedDetalleId, haptic]
   )
 
   /**
@@ -235,6 +258,90 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
       }))
     },
     [data, onDataChange]
+  )
+
+  /**
+   * Validar un solo extintor (individual)
+   */
+  const validateSingleDetalle = (detalleId: string): { valid: boolean; errors: string[] } => {
+    const detalle = data.detalles.find((d) => d.id === detalleId)
+    if (!detalle) {
+      return { valid: false, errors: ['Extintor no encontrado'] }
+    }
+
+    // Validar con DetalleExtintorSchema
+    const validation = validateData(DetalleExtintorSchema, detalle)
+
+    if (validation.valid) {
+      return { valid: true, errors: [] }
+    } else {
+      // Convertir errores a array de strings
+      const errorMessages = Object.values(validation.errors)
+      return { valid: false, errors: errorMessages }
+    }
+  }
+
+  /**
+   * Guardar extintor actual y crear/abrir el siguiente
+   */
+  const handleSaveAndNext = useCallback(
+    async (detalleId: string) => {
+      // 1. Validar extintor actual
+      const validation = validateSingleDetalle(detalleId)
+
+      if (!validation.valid) {
+        // Mostrar errores: marcar todos los campos como tocados
+        const detalle = data.detalles.find((d) => d.id === detalleId)
+        if (detalle) {
+          setTouchedDetalles((prev) => ({
+            ...prev,
+            [detalleId]: {
+              extintorNro: true,
+              capacidadUnidad: true,
+              capacidadValor: true,
+              marca: true,
+              tipo: true,
+            },
+          }))
+        }
+        await haptic.trigger(HapticType.ERROR)
+        return
+      }
+
+      // 2. Validación exitosa
+      await haptic.trigger(HapticType.SUCCESS)
+
+      // 3. Colapsar extintor actual
+      setExpandedDetalleId(null)
+
+      // 4. Auto-crear siguiente extintor vacío
+      const newDetalle: DetalleExtintor = {
+        id: generateId(),
+        extintorNro: '',
+        capacidadUnidad: '',
+        capacidadValor: '',
+        marca: '',
+        tipo: '',
+      }
+
+      const updatedDetalles = [...data.detalles, newDetalle]
+      const updatedData = { ...data, detalles: updatedDetalles }
+
+      onDataChange(updatedData)
+
+      // 5. Expandir el nuevo extintor automáticamente
+      // Usar setTimeout para asegurar que el estado se actualice primero
+      setTimeout(() => {
+        setExpandedDetalleId(newDetalle.id)
+      }, 100)
+
+      // 6. Inicializar touched para el nuevo extintor
+      setTouchedDetalles((prev) => ({
+        ...prev,
+        [newDetalle.id]: {},
+      }))
+    },
+    [data, onDataChange, haptic]
   )
 
   /**
@@ -411,15 +518,28 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
                     touched={!!touched.tipo}
                   />
 
-                  {/* Botón remover */}
-                  {data.detalles.length > 1 && (
+                  {/* Botones de acción */}
+                  <View style={styles.actionsContainer}>
+                    {/* Botón Guardar y Siguiente */}
                     <TouchableOpacity
-                      style={[styles.removeButton, { backgroundColor: theme.errorBg, borderColor: theme.errorBorder }]}
+                      style={[styles.saveButton, { borderColor: theme.success }]}
+                      onPress={() => handleSaveAndNext(detalle.id)}
+                    >
+                      <Text style={[styles.saveButtonText, { color: theme.success }]}>
+                        ✅ Guardar y Siguiente
+                      </Text>
+                    </TouchableOpacity>
+
+                    {/* Botón Remover (siempre visible) */}
+                    <TouchableOpacity
+                      style={[styles.removeButton, { borderColor: theme.error }]}
                       onPress={() => handleRemoveDetalle(detalle.id)}
                     >
-                      <Text style={[styles.removeButtonText, { color: theme.error }]}>🗑️ Remover este extintor</Text>
+                      <Text style={[styles.removeButtonText, { color: theme.error }]}>
+                        🗑️ Remover Extintor
+                      </Text>
                     </TouchableOpacity>
-                  )}
+                  </View>
                 </View>
               )}
             </View>
@@ -634,14 +754,40 @@ const styles = StyleSheet.create({
   lightDetalleContent: {
     backgroundColor: '#fafafa',
   },
+  // Nuevo contenedor para botones de acción
+  actionsContainer: {
+    gap: 12,
+    marginTop: 8,
+  },
+  // Botón "Guardar y Siguiente" (verde, ghost)
+  saveButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    backgroundColor: 'transparent',
+  },
+  saveButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  // Botón "Remover" (rojo, ghost, más discreto)
   removeButton: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 12,
     borderWidth: 1,
+    backgroundColor: 'transparent',
   },
+  removeButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    opacity: 0.9,
+  },
+  // Deprecated styles (mantener para compatibilidad)
   darkRemoveButton: {
     backgroundColor: '#3a1a1a',
     borderColor: '#8b4a4a',
@@ -649,11 +795,6 @@ const styles = StyleSheet.create({
   lightRemoveButton: {
     backgroundColor: '#fff5f5',
     borderColor: '#ffcccc',
-  },
-  removeButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FF3B30',
   },
   addButton: {
     paddingVertical: 12,

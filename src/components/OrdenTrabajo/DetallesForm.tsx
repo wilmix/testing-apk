@@ -518,28 +518,15 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
                     touched={!!touched.tipo}
                   />
 
-                  {/* Botones de acción */}
-                  <View style={styles.actionsContainer}>
-                    {/* Botón Guardar y Siguiente */}
+                  {/* Botón remover inline (solo si hay más de 1 extintor) */}
+                  {data.detalles.length > 1 && (
                     <TouchableOpacity
-                      style={[styles.saveButton, { borderColor: theme.success }]}
-                      onPress={() => handleSaveAndNext(detalle.id)}
-                    >
-                      <Text style={[styles.saveButtonText, { color: theme.success }]}>
-                        ✅ Guardar y Siguiente
-                      </Text>
-                    </TouchableOpacity>
-
-                    {/* Botón Remover (siempre visible) */}
-                    <TouchableOpacity
-                      style={[styles.removeButton, { borderColor: theme.error }]}
+                      style={[styles.inlineRemoveButton, { borderColor: theme.error }]}
                       onPress={() => handleRemoveDetalle(detalle.id)}
                     >
-                      <Text style={[styles.removeButtonText, { color: theme.error }]}>
-                        🗑️ Remover Extintor
-                      </Text>
+                      <Text style={styles.removeIcon}>🗑️</Text>
                     </TouchableOpacity>
-                  </View>
+                  )}
                 </View>
               )}
             </View>
@@ -547,12 +534,12 @@ export const DetallesForm: React.FC<DetallesFormProps> = ({
         })}
       </View>
 
-      {/* Botón agregar extintor */}
+      {/* Botón agregar extintor - Prominente */}
       <TouchableOpacity
-        style={[styles.addButton, { backgroundColor: theme.infoBg, borderColor: theme.info }]}
+        style={[styles.primaryAddButton, { backgroundColor: theme.success }]}
         onPress={handleAddDetalle}
       >
-        <Text style={[styles.addButtonText, { color: theme.info }]}>➕ Agregar otro extintor</Text>
+        <Text style={styles.primaryAddText}>➕ Agregar Extintor</Text>
       </TouchableOpacity>
 
       {/* Status de validación */}
@@ -887,5 +874,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#ffffff',
+  },
+  // 🆕 Nuevos estilos para UX mejorado
+  inlineRemoveButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    backgroundColor: '#fff5f5',
+  },
+  removeIcon: {
+    fontSize: 16,
+    color: '#FF3B30',
+  },
+  primaryAddButton: {
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginVertical: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  primaryAddText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
   },
 })
